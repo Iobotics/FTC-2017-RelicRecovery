@@ -57,7 +57,7 @@ import java.util.List;
  * Vuforia uses the phone's camera to inspect it's surroundings, and attempt to locate target images.
  *
  * When images are located, Vuforia is able to determine the position and orientation of the
- * image relative to the camera.  This sample code than combines that information with a
+ * image relative to the camera.  This sample code then combines that information with a
  * knowledge of where the target images are on the field, to determine the location of the camera.
  *
  * This example assumes a "diamond" field configuration where the red and blue alliance stations
@@ -84,7 +84,7 @@ import java.util.List;
 @Disabled
 public class ConceptVuforiaNavigation extends LinearOpMode {
 
-    public static final String TAG = "Vuforia Navigation Sample";
+    public static final String TAG =  "Vuforia Navigation Sample";
 
     OpenGLMatrix lastLocation = null;
 
