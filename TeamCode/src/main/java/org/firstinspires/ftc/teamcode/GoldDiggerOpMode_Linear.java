@@ -35,10 +35,13 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.ServoController;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 //setting motors right here under
+//USE setPosition to prgram Servos
 @TeleOp(name = "TeleOp Tank Drive", group = "Linear Opmode")
 public class GoldDiggerOpMode_Linear extends LinearOpMode {
     GoldDiggerBot robot = new GoldDiggerBot();
@@ -52,11 +55,7 @@ public class GoldDiggerOpMode_Linear extends LinearOpMode {
 
         while (opModeIsActive()) {
             //setting the motors to different joysticks of controller
-            robot.leftBackDrive.setPower(gamepad1.left_stick_y);
-            robot.leftFrontDrive.setPower(gamepad1.left_stick_y);
-            robot.rightBackDrive.setPower(gamepad1.right_stick_y);
-            robot.rightFrontDrive.setPower(gamepad1.right_stick_y);
-
+            robot.drive(gamepad1.left_stick_y, gamepad1.right_stick_y);
             //If the letter "A" on gamepad is HELD, robot will spin
             if (gamepad1.a == true) {
                 robot.leftBackDrive.setPower(0.5);
@@ -64,6 +63,26 @@ public class GoldDiggerOpMode_Linear extends LinearOpMode {
                 robot.rightBackDrive.setPower(-0.5);
                 robot.rightFrontDrive.setPower(-0.5);
             }
+            else if (gamepad1.b == true); {
+                robot.glyphPull(0.60, 0.60);
+            }
+            if (gamepad1.x == true); {
+                robot.drive(.50, .50);
+
+            }
+
+            if (gamepad1.y == true); {
+                robot.drive(.5, -0.5);
+            }
+
+        }
+        //gamepad1.right_trigger will be used for elevator
+        if (gamepad1.right_bumper){
+            robot.leftElevator.setPosition(0.5);
+            robot.leftElevator.setPosition(0.5);
+        }
+
+        else if (gamepad1.left_bumper){
 
         }
     }
