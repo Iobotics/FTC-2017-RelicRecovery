@@ -27,7 +27,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.team8741;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -35,7 +35,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 // Setting motors right here under
 // USE setPosition to program Servos
-@TeleOp(name = "TeleOp Tank Drive", group = "Linear Opmode")
+@TeleOp(name = "TeleOp: Tank Drive", group = "Linear Opmode")
 //@Disabled
 public class GoldDiggerOpMode_Linear extends LinearOpMode {
     GoldDiggerBot robot = new GoldDiggerBot();

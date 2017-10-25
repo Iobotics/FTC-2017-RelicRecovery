@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.team8741;
 
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -37,8 +37,8 @@ public class GoldDiggerBot {
         leftFrontDrive = hwMap.get(DcMotor.class, "frontLeft");
         rightBackDrive = hwMap.get(DcMotor.class, "backRight");
         rightFrontDrive = hwMap.get(DcMotor.class, "frontRight");
-        rightGlyphPull = hwMap.get(DcMotor.class, "rightPull");
-        leftGlyphPull = hwMap.get(DcMotor.class, "leftPull");
+        rightGlyphPull = hwMap.get(DcMotor.class, "rightIntake");
+        leftGlyphPull = hwMap.get(DcMotor.class, "leftIntake");
         rightElevator = hwMap.get(CRServo.class, "rightLift");
         leftElevator = hwMap.get(CRServo.class, "leftLift");
         //setting direction of motors and how they will spin
