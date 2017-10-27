@@ -87,14 +87,44 @@ public class Team8740_Teleop extends LinearOpMode {
             // Use gamepad right bumper to run intake
             if(gamepad1.right_bumper) {
                robot.runIntake();
-            } else {
+            }else if(gamepad1.right_trigger > 0.2) {
+                robot.reverseIntake();
+            }else {
                 robot.stopIntake();
+            }
+
+            if(gamepad1.y) {
+                robot.lowerJewelArm();
+            } else if(gamepad1.b) {
+                robot.raiseJewelArm();
+            }
+
+            if(gamepad1.left_bumper) {
+                robot.pushGlyph();
+            } else if(gamepad1.left_trigger > 0.2) {
+                robot.retractGlyph();
+            } else {
+                robot.stopGlyph();
+            }
+
+            if(gamepad1.dpad_down) {
+                robot.lowerLift();
+            } else if(gamepad1.dpad_up) {
+                robot.raiseLift();
+            } else {
+                robot.stopLift();
+            }
+
+            if(gamepad1.start) {
+                robot.toggleSpeed();
             }
 
             // Send telemetry message to signify robot running;
             telemetry.addData("x",  "%.2f", x);
             telemetry.addData("y", "%.2f", y);
             telemetry.addData("claws", robot.areClawsOpen());
+            telemetry.addData("lower limit", robot.atLowerLimit());
+            telemetry.addData("upper limit", robot.atUpperLimit());
             telemetry.update();
 
             // Pause for 40 mS each cycle = update 25 times a second.
