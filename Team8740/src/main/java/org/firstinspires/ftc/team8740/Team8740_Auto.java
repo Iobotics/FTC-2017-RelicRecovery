@@ -73,7 +73,7 @@ import org.firstinspires.ftc.robotcontroller.external.samples.HardwarePushbot;
  */
 
 @Autonomous(name="Team 8740: Auto", group="Team 8740")
-@Disabled
+//@Disabled
 public class Team8740_Auto extends LinearOpMode {
 
     /* Declare OpMode members */
@@ -112,9 +112,10 @@ public class Team8740_Auto extends LinearOpMode {
 
         robot.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        // Wait for the game to start (Display Gyro value), and reset gyro before we move..
+        // Wait for the game to start (Display Gyro value), and reset gyro before we move
         while (!isStarted()) {
-            telemetry.addData(">", "Robot Heading = %d", robot.getGyroHeading());
+            telemetry.addLine("encoders").addData("left", robot.getLeftEncoder()).addData("right", robot.getRightEncoder());
+            telemetry.addData(">", "Robot Heading = %.2f", robot.getGyroHeading());
             telemetry.update();
         }
 
@@ -125,6 +126,9 @@ public class Team8740_Auto extends LinearOpMode {
         // Put a hold after each turn
 
         // TODO - Add autonomous code
+        robot.gyroDrive(0.4, 30.0, 0.0);
+
+        requestOpModeStop();
     }
 
 }

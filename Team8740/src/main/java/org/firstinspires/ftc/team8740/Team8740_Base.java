@@ -66,13 +66,15 @@ import java.io.File;
  */
 public class Team8740_Base {
     /* Constants */
-    private final static double LEFT_SERVO_HOME  = 0.36;
-    private final static double RIGHT_SERVO_HOME = 0.65;
+    private final static double LEFT_SERVO_HOME  = 0.3;
+    private final static double RIGHT_SERVO_HOME = 0.6;
+    private final static double LEFT_SERVO_CLOSED  = 0.33;
+    private final static double RIGHT_SERVO_CLOSED = 0.63;
     private final static double LEFT_SERVO_OPEN  = 0.72;
     private final static double RIGHT_SERVO_OPEN = 1.25;
 
-    private final static double JEWEL_SERVO_HOME = 0.5;
-    private final static double JEWEL_SERVO_DOWN = 0.8;
+    private final static double JEWEL_SERVO_HOME = 0.45;
+    private final static double JEWEL_SERVO_DOWN = 0.85;
 
     private final static double LOW_SPEED = 0.5;
     private final static double HIGH_SPEED = 0.7;
@@ -84,10 +86,10 @@ public class Team8740_Base {
     private final static double LIFT_DOWN_POWER = -0.4;
     private final static double LIFT_UP_POWER = 0.6;
 
-    private final static double TICKS_PER_REV   = 1440;    // Ticks per revolution
+    private final static double TICKS_PER_REV   = 537.6;    // Ticks per revolution
     private final static double GEAR_REDUCTION  = 1.0;     // This is < 1.0 if geared UP
     private final static double WHEEL_DIAMETER  = 4.0;     // Inches
-    private final static double TICKS_PER_INCH = (TICKS_PER_REV * GEAR_REDUCTION) / (WHEEL_DIAMETER * 3.1415);
+    private final static double TICKS_PER_INCH = (TICKS_PER_REV * GEAR_REDUCTION) * Math.sqrt(2) / (WHEEL_DIAMETER * 3.1415);
 
     private final static double HEADING_THRESHOLD = 1;      // As tight as we can make it with an integer gyro
     private final static double P_TURN_COEFF       = 0.1;     // Larger is more responsive, but also less stable
@@ -149,6 +151,7 @@ public class Team8740_Base {
 
     /* Local OpMode members. */
     private boolean isLowSpeed = false;
+    private boolean jewelStatus = false;
     private boolean clawStatus = false;
 
     private double speedMultiplier = HIGH_SPEED;
@@ -191,10 +194,7 @@ public class Team8740_Base {
         backRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // Set all motors to run without encoders
-        frontLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        frontRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        backLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        backRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         // Set all motors to zero power
         this.setPower(0, 0, 0, 0);
@@ -244,7 +244,7 @@ public class Team8740_Base {
     }
 
     private void initColorSensor() {
-        color_sensor = hwMap.colorSensor.get("color");
+        color_sensor = hwMap.get(ColorSensor.class, "color");
     }
 
     private void initVuforia() {
@@ -330,20 +330,20 @@ public class Team8740_Base {
         isLowSpeed = !isLowSpeed;
     }
 
-    public int getLeftEncoder() {
+    public double getLeftEncoder() {
         return frontLeftDrive.getCurrentPosition();
     }
 
-    public int getRightEncoder() {
+    public double getRightEncoder() {
         return frontRightDrive.getCurrentPosition();
     }
 
-    public void setLeftEncoder(int position) {
-        frontLeftDrive.setTargetPosition(position);
+    public void setLeftEncoder(double position) {
+        frontLeftDrive.setTargetPosition(Math.round((float) position));
     }
 
-    public void setRightEncoder(int position) {
-        frontRightDrive.setTargetPosition(position);
+    public void setRightEncoder(double position) {
+        frontRightDrive.setTargetPosition(Math.round((float) position));
     }
 
     /**
@@ -351,8 +351,8 @@ public class Team8740_Base {
      * @param inches
      * @return ticks
      */
-    public int inchesToTicks(double inches) {
-        int ticks = (int) (inches * TICKS_PER_INCH);
+    public double inchesToTicks(double inches) {
+        double ticks = inches * TICKS_PER_INCH;
         return ticks;
     }
 
@@ -380,7 +380,7 @@ public class Team8740_Base {
     }
 
     public void lowerLift() {
-        if(lowerLimit.getState()) {
+        if(!lowerLimit.getState()) {
             lift.setPower(0);
         } else {
             lift.setPower(LIFT_DOWN_POWER);
@@ -388,7 +388,7 @@ public class Team8740_Base {
     }
 
     public void raiseLift() {
-        if(upperLimit.getState()) {
+        if(!upperLimit.getState()) {
             lift.setPower(0);
         } else {
             lift.setPower(LIFT_UP_POWER);
@@ -429,8 +429,8 @@ public class Team8740_Base {
     }
 
     public void toggleClaws() {
-        leftServo.setPosition(clawStatus ? LEFT_SERVO_HOME : LEFT_SERVO_OPEN);
-        rightServo.setPosition(clawStatus ? RIGHT_SERVO_HOME : RIGHT_SERVO_OPEN);
+        leftServo.setPosition(clawStatus ? LEFT_SERVO_CLOSED : LEFT_SERVO_OPEN);
+        rightServo.setPosition(clawStatus ? RIGHT_SERVO_CLOSED : RIGHT_SERVO_OPEN);
         clawStatus = !clawStatus;
     }
 
@@ -446,12 +446,9 @@ public class Team8740_Base {
         pushServo.setPower(0);
     }
 
-    public void lowerJewelArm() {
-        jewelServo.setPosition(JEWEL_SERVO_DOWN);
-    }
-
-    public void raiseJewelArm() {
-        jewelServo.setPosition(JEWEL_SERVO_HOME);
+    public void toggleJewelArm() {
+        jewelServo.setPosition(jewelStatus ? JEWEL_SERVO_DOWN : JEWEL_SERVO_HOME);
+        jewelStatus = !jewelStatus;
     }
 
     /**
@@ -567,9 +564,9 @@ public class Team8740_Base {
      *                 If a relative angle is required, add/subtract from current heading.
      */
     public void gyroDrive(double speed, double distance, double angle) {
-        int newLeftTarget;
-        int newRightTarget;
-        int moveCounts;
+        double newLeftTarget;
+        double newRightTarget;
+        double moveCounts;
         double max;
         double error;
         double steer;
@@ -578,7 +575,7 @@ public class Team8740_Base {
         // Ensure that the opmode is still active
         if (opmode.opModeIsActive()) {
             // Determine new target position, and pass to motor controller
-            moveCounts = (int) (distance * TICKS_PER_INCH);
+            moveCounts = distance * TICKS_PER_INCH;
             newLeftTarget = getLeftEncoder() + moveCounts;
             newRightTarget = getRightEncoder() + moveCounts;
 
@@ -616,8 +613,8 @@ public class Team8740_Base {
 
                 // Display drive status for the driver.
                 opmode.telemetry.addData("Err/St",  "%5.1f/%5.1f", error, steer);
-                opmode.telemetry.addData("Target",  "%7d:%7d",      newLeftTarget,  newRightTarget);
-                opmode.telemetry.addData("Actual",  "%7d:%7d",      getLeftEncoder(), getRightEncoder());
+                opmode.telemetry.addData("Target",  "%.2f:%.2f",      newLeftTarget,  newRightTarget);
+                opmode.telemetry.addData("Actual",  "%.2f:%.2f",      getLeftEncoder(), getRightEncoder());
                 opmode.telemetry.addData("Speed",   "%5.2f:%5.2f", leftSpeed, rightSpeed);
                 opmode.telemetry.update();
             }
