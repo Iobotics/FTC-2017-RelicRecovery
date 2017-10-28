@@ -61,7 +61,7 @@ public class GoldDiggerAuto extends LinearOpMode {
         Thread.sleep(1000);
 
 
-        robot.elevatorLift(.4, .4);
+
         Thread.sleep(1500);
 
 

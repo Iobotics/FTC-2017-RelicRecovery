@@ -46,7 +46,6 @@ public class GoldDiggerOpMode_Linear extends LinearOpMode {
     public void runOpMode() {
 
         robot.init(hardwareMap);
-        init();
 
         waitForStart();
 
@@ -67,11 +66,13 @@ public class GoldDiggerOpMode_Linear extends LinearOpMode {
                 robot.glyphPull(0, 0);
             }
 
-            if (gamepad1.x == true) {
-                robot.elevatorLift(.50, .50);
-
-            } else {
-                robot.elevatorLift(0, 0);
+            if (gamepad1.x){
+                robot.position += 0.01;
+                robot.elevatorLift(robot.position);
+            }
+            if (gamepad1.y){
+                robot.position -= 0.01;
+                robot.elevatorLift(robot.position);
             }
         }
     }

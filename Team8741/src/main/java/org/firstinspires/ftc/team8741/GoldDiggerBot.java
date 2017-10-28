@@ -2,6 +2,7 @@ package org.firstinspires.ftc.team8741;
 
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -17,15 +18,16 @@ public class GoldDiggerBot {
     public DcMotor rightFrontDrive = null;
     public DcMotor leftGlyphPull = null;
     public DcMotor rightGlyphPull = null;
-    public Servo rightElevator = null;
-    public Servo leftElevator = null;
-    public Servo underWheel = null;
+    public Servo bottomLift = null;
+    public Servo topLift = null;
 
 
     public final int TICKS_PER_REV = 1440;
     public final int WHEEL_DIAMETER = 4;
     public final double COUNTS_PER_INCH = TICKS_PER_REV / (Math.PI * WHEEL_DIAMETER);
-
+    public final double MAX_POS = 1.0;
+    public final double MIN_POS = 0;
+    public double position = 0;
     HardwareMap hwMap = null;
 
     public void init(HardwareMap ahwMap) {
@@ -39,17 +41,18 @@ public class GoldDiggerBot {
         rightFrontDrive = hwMap.get(DcMotor.class, "frontRight");
         rightGlyphPull = hwMap.get(DcMotor.class, "rightIntake");
         leftGlyphPull = hwMap.get(DcMotor.class, "leftIntake");
-        rightElevator = hwMap.get(Servo.class, "bottomLift");
-        leftElevator = hwMap.get(Servo.class, "topLift");
+        bottomLift = hwMap.get(Servo.class, "bottomLift");
+        topLift = hwMap.get(Servo.class, "topLift");
         //setting direction of motors and how they will spin
         leftBackDrive.setDirection(DcMotor.Direction.FORWARD);
         leftFrontDrive.setDirection(DcMotor.Direction.FORWARD);
         rightBackDrive.setDirection(DcMotor.Direction.REVERSE);
         rightFrontDrive.setDirection(DcMotor.Direction.REVERSE);
-        rightGlyphPull.setDirection(DcMotor.Direction.REVERSE);
+        rightGlyphPull.setDirection(DcMotor.Direction.FORWARD);
         leftGlyphPull.setDirection(DcMotor.Direction.REVERSE);
-        rightElevator.setDirection(Servo.Direction.REVERSE);
-        leftElevator.setDirection(Servo.Direction.FORWARD);
+        bottomLift.setDirection(Servo.Direction.REVERSE);
+        topLift.setDirection(Servo.Direction.FORWARD);
+        elevatorLift(MIN_POS);
     }
 
     public void drive(double leftPower, double rightPower) {
@@ -64,18 +67,9 @@ public class GoldDiggerBot {
         rightGlyphPull.setPower(rightGlyphPower);
     }
 
-    public void elevatorLift(double leftElevatorPower, double rightElevatorPower) {
-
-    }
-
-    public void leftElevator(double v, double v1) {
-    }
-
-    public void rightElevator(double v, double v1) {
-    }
-
-    public void moveInches(double rightInches, double leftInches, double speed) {
-
+    public void elevatorLift(double elevatorPosition) {
+        bottomLift.setPosition(elevatorPosition);
+        bottomLift.setPosition(elevatorPosition);
     }
 
     public void encoderDrive(double rightInches, double leftInches, double speed) {
