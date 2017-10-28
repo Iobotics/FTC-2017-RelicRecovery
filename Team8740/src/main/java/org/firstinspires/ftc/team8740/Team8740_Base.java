@@ -31,7 +31,9 @@ package org.firstinspires.ftc.team8740;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -42,6 +44,8 @@ import com.qualcomm.robotcore.util.ReadWriteFile;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 
@@ -81,6 +85,16 @@ public class Team8740_Base {
     private final static double P_TURN_COEFF       = 0.1;     // Larger is more responsive, but also less stable
     private final static double P_DRIVE_COEFF      = 0.15;    // Larger is more responsive, but also less stable
 
+    // TODO - Find thresholds
+    private final static double RED_THRESHOLD = 180;
+    private final static double BLUE_THRESHOLD = 150;
+
+    private enum Color {
+        RED,
+        BLUE,
+        UNKNOWN
+    }
+
 
     /* OpMode members */
     private DcMotor frontLeftDrive  = null;
@@ -103,6 +117,8 @@ public class Team8740_Base {
     private DigitalChannel lowerLimit = null;
     private DigitalChannel upperLimit = null;
 
+    private ColorSensor color_sensor = null;
+
     // The IMU sensor object
     private BNO055IMU imu = null;
 
@@ -121,37 +137,32 @@ public class Team8740_Base {
 
     private HardwareMap hwMap = null;
 
-    private Team8740_Auto auto = null;
+    private LinearOpMode opmode = null;
 
     /* Initialize standard Hardware interfaces */
     public void init(HardwareMap hwMap) {
-        this.hwMap = hwMap;
-
-        initDrive();
-        initIntake();
-        initLift();
-        initServos();
-        //initGyro();
+        this.init(hwMap, null);
     }
 
     /* Initialize standard Hardware interfaces */
-    public void init(HardwareMap hwMap, Team8740_Auto auto) {
+    public void init(HardwareMap hwMap, LinearOpMode opmode) {
         this.hwMap = hwMap;
-        this.auto = auto;
+        this.opmode = opmode;
 
         initDrive();
         initIntake();
         initLift();
         initServos();
-        //initGyro();
+        initColorSensor();
+        initGyro();
     }
 
     private void initDrive() {
         // Define and initialize motors
-        frontLeftDrive  = hwMap.get(DcMotor.class, "frontLeft");
-        frontRightDrive = hwMap.get(DcMotor.class, "frontRight");
-        backLeftDrive   = hwMap.get(DcMotor.class, "backLeft");
-        backRightDrive  = hwMap.get(DcMotor.class, "backRight");
+        frontLeftDrive  = hwMap.dcMotor.get("frontLeft");
+        frontRightDrive = hwMap.dcMotor.get("frontRight");
+        backLeftDrive   = hwMap.dcMotor.get("backLeft");
+        backRightDrive  = hwMap.dcMotor.get("backRight");
 
         // Reverse left motors
         frontLeftDrive.setDirection(DcMotor.Direction.REVERSE);
@@ -175,8 +186,8 @@ public class Team8740_Base {
 
     private void initIntake() {
         // Define the intake motors
-        intakeLeft = hwMap.get(DcMotor.class, "intakeLeft");
-        intakeRight = hwMap.get(DcMotor.class, "intakeRight");
+        intakeLeft  = hwMap.dcMotor.get("intakeLeft");
+        intakeRight = hwMap.dcMotor.get("intakeRight");
 
         // Reverse the right intake motor
         intakeRight.setDirection(DcMotor.Direction.REVERSE);
@@ -184,25 +195,25 @@ public class Team8740_Base {
 
     private void initLift() {
         // Define the lift motor
-        lift = hwMap.get(DcMotor.class, "lift");
+        lift = hwMap.dcMotor.get("lift");
 
         // Define limit switches
-        lowerLimit = hwMap.get(DigitalChannel.class, "lowerLimit");
-        upperLimit = hwMap.get(DigitalChannel.class, "upperLimit");
+        lowerLimit = hwMap.digitalChannel.get("lowerLimit");
+        upperLimit = hwMap.digitalChannel.get("upperLimit");
 
-        // Set limit switches to output mode
-        lowerLimit.setMode(DigitalChannel.Mode.OUTPUT);
-        upperLimit.setMode(DigitalChannel.Mode.OUTPUT);
+        // Set limit switches to input mode
+        lowerLimit.setMode(DigitalChannel.Mode.INPUT);
+        upperLimit.setMode(DigitalChannel.Mode.INPUT);
     }
 
     private void initServos() {
         // Define and initialize ALL installed servos
-        leftServo  = hwMap.get(Servo.class, "grabLeft");
-        rightServo = hwMap.get(Servo.class, "grabRight");
+        leftServo  = hwMap.servo.get("grabLeft");
+        rightServo = hwMap.servo.get("grabRight");
 
-        jewelServo = hwMap.get(Servo.class, "jewelArm");
+        jewelServo = hwMap.servo.get("jewelArm");
 
-        pushServo = hwMap.get(CRServo.class, "pushServo");
+        pushServo = hwMap.crservo.get("pushServo");
 
         // Reverse the right servo and jewel servo
         rightServo.setDirection(Servo.Direction.REVERSE);
@@ -214,6 +225,10 @@ public class Team8740_Base {
         rightServo.setPosition(RIGHT_SERVO_HOME);
 
         jewelServo.setPosition(JEWEL_SERVO_HOME);
+    }
+
+    private void initColorSensor() {
+        color_sensor = hwMap.colorSensor.get("color");
     }
 
     private void initGyro() {
@@ -335,19 +350,19 @@ public class Team8740_Base {
     }
 
     public void lowerLift() {
-        //if(!lowerLimit.getState()) {
-        lift.setPower(LIFT_DOWN_POWER);
-        /*} else {
+        if(lowerLimit.getState()) {
             lift.setPower(0);
-        }*/
+        } else {
+            lift.setPower(LIFT_DOWN_POWER);
+        }
     }
 
     public void raiseLift() {
-        //if(!upperLimit.getState()) {
-        lift.setPower(LIFT_UP_POWER);
-        /*} else {
+        if(upperLimit.getState()) {
             lift.setPower(0);
-        }*/
+        } else {
+            lift.setPower(LIFT_UP_POWER);
+        }
     }
 
     public void stopLift() {
@@ -409,6 +424,23 @@ public class Team8740_Base {
         jewelServo.setPosition(JEWEL_SERVO_HOME);
     }
 
+    /**
+     * Gets color from the color sensor
+     * @return color
+     */
+    public Color getColor() {
+        Color color;
+        if(color_sensor.red() > RED_THRESHOLD) {
+            color = Color.RED;
+        } else if(color_sensor.blue() > BLUE_THRESHOLD) {
+            color = Color.BLUE;
+        } else {
+            color = Color.UNKNOWN;
+        }
+
+        return color;
+    }
+
     public void calibrateGyro() {
         // Get the calibration data
         BNO055IMU.CalibrationData calibrationData = imu.readCalibrationData();
@@ -429,14 +461,9 @@ public class Team8740_Base {
      * @return isCalibrating
      */
     public boolean isGyroCalibrating() {
-        byte calibrationStatus = imu.getCalibrationStatus().calibrationStatus;
-        boolean isCalibrating;
-
-        if (((calibrationStatus >> 4) & 0x03) == 0) {
-            isCalibrating = true;
-        } else {
-            isCalibrating = false;
-        }
+        angles   = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        gravity  = imu.getGravity();
+        boolean isCalibrating = imu.isGyroCalibrated();
 
         return isCalibrating;
     }
@@ -447,6 +474,8 @@ public class Team8740_Base {
      * @return heading
      */
     public double getGyroHeading() {
+        angles  = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        gravity = imu.getGravity();
         double heading = AngleUnit.DEGREES.normalize(AngleUnit.DEGREES.fromUnit(angles.angleUnit, angles.firstAngle));
         return heading;
     }
@@ -473,7 +502,7 @@ public class Team8740_Base {
         double leftSpeed;
         double rightSpeed;
         // Ensure that the opmode is still active
-        if (auto.opModeIsActive()) {
+        if (opmode.opModeIsActive()) {
             // Determine new target position, and pass to motor controller
             moveCounts = (int) (distance * TICKS_PER_INCH);
             newLeftTarget = getLeftEncoder() + moveCounts;
@@ -490,7 +519,7 @@ public class Team8740_Base {
             setTank(speed, speed);
 
             // keep looping while we are still active, and BOTH motors are running.
-            while (auto.opModeIsActive() && (frontLeftDrive.isBusy() && frontRightDrive.isBusy())) {
+            while (opmode.opModeIsActive() && (frontLeftDrive.isBusy() && frontRightDrive.isBusy())) {
                 // adjust relative speed based on heading error.
                 error = getError(angle);
                 steer = getSteer(error, P_DRIVE_COEFF);
@@ -512,11 +541,11 @@ public class Team8740_Base {
                 setTank(leftSpeed, rightSpeed);
 
                 // Display drive status for the driver.
-                auto.telemetry.addData("Err/St",  "%5.1f/%5.1f", error, steer);
-                auto.telemetry.addData("Target",  "%7d:%7d",      newLeftTarget,  newRightTarget);
-                auto.telemetry.addData("Actual",  "%7d:%7d",      getLeftEncoder(), getRightEncoder());
-                auto.telemetry.addData("Speed",   "%5.2f:%5.2f", leftSpeed, rightSpeed);
-                auto.telemetry.update();
+                opmode.telemetry.addData("Err/St",  "%5.1f/%5.1f", error, steer);
+                opmode.telemetry.addData("Target",  "%7d:%7d",      newLeftTarget,  newRightTarget);
+                opmode.telemetry.addData("Actual",  "%7d:%7d",      getLeftEncoder(), getRightEncoder());
+                opmode.telemetry.addData("Speed",   "%5.2f:%5.2f", leftSpeed, rightSpeed);
+                opmode.telemetry.update();
             }
 
             // Stop all motion;
@@ -541,9 +570,9 @@ public class Team8740_Base {
     public void gyroTurn(double speed, double angle) {
 
         // keep looping while we are still active, and not on heading.
-        while (auto.opModeIsActive() && !onHeading(speed, angle, P_TURN_COEFF)) {
+        while (opmode.opModeIsActive() && !onHeading(speed, angle, P_TURN_COEFF)) {
             // Update telemetry & Allow time for other processes to run.
-            auto.telemetry.update();
+            opmode.telemetry.update();
         }
     }
 
@@ -563,10 +592,10 @@ public class Team8740_Base {
 
         // keep looping while we have time remaining.
         holdTimer.reset();
-        while (auto.opModeIsActive() && (holdTimer.time() < holdTime)) {
+        while (opmode.opModeIsActive() && (holdTimer.time() < holdTime)) {
             // Update telemetry & Allow time for other processes to run.
             onHeading(speed, angle, P_TURN_COEFF);
-            auto.telemetry.update();
+            opmode.telemetry.update();
         }
 
         // Stop all motion;
@@ -608,9 +637,9 @@ public class Team8740_Base {
         setTank(leftSpeed, rightSpeed);
 
         // Display it for the driver
-        auto.telemetry.addData("Target", "%5.2f", angle);
-        auto.telemetry.addData("Err/St", "%5.2f/%5.2f", error, steer);
-        auto.telemetry.addData("Speed.", "%5.2f:%5.2f", leftSpeed, rightSpeed);
+        opmode.telemetry.addData("Target", "%5.2f", angle);
+        opmode.telemetry.addData("Err/St", "%5.2f/%5.2f", error, steer);
+        opmode.telemetry.addData("Speed.", "%5.2f:%5.2f", leftSpeed, rightSpeed);
 
         return onTarget;
     }

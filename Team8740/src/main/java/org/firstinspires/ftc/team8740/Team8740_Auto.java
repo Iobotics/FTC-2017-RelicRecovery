@@ -73,7 +73,7 @@ import org.firstinspires.ftc.robotcontroller.external.samples.HardwarePushbot;
  */
 
 @Autonomous(name="Team 8740: Auto", group="Team 8740")
-//@Disabled
+@Disabled
 public class Team8740_Auto extends LinearOpMode {
 
     /* Declare OpMode members */
@@ -122,7 +122,7 @@ public class Team8740_Auto extends LinearOpMode {
         // Note: Reverse movement is obtained by setting a negative distance (not speed)
         // Put a hold after each turn
 
-        /* CODE GOES HERE */
+        // TODO - Add autonomous code
     }
 
 }

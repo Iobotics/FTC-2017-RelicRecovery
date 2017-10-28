@@ -43,7 +43,7 @@ public class Team8740_Teleop extends LinearOpMode {
     public void runOpMode() {
 
         //Initialize the hardware variables.
-        robot.init(hardwareMap);
+        robot.init(hardwareMap, this);
 
         // Send telemetry message to signify robot waiting
         telemetry.addData("Say", "Waiting for start");
@@ -109,8 +109,7 @@ public class Team8740_Teleop extends LinearOpMode {
             }
 
             // Send telemetry message to signify robot running;
-            telemetry.addData("lower limit", robot.getLowerLimit());
-            telemetry.addData("upper limit", robot.getUpperLimit());
+            telemetry.addLine("limits").addData("lower", robot.getLowerLimit()).addData("upper", robot.getUpperLimit());
             //telemetry.addData("gyro status", robot.getGyroStatus());
             //telemetry.addData("heading", robot.getGyroHeading());
             telemetry.update();
