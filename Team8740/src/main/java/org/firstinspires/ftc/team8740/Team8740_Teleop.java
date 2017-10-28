@@ -69,21 +69,23 @@ public class Team8740_Teleop extends LinearOpMode {
                 sleep(100);
             }
 
-            // Use gamepad right bumper to run intake
+            // Use gamepad right bumper and trigger to run intake
             if(gamepad1.right_bumper) {
                robot.runIntake();
-            }else if(gamepad1.right_trigger > 0.2) {
+            } else if(gamepad1.right_trigger > 0.2) {
                 robot.reverseIntake();
             }else {
                 robot.stopIntake();
             }
 
+            // Use gamepad Y and B to lower and raise the jewel arm
             if(gamepad1.y) {
                 robot.lowerJewelArm();
             } else if(gamepad1.b) {
                 robot.raiseJewelArm();
             }
 
+            // Use gamepad left bumper and trigger to push the glyph
             if(gamepad1.left_bumper) {
                 robot.pushGlyph();
             } else if(gamepad1.left_trigger > 0.2) {
@@ -92,6 +94,7 @@ public class Team8740_Teleop extends LinearOpMode {
                 robot.stopGlyph();
             }
 
+            // Use gamepad dpad to control the lift
             if(gamepad1.dpad_down) {
                 robot.lowerLift();
             } else if(gamepad1.dpad_up) {
@@ -100,6 +103,7 @@ public class Team8740_Teleop extends LinearOpMode {
                 robot.stopLift();
             }
 
+            // Use gamepad start to toggle speed control
             if(gamepad1.start) {
                 robot.toggleSpeed();
             }
