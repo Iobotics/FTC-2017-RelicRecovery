@@ -37,15 +37,12 @@ import com.qualcomm.robotcore.util.Range;
 //@Disabled
 public class Team8740_Teleop extends LinearOpMode {
 
-    /* Declare OpMode members. */
     Team8740_Base robot = new Team8740_Base();
 
     @Override
     public void runOpMode() {
-        /*
-         * Initialize the hardware variables.
-         * The init() method of the hardware class does all the work here
-         */
+
+        //Initialize the hardware variables.
         robot.init(hardwareMap);
 
         // Send telemetry message to signify robot waiting
@@ -55,14 +52,8 @@ public class Team8740_Teleop extends LinearOpMode {
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
 
-        // run until the end of the match (driver presses STOP)
+        // Run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
-
-            // Setup a variable for each drive wheel to save power level for telemetry
-            double frontLeftPower;
-            double frontRightPower;
-            double backLeftPower;
-            double backRightPower;
 
             // Mecanum drive uses left stick to strafe along X and Y, and right stick X to turn.
             double x = gamepad1.left_stick_x;
@@ -70,13 +61,7 @@ public class Team8740_Teleop extends LinearOpMode {
 
             double rotation = gamepad1.right_stick_x;
 
-            frontLeftPower   = Range.clip(x + y - rotation, -1.0, 1.0);
-            frontRightPower  = Range.clip(-x + y + rotation, -1.0, 1.0);
-            backLeftPower    = Range.clip(-x + y - rotation, -1.0, 1.0);
-            backRightPower   = Range.clip(x + y + rotation, -1.0, 1.0);
-
-            // Send calculated power to wheels
-            robot.setPower(frontLeftPower, frontRightPower, backLeftPower, backRightPower);
+            robot.setMecanum(x, y, rotation);
 
             // Use gamepad A to open and close the claw
             if(gamepad1.a) {
@@ -120,11 +105,10 @@ public class Team8740_Teleop extends LinearOpMode {
             }
 
             // Send telemetry message to signify robot running;
-            telemetry.addData("x",  "%.2f", x);
-            telemetry.addData("y", "%.2f", y);
-            telemetry.addData("claws", robot.areClawsOpen());
-            telemetry.addData("lower limit", robot.atLowerLimit());
-            telemetry.addData("upper limit", robot.atUpperLimit());
+            telemetry.addData("lower limit", robot.getLowerLimit());
+            telemetry.addData("upper limit", robot.getUpperLimit());
+            //telemetry.addData("gyro status", robot.getGyroStatus());
+            //telemetry.addData("heading", robot.getGyroHeading());
             telemetry.update();
 
             // Pause for 40 mS each cycle = update 25 times a second.
