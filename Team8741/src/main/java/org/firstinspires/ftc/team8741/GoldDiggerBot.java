@@ -3,6 +3,8 @@ package org.firstinspires.ftc.team8741;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
+import com.qualcomm.robotcore.hardware.GyroSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -20,6 +22,7 @@ public class GoldDiggerBot {
     public DcMotor rightGlyphPull = null;
     public Servo bottomLift = null;
     public Servo topLift = null;
+    public GyroSensor gyro = null;
 
 
     public final int TICKS_PER_REV = 1440;
@@ -28,6 +31,8 @@ public class GoldDiggerBot {
     public final double MAX_POS = 1.0;
     public final double MIN_POS = 0;
     public double position = 0;
+    private int degreesReset;
+
     HardwareMap hwMap = null;
 
     public void init(HardwareMap ahwMap) {
@@ -41,8 +46,12 @@ public class GoldDiggerBot {
         rightFrontDrive = hwMap.get(DcMotor.class, "frontRight");
         rightGlyphPull = hwMap.get(DcMotor.class, "rightIntake");
         leftGlyphPull = hwMap.get(DcMotor.class, "leftIntake");
+
         bottomLift = hwMap.get(Servo.class, "bottomLift");
         topLift = hwMap.get(Servo.class, "topLift");
+
+        gyro = hwMap.get(ModernRoboticsI2cGyro.class, "gyro");
+
         //setting direction of motors and how they will spin
         leftBackDrive.setDirection(DcMotor.Direction.FORWARD);
         leftFrontDrive.setDirection(DcMotor.Direction.FORWARD);
@@ -109,6 +118,16 @@ public class GoldDiggerBot {
         leftBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    }
+
+    public void gyroTurn(double degrees, double speed) {
+        if(degrees > 0){
+            while(degrees != degreesReset - gyro.getHeading() )
+            leftBackDrive.setPower(-1);
+        }
+        else{
+            leftBackDrive.setPower(-1);
+        }
     }
 }
 

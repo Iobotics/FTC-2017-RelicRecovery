@@ -18,77 +18,51 @@ public class GoldDiggerAuto extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         robot.init(hardwareMap);
 //use (name).setPower to run motors and Thread.sleep for delay
-        robot.leftFrontDrive.setPower(.5);
-        robot.leftBackDrive.setPower(.5);
-        robot.rightFrontDrive.setPower(.5);
-        robot.rightBackDrive.setPower(.5);
+
+        //remember to set all setPowers to setTargetPosition
+        robot.encoderDrive(28, 28, 0.5);
+        //drive to glyph box
+
+
+        Thread.sleep(1000);
+
+        //use baseball bat to hit glyph into glyph box
+
+        robot.gyroTurn(90, 0.3);
+        //turn from glyph box to other team pad
+
+        robot.encoderDrive(38, 38, 0.3);
+        //drive to line of middle glyph pit
+
+        robot.gyroTurn(90, 0.3);
+        //turn to glyph pit
+
+        robot.encoderDrive(60, 60, 0.6);
+        //drive close to glyph pit
+
+        robot.encoderDrive(20, 20, 0.2);
+        robot.glyphPull(0.7, 0.7);
+        Thread.sleep(1000);
+        robot.glyphPull(0, 0);
+        //drive through glyph pit and try to grab a glyph
+
+        robot.gyroTurn(180, 0.4);
+        //turn back to wall on the south of PC table
+
+        robot.encoderDrive(70, 70, 0.5);
+        //drive back to wall
+
+        robot.gyroTurn(90, 0.3);
+        //turn back to glyph box
+
+        robot.encoderDrive(48, 48, 0.5);
+        //drive to glyph box
+
+        robot.gyroTurn(90, 0.2);
+        //turn to be parallel
+
         Thread.sleep(1500);
-
-
-        robot.leftFrontDrive.setPower(-.3);
-        robot.leftBackDrive.setPower(-.3);
-        robot.rightFrontDrive.setPower(.3);
-        robot.rightBackDrive.setPower(.3);
-        Thread.sleep(1000);
-
-
-        robot.leftFrontDrive.setPower(.4);
-        robot.leftBackDrive.setPower(.4);
-        robot.rightFrontDrive.setPower(.4);
-        robot.rightBackDrive.setPower(.4);
-        robot.rightGlyphPull.setPower(.5);
-        robot.leftGlyphPull.setPower(.5);
-        Thread.sleep(3000);
-
-        robot.leftFrontDrive.setPower(0);
-        robot.leftBackDrive.setPower(0);
-        robot.rightFrontDrive.setPower(0);
-        robot.rightBackDrive.setPower(0);
-        Thread.sleep(1000);
-
-
-        robot.leftFrontDrive.setPower(-.3);
-        robot.leftBackDrive.setPower(-.3);
-        robot.rightFrontDrive.setPower(.3);
-        robot.rightBackDrive.setPower(.3);
-        Thread.sleep(1500);
-
-
-        robot.leftFrontDrive.setPower(0);
-        robot.leftBackDrive.setPower(0);
-        robot.rightFrontDrive.setPower(0);
-        robot.rightBackDrive.setPower(0);
-        Thread.sleep(1000);
-
-
-
-        Thread.sleep(1500);
-
-
-        robot.leftFrontDrive.setPower(.4);
-        robot.leftBackDrive.setPower(.4);
-        robot.rightFrontDrive.setPower(.4);
-        robot.rightBackDrive.setPower(.4);
-        Thread.sleep(1000);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        //push last glyph into box, get extra 10 points for being in safe zone
 
 
     }
