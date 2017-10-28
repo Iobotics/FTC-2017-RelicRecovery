@@ -25,9 +25,8 @@ public class GoldDiggerBot {
     public final int TICKS_PER_REV = 1440;
     public final int WHEEL_DIAMETER = 4;
     public final double COUNTS_PER_INCH = TICKS_PER_REV / (Math.PI * WHEEL_DIAMETER);
-    public final double MAX_POS = 1.0;
+    public final double MAX_POS = 2.8;
     public final double MIN_POS = 0;
-    public double position = 0;
     HardwareMap hwMap = null;
 
     public void init(HardwareMap ahwMap) {
@@ -50,7 +49,7 @@ public class GoldDiggerBot {
         rightFrontDrive.setDirection(DcMotor.Direction.REVERSE);
         rightGlyphPull.setDirection(DcMotor.Direction.FORWARD);
         leftGlyphPull.setDirection(DcMotor.Direction.REVERSE);
-        bottomLift.setDirection(Servo.Direction.REVERSE);
+        bottomLift.setDirection(Servo.Direction.FORWARD);
         topLift.setDirection(Servo.Direction.FORWARD);
         elevatorLift(MIN_POS);
     }
@@ -69,7 +68,7 @@ public class GoldDiggerBot {
 
     public void elevatorLift(double elevatorPosition) {
         bottomLift.setPosition(elevatorPosition);
-        bottomLift.setPosition(elevatorPosition);
+        topLift.setPosition(MAX_POS - elevatorPosition);
     }
 
     public void encoderDrive(double rightInches, double leftInches, double speed) {

@@ -43,7 +43,7 @@ public class GoldDiggerOpMode_Linear extends LinearOpMode {
     // TANK DRIVE NOT ARCADE
     // Have an else for every if especially for
     @Override
-    public void runOpMode() {
+    public void runOpMode() throws InterruptedException {
 
         robot.init(hardwareMap);
 
@@ -67,13 +67,22 @@ public class GoldDiggerOpMode_Linear extends LinearOpMode {
             }
 
             if (gamepad1.x){
-                robot.position += 0.01;
-                robot.elevatorLift(robot.position);
+                robot.elevatorLift(robot.bottomLift.getPosition() + 0.01);
+                if(robot.bottomLift.getPosition() >= robot.MAX_POS){
+                    robot.elevatorLift(robot.MAX_POS);
+                    Thread.sleep(50);
+                }
             }
             if (gamepad1.y){
-                robot.position -= 0.01;
-                robot.elevatorLift(robot.position);
+                robot.elevatorLift(robot.bottomLift.getPosition() - 0.01);
+                if(robot.bottomLift.getPosition() <= robot.MIN_POS){
+                    robot.elevatorLift(robot.MIN_POS);
+                    Thread.sleep(50);
+                }
             }
+            telemetry.addData("position", robot.bottomLift.getPosition());
+            telemetry.update();
+
         }
     }
 }
