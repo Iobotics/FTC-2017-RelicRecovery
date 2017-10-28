@@ -23,11 +23,15 @@ public class GoldDiggerAuto extends LinearOpMode {
         robot.rightFrontDrive.setPower(.5);
         robot.rightBackDrive.setPower(.5);
         Thread.sleep(1500);
+
+
         robot.leftFrontDrive.setPower(-.3);
         robot.leftBackDrive.setPower(-.3);
         robot.rightFrontDrive.setPower(.3);
         robot.rightBackDrive.setPower(.3);
         Thread.sleep(1000);
+
+
         robot.leftFrontDrive.setPower(.4);
         robot.leftBackDrive.setPower(.4);
         robot.rightFrontDrive.setPower(.4);
@@ -35,6 +39,54 @@ public class GoldDiggerAuto extends LinearOpMode {
         robot.rightGlyphPull.setPower(.5);
         robot.leftGlyphPull.setPower(.5);
         Thread.sleep(3000);
+
+        robot.leftFrontDrive.setPower(0);
+        robot.leftBackDrive.setPower(0);
+        robot.rightFrontDrive.setPower(0);
+        robot.rightBackDrive.setPower(0);
+        Thread.sleep(1000);
+
+
+        robot.leftFrontDrive.setPower(-.3);
+        robot.leftBackDrive.setPower(-.3);
+        robot.rightFrontDrive.setPower(.3);
+        robot.rightBackDrive.setPower(.3);
+        Thread.sleep(1500);
+
+
+        robot.leftFrontDrive.setPower(0);
+        robot.leftBackDrive.setPower(0);
+        robot.rightFrontDrive.setPower(0);
+        robot.rightBackDrive.setPower(0);
+        Thread.sleep(1000);
+
+
+        robot.elevatorLift(.4, .4);
+        Thread.sleep(1500);
+
+
+        robot.leftFrontDrive.setPower(.4);
+        robot.leftBackDrive.setPower(.4);
+        robot.rightFrontDrive.setPower(.4);
+        robot.rightBackDrive.setPower(.4);
+        Thread.sleep(1000);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -17,8 +17,8 @@ public class GoldDiggerBot {
     public DcMotor rightFrontDrive = null;
     public DcMotor leftGlyphPull = null;
     public DcMotor rightGlyphPull = null;
-    public CRServo rightElevator = null;
-    public CRServo leftElevator = null;
+    public Servo rightElevator = null;
+    public Servo leftElevator = null;
     public Servo underWheel = null;
 
 
@@ -39,8 +39,8 @@ public class GoldDiggerBot {
         rightFrontDrive = hwMap.get(DcMotor.class, "frontRight");
         rightGlyphPull = hwMap.get(DcMotor.class, "rightIntake");
         leftGlyphPull = hwMap.get(DcMotor.class, "leftIntake");
-        rightElevator = hwMap.get(CRServo.class, "rightLift");
-        leftElevator = hwMap.get(CRServo.class, "leftLift");
+        rightElevator = hwMap.get(Servo.class, "bottomLift");
+        leftElevator = hwMap.get(Servo.class, "topLift");
         //setting direction of motors and how they will spin
         leftBackDrive.setDirection(DcMotor.Direction.FORWARD);
         leftFrontDrive.setDirection(DcMotor.Direction.FORWARD);
@@ -48,8 +48,8 @@ public class GoldDiggerBot {
         rightFrontDrive.setDirection(DcMotor.Direction.REVERSE);
         rightGlyphPull.setDirection(DcMotor.Direction.REVERSE);
         leftGlyphPull.setDirection(DcMotor.Direction.REVERSE);
-        rightElevator.setDirection(CRServo.Direction.FORWARD);
-        leftElevator.setDirection(CRServo.Direction.FORWARD);
+        rightElevator.setDirection(Servo.Direction.REVERSE);
+        leftElevator.setDirection(Servo.Direction.FORWARD);
     }
 
     public void drive(double leftPower, double rightPower) {

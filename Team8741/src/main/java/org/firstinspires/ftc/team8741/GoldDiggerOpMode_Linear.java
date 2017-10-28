@@ -35,7 +35,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 // Setting motors right here under
 // USE setPosition to program Servos
-@TeleOp(name = "TeleOp: Tank Drive", group = "Linear Opmode")
+@TeleOp(name = "TeleOp: Gold Digger Tank Drive", group = "Linear Opmode")
 //@Disabled
 public class GoldDiggerOpMode_Linear extends LinearOpMode {
     GoldDiggerBot robot = new GoldDiggerBot();
