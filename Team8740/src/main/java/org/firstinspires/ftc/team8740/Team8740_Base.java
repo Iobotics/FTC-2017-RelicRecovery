@@ -27,19 +27,53 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 package org.firstinspires.ftc.team8740;
 
+import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
+import com.qualcomm.robotcore.util.ReadWriteFile;
 
+import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
+
+import java.io.File;
+
+/**
+ * Team 8740 base class
+ * @author Darren Kam
+ */
 public class Team8740_Base
 {
-    /* Public OpMode members. */
+    /* Constants */
+    private final static double LEFT_SERVO_HOME = 0.36;
+    private final static double RIGHT_SERVO_HOME = 0.65;
+    private final static double LEFT_SERVO_OPEN  = 0.72;
+    private final static double RIGHT_SERVO_OPEN  = 1.25;
+
+    private final static double JEWEL_SERVO_HOME  = 0.5;
+    private final static double JEWEL_SERVO_DOWN  = 0.8;
+
+    private final static double LOW_SPEED = 0.5;
+    private final static double HIGH_SPEED = 0.7;
+
+    private final static double INTAKE_POWER = 1.0;
+
+    private final static double GLYPH_POWER = 1.0;
+
+    private final static double LIFT_DOWN_POWER = -0.4;
+    private final static double LIFT_UP_POWER = 0.6;
+
+
+    /* OpMode members */
     private DcMotor frontLeftDrive   = null;
     private DcMotor frontRightDrive  = null;
     private DcMotor backLeftDrive    = null;
@@ -60,63 +94,56 @@ public class Team8740_Base
     private DigitalChannel lowerLimit = null;
     private DigitalChannel upperLimit = null;
 
-    private final static double LEFT_SERVO_HOME = 0.4;
-    private final static double RIGHT_SERVO_HOME = 0.4;
-    private final static double LEFT_SERVO_OPEN  = 0.72;
-    private final static double RIGHT_SERVO_OPEN  = 1.25;
+    // The IMU sensor object
+    private BNO055IMU imu = null;
 
-    private final static double JEWEL_SERVO_HOME  = 0.5;
-    private final static double JEWEL_SERVO_DOWN  = 0.8;
+    // State used for updating telemetry
+    private Orientation angles = null;
+    private Acceleration gravity = null;
 
-    private final static double LOW_SPEED = 0.5;
-    private final static double HIGH_SPEED = 0.7;
-
-    private final static double INTAKE_POWER = 1.0;
-
-    private final static double GLYPH_POWER = 0.5;
-
-    private final static double LIFT_DOWN_POWER = -0.4;
-    private final static double LIFT_UP_POWER = 0.6;
 
     /* Local OpMode members. */
     private boolean isLowSpeed = false;
-    private boolean areClawsOpen = false;
+    private boolean clawStatus = false;
 
     private double speedMultiplier = HIGH_SPEED;
 
     private ElapsedTime time  = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
 
+    private HardwareMap hwMap = null;
+
+
     /* Constructor */
     public Team8740_Base() { }
 
+
     /* Initialize standard Hardware interfaces */
     public void init(HardwareMap hwMap) {
+        this.hwMap = hwMap;
 
-        // Define and Initialize Motors
+        initDrive();
+        initIntake();
+        initLift();
+        initServos();
+        //initGyro();
+    }
+
+    private void initDrive() {
+        // Define and initialize motors
         frontLeftDrive  = hwMap.get(DcMotor.class, "frontLeft");
         frontRightDrive = hwMap.get(DcMotor.class, "frontRight");
         backLeftDrive   = hwMap.get(DcMotor.class, "backLeft");
         backRightDrive  = hwMap.get(DcMotor.class, "backRight");
 
+        // Reverse left motors
         frontLeftDrive.setDirection(DcMotor.Direction.REVERSE);
-        frontRightDrive.setDirection(DcMotor.Direction.FORWARD);
         backLeftDrive.setDirection(DcMotor.Direction.REVERSE);
-        backRightDrive.setDirection(DcMotor.Direction.FORWARD);
 
+        // Set all motors to brake mode
         frontLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-        intakeLeft = hwMap.get(DcMotor.class, "intakeLeft");
-        intakeRight = hwMap.get(DcMotor.class, "intakeRight");
-
-        intakeRight.setDirection(DcMotor.Direction.REVERSE);
-
-        lift = hwMap.get(DcMotor.class, "lift");
-
-        // Set all motors to zero power
-        this.setPower(0, 0, 0, 0);
 
         // Set all motors to run without encoders
         frontLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -124,34 +151,103 @@ public class Team8740_Base
         backLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
+        // Set all motors to zero power
+        this.setPower(0, 0, 0, 0);
+    }
+
+    private void initIntake() {
+        // Define the intake motors
+        intakeLeft = hwMap.get(DcMotor.class, "intakeLeft");
+        intakeRight = hwMap.get(DcMotor.class, "intakeRight");
+
+        // Reverse the right intake motor
+        intakeRight.setDirection(DcMotor.Direction.REVERSE);
+    }
+
+    private void initLift() {
+        // Define the lift motor
+        lift = hwMap.get(DcMotor.class, "lift");
+
         // Define limit switches
         lowerLimit = hwMap.get(DigitalChannel.class, "lowerLimit");
         upperLimit = hwMap.get(DigitalChannel.class, "upperLimit");
 
+        // Set limit switches to output mode
         lowerLimit.setMode(DigitalChannel.Mode.OUTPUT);
         upperLimit.setMode(DigitalChannel.Mode.OUTPUT);
+    }
 
+    private void initServos() {
         // Define and initialize ALL installed servos
         leftServo  = hwMap.get(Servo.class, "grabLeft");
         rightServo = hwMap.get(Servo.class, "grabRight");
 
-        leftServo.setDirection(Servo.Direction.FORWARD);
-        rightServo.setDirection(Servo.Direction.REVERSE);
-
-        leftServo.setPosition(LEFT_SERVO_HOME);
-        rightServo.setPosition(RIGHT_SERVO_HOME);
-
         jewelServo = hwMap.get(Servo.class, "jewelArm");
+
+        pushServo = hwMap.get(CRServo.class, "pushServo");
+
+        // Reverse the right servo and jewel servo
+        rightServo.setDirection(Servo.Direction.REVERSE);
 
         jewelServo.setDirection(Servo.Direction.REVERSE);
 
-        jewelServo.setPosition(JEWEL_SERVO_HOME);
+        // Home the servos
+        leftServo.setPosition(LEFT_SERVO_HOME);
+        rightServo.setPosition(RIGHT_SERVO_HOME);
 
-        pushServo = hwMap.get(CRServo.class, "pushServo");
+        jewelServo.setPosition(JEWEL_SERVO_HOME);
     }
 
+    private void initGyro() {
+        // Set up the parameters with which we will use our IMU. Note that integration
+        // algorithm here just reports accelerations to the logcat log; it doesn't actually
+        // provide positional information.
+        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+        parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
+        parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        parameters.calibrationDataFile = "BNO055IMUCalibration.json"; // see the calibration sample opmode
+        parameters.loggingEnabled      = true;
+        parameters.loggingTag          = "IMU";
+        parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
+
+        // Retrieve and initialize the IMU. We expect the IMU to be attached to an I2C port
+        // on a Core Device Interface Module, configured to be a sensor of type "AdaFruit IMU",
+        // and named "imu".
+        imu = hwMap.get(BNO055IMU.class, "imu");
+        imu.initialize(parameters);
+
+        calibrateGyro();
+    }
+
+    /**
+     * Set tank drive
+     * @param left
+     * @param right
+     */
     public void setTank(double left, double right) {
         this.setPower(left, right, left, right);
+    }
+
+    /**
+     * Set mecanum drive
+     * @param x
+     * @param y
+     * @param rotation
+     */
+    public void setMecanum(double x, double y, double rotation) {
+        // Setup a variable for each drive wheel to save power level for telemetry
+        double frontLeftPower;
+        double frontRightPower;
+        double backLeftPower;
+        double backRightPower;
+
+        frontLeftPower   = Range.clip(x + y - rotation, -1.0, 1.0);
+        frontRightPower  = Range.clip(-x + y + rotation, -1.0, 1.0);
+        backLeftPower    = Range.clip(-x + y - rotation, -1.0, 1.0);
+        backRightPower   = Range.clip(x + y + rotation, -1.0, 1.0);
+
+        // Send calculated power to wheels
+        setPower(frontLeftPower, frontRightPower, backLeftPower, backRightPower);
     }
 
     public void setPower(double frontLeft, double frontRight, double backLeft, double backRight) {
@@ -189,9 +285,9 @@ public class Team8740_Base
      * Toggles the claws
      */
     public void toggleClaws() {
-        leftServo.setPosition(areClawsOpen ? LEFT_SERVO_HOME : LEFT_SERVO_OPEN);
-        rightServo.setPosition(areClawsOpen ? RIGHT_SERVO_HOME : RIGHT_SERVO_OPEN);
-        areClawsOpen = !areClawsOpen;
+        leftServo.setPosition(clawStatus ? LEFT_SERVO_HOME : LEFT_SERVO_OPEN);
+        rightServo.setPosition(clawStatus ? RIGHT_SERVO_HOME : RIGHT_SERVO_OPEN);
+        clawStatus = !clawStatus;
     }
 
     public void pushGlyph() {
@@ -230,7 +326,7 @@ public class Team8740_Base
      * Gets the state of the lower limit switch
      * @return lowerLimitState
      */
-    public boolean atLowerLimit() {
+    public boolean getLowerLimit() {
         boolean lowerLimitState = lowerLimit.getState();
         return lowerLimitState;
     }
@@ -239,7 +335,7 @@ public class Team8740_Base
      * Gets the state of the upper limit switch
      * @return upperLimitState
      */
-    public boolean atUpperLimit() {
+    public boolean getUpperLimit() {
         boolean upperLimitState = upperLimit.getState();
         return upperLimitState;
     }
@@ -254,9 +350,44 @@ public class Team8740_Base
 
     /**
      * Checks if claws are open
-     * @return areClawsOpen
+     * @return clawStatus
      */
-    public boolean areClawsOpen() {
-        return areClawsOpen;
+    public boolean getClawStatus() {
+        return clawStatus;
+    }
+
+    /**
+     * Calibrates the gyro
+     */
+    public void calibrateGyro() {
+        // Get the calibration data
+        BNO055IMU.CalibrationData calibrationData = imu.readCalibrationData();
+
+        // Save the calibration data to a file. You can choose whatever file
+        // name you wish here, but you'll want to indicate the same file name
+        // when you initialize the IMU in an opmode in which it is used. If you
+        // have more than one IMU on your robot, you'll of course want to use
+        // different configuration file names for each.
+        String filename = "BNO055IMUCalibration.json";
+        File file = AppUtil.getInstance().getSettingsFile(filename);
+        ReadWriteFile.writeFile(file, calibrationData.serialize());
+    }
+
+    /**
+     * Gets the calibration status of the gyro
+     * @return
+     */
+    public String getGyroStatus() {
+        String status = imu.getCalibrationStatus().toString();
+        return status;
+    }
+
+    /**
+     * Gets the heading of the gyro in degrees
+     * @return heading
+     */
+    public double getGyroHeading() {
+        double heading = AngleUnit.DEGREES.normalize(AngleUnit.DEGREES.fromUnit(angles.angleUnit, angles.firstAngle));
+        return heading;
     }
 }
