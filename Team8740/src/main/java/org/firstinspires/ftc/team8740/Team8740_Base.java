@@ -42,11 +42,19 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.robotcore.util.ReadWriteFile;
 
+import org.firstinspires.ftc.robotcore.external.ClassFactory;
+import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
+import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 
 import java.io.File;
@@ -89,6 +97,8 @@ public class Team8740_Base {
     private final static double RED_THRESHOLD = 180;
     private final static double BLUE_THRESHOLD = 150;
 
+    private final static String VUFORIA_LICENSE = "AY0QHQL/////AAAAGddY2lrlhEkenq0T04cRoVVmq/FAquH7DThEnayFrV+ojyjel8qTCn03vKe+FaZt0FwnE4tKdbimF0i47pzVuCQm2lRVdy5m1W03vvMN+8SA0RoXquxc1ddQLNyw297Ei3yWCJLV74UsEtfBwYKqr4ys3d2b2vPgaWnaZX6SNzD+x7AfKsaTSEIFqWfH8GOBoyw0kJ6qSCL384ylCcId6fVJbO8s9WccvuQYsCgCizdr0N/wOdEn76wY7fiNuR+5oReDCaIgfw5L35mD8EtQ0UHmNZGeDndtPDd6ZfNVlU3gyzch7nj5cmPBTleaoiCjyR9AputQHRH3qXnf3k76MvozmMGTE/j5o1HBA6BMSPwH";
+
     private enum Color {
         RED,
         BLUE,
@@ -126,6 +136,16 @@ public class Team8740_Base {
     private Orientation angles   = null;
     private Acceleration gravity = null;
 
+    private VuforiaLocalizer vuforia = null;
+    private VuforiaTrackables relicTrackables = null;
+    private VuforiaTrackable relicTemplate = null;
+
+    private HardwareMap hwMap = null;
+
+    private LinearOpMode opmode = null;
+
+    private ElapsedTime time = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
+
 
     /* Local OpMode members. */
     private boolean isLowSpeed = false;
@@ -133,11 +153,6 @@ public class Team8740_Base {
 
     private double speedMultiplier = HIGH_SPEED;
 
-    private ElapsedTime time = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
-
-    private HardwareMap hwMap = null;
-
-    private LinearOpMode opmode = null;
 
     /* Initialize standard Hardware interfaces */
     public void init(HardwareMap hwMap) {
@@ -154,6 +169,7 @@ public class Team8740_Base {
         initLift();
         initServos();
         initColorSensor();
+        initVuforia();
         initGyro();
     }
 
@@ -229,6 +245,20 @@ public class Team8740_Base {
 
     private void initColorSensor() {
         color_sensor = hwMap.colorSensor.get("color");
+    }
+
+    private void initVuforia() {
+        int cameraMonitorViewId = hwMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hwMap.appContext.getPackageName());
+        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
+
+        parameters.vuforiaLicenseKey = VUFORIA_LICENSE;
+        parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
+
+        this.vuforia = ClassFactory.createVuforiaLocalizer(parameters);
+
+        relicTrackables = this.vuforia.loadTrackablesFromAsset("RelicVuMark");
+        relicTemplate = relicTrackables.get(0);
+        relicTemplate.setName("relicVuMarkTemplate");
     }
 
     private void initGyro() {
@@ -439,6 +469,50 @@ public class Team8740_Base {
         }
 
         return color;
+    }
+
+    public void activateVuforia() {
+        relicTrackables.activate();
+    }
+
+    public void trackVuMarks() {
+        RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
+        if (vuMark != RelicRecoveryVuMark.UNKNOWN) {
+
+                /* Found an instance of the template. In the actual game, you will probably
+                 * loop until this condition occurs, then move on to act accordingly depending
+                 * on which VuMark was visible. */
+            opmode.telemetry.addData("VuMark", "%s visible", vuMark);
+
+                /* For fun, we also exhibit the navigational pose. In the Relic Recovery game,
+                 * it is perhaps unlikely that you will actually need to act on this pose information, but
+                 * we illustrate it nevertheless, for completeness. */
+            OpenGLMatrix pose = ((VuforiaTrackableDefaultListener)relicTemplate.getListener()).getPose();
+            String formattedPose = (pose != null) ? pose.formatAsTransform() : "null";
+            opmode.telemetry.addData("Pose", formattedPose);
+
+                /* We further illustrate how to decompose the pose into useful rotational and
+                 * translational components */
+            if (pose != null) {
+                VectorF trans = pose.getTranslation();
+                Orientation rot = Orientation.getOrientation(pose, AxesReference.EXTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES);
+
+                // Extract the X, Y, and Z components of the offset of the target relative to the robot
+                double tX = trans.get(0);
+                double tY = trans.get(1);
+                double tZ = trans.get(2);
+
+                // Extract the rotational components of the target relative to the robot
+                double rX = rot.firstAngle;
+                double rY = rot.secondAngle;
+                double rZ = rot.thirdAngle;
+            }
+        }
+        else {
+            opmode.telemetry.addData("VuMark", "not visible");
+        }
+
+        opmode.telemetry.update();
     }
 
     public void calibrateGyro() {

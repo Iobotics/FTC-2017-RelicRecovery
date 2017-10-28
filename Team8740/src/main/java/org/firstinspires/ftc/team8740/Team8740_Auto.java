@@ -118,6 +118,8 @@ public class Team8740_Auto extends LinearOpMode {
             telemetry.update();
         }
 
+        //robot.activateVuforia();
+
         // Step through each leg of the path,
         // Note: Reverse movement is obtained by setting a negative distance (not speed)
         // Put a hold after each turn
