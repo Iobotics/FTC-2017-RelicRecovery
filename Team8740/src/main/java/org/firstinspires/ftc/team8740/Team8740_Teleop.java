@@ -41,11 +41,8 @@ public class Team8740_Teleop extends LinearOpMode {
     @Override
     public void runOpMode() {
 
-        telemetry.addData("X", "Wait for calibration");
-        telemetry.update();
-
         //Initialize the hardware variables.
-        robot.init(hardwareMap, this);
+        robot.init(hardwareMap, this, true);
 
         // Send telemetry message to signify robot waiting
         telemetry.addData("O", "Waiting for start");
@@ -108,12 +105,6 @@ public class Team8740_Teleop extends LinearOpMode {
             if(gamepad1.start) {
                 robot.toggleSpeed();
             }
-
-            // Send telemetry message to signify robot running;
-            telemetry.addLine("encoders").addData("left", robot.getLeftEncoder()).addData("right", robot.getRightEncoder());
-            telemetry.addData("heading", robot.getGyroHeading());
-            telemetry.addData("color", robot.getColor());
-            telemetry.update();
 
             // Pause for 25 mS each cycle = update 40 times a second.
             sleep(25);

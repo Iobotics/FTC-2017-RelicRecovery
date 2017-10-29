@@ -76,7 +76,7 @@ public class Team8740_Base {
     private final static double JEWEL_SERVO_HOME = 0.45;
     private final static double JEWEL_SERVO_DOWN = 0.85;
 
-    private final static double LOW_SPEED = 0.5;
+    private final static double LOW_SPEED = 0.4;
     private final static double HIGH_SPEED = 0.7;
 
     private final static double INTAKE_POWER = 1.0;
@@ -92,8 +92,8 @@ public class Team8740_Base {
     private final static double TICKS_PER_INCH = (TICKS_PER_REV * GEAR_REDUCTION) * Math.sqrt(2) / (WHEEL_DIAMETER * 3.1415);
 
     private final static double HEADING_THRESHOLD = 1;      // As tight as we can make it with an integer gyro
-    private final static double P_TURN_COEFF       = 0.1;     // Larger is more responsive, but also less stable
-    private final static double P_DRIVE_COEFF      = 0.15;    // Larger is more responsive, but also less stable
+    private final static double P_TURN_COEFF       = 0.05;     // Larger is more responsive, but also less stable
+    private final static double P_DRIVE_COEFF      = 0.05;    // Larger is more responsive, but also less stable
 
     // TODO - Find thresholds
     private final static double RED_THRESHOLD = 180;
@@ -153,6 +153,7 @@ public class Team8740_Base {
     private boolean isLowSpeed = false;
     private boolean jewelStatus = false;
     private boolean clawStatus = false;
+    private boolean teleop = false;
 
     private double speedMultiplier = HIGH_SPEED;
 
@@ -164,16 +165,22 @@ public class Team8740_Base {
 
     /* Initialize standard Hardware interfaces */
     public void init(HardwareMap hwMap, LinearOpMode opmode) {
+        this.init(hwMap, opmode, false);
+    }
+
+    /* Initialize standard Hardware interfaces */
+    public void init(HardwareMap hwMap, LinearOpMode opmode, boolean teleop) {
         this.hwMap = hwMap;
         this.opmode = opmode;
+        this.teleop = teleop;
 
         initDrive();
         initIntake();
         initLift();
         initServos();
-        initColorSensor();
-        initVuforia();
-        initGyro();
+        if(!teleop) initColorSensor();
+        //initVuforia();
+        if(!teleop) initGyro();
     }
 
     private void initDrive() {
@@ -184,8 +191,10 @@ public class Team8740_Base {
         backRightDrive  = hwMap.dcMotor.get("backRight");
 
         // Reverse left motors
-        frontLeftDrive.setDirection(DcMotor.Direction.REVERSE);
-        backLeftDrive.setDirection(DcMotor.Direction.REVERSE);
+        if(teleop) {
+            frontLeftDrive.setDirection(DcMotor.Direction.REVERSE);
+            backLeftDrive.setDirection(DcMotor.Direction.REVERSE);
+        }
 
         // Set all motors to brake mode
         frontLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
