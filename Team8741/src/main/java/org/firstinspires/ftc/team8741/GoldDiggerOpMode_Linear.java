@@ -51,17 +51,19 @@ public class GoldDiggerOpMode_Linear extends LinearOpMode {
 
         while (opModeIsActive()) {
             // Setting the motors to different joysticks of controller
-            robot.drive(gamepad1.left_stick_y, gamepad1.right_stick_y);
+
+                robot.drive(-gamepad1.left_stick_y* 0.5, -gamepad1.right_stick_y * 0.5);
+
             // If the letter "A" on gamepad is HELD, robot will spin
             if (gamepad1.a == true) {
-                robot.glyphPull(-.60, -.60);
+                robot.glyphPull(-1, -1);
             } else {
                 robot.glyphPull(0, 0);
             }
 
 
             if (gamepad1.b == true) {
-                robot.glyphPull(0.60, 0.60);
+                robot.glyphPull(1, 1);
             } else {
                 robot.glyphPull(0, 0);
             }
@@ -70,15 +72,15 @@ public class GoldDiggerOpMode_Linear extends LinearOpMode {
                 robot.elevatorLift(robot.bottomLift.getPosition() + 0.01);
                 if(robot.bottomLift.getPosition() >= robot.MAX_POS){
                     robot.elevatorLift(robot.MAX_POS);
-                    Thread.sleep(50);
                 }
+                Thread.sleep(50);
             }
             if (gamepad1.y){
                 robot.elevatorLift(robot.bottomLift.getPosition() - 0.01);
                 if(robot.bottomLift.getPosition() <= robot.MIN_POS){
                     robot.elevatorLift(robot.MIN_POS);
-                    Thread.sleep(50);
                 }
+                Thread.sleep(50);
             }
             telemetry.addData("position", robot.bottomLift.getPosition());
             telemetry.update();
