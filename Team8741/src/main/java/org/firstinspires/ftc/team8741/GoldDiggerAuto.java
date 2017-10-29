@@ -17,79 +17,9 @@ public class GoldDiggerAuto extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         robot.init(hardwareMap);
-//use (name).setPower to run motors and Thread.sleep for delay
-        robot.leftFrontDrive.setPower(.5);
-        robot.leftBackDrive.setPower(.5);
-        robot.rightFrontDrive.setPower(.5);
-        robot.rightBackDrive.setPower(.5);
-        Thread.sleep(1500);
-
-
-        robot.leftFrontDrive.setPower(-.3);
-        robot.leftBackDrive.setPower(-.3);
-        robot.rightFrontDrive.setPower(.3);
-        robot.rightBackDrive.setPower(.3);
-        Thread.sleep(1000);
-
-
-        robot.leftFrontDrive.setPower(.4);
-        robot.leftBackDrive.setPower(.4);
-        robot.rightFrontDrive.setPower(.4);
-        robot.rightBackDrive.setPower(.4);
-        robot.rightGlyphPull.setPower(.5);
-        robot.leftGlyphPull.setPower(.5);
-        Thread.sleep(3000);
-
-        robot.leftFrontDrive.setPower(0);
-        robot.leftBackDrive.setPower(0);
-        robot.rightFrontDrive.setPower(0);
-        robot.rightBackDrive.setPower(0);
-        Thread.sleep(1000);
-
-
-        robot.leftFrontDrive.setPower(-.3);
-        robot.leftBackDrive.setPower(-.3);
-        robot.rightFrontDrive.setPower(.3);
-        robot.rightBackDrive.setPower(.3);
-        Thread.sleep(1500);
-
-
-        robot.leftFrontDrive.setPower(0);
-        robot.leftBackDrive.setPower(0);
-        robot.rightFrontDrive.setPower(0);
-        robot.rightBackDrive.setPower(0);
-        Thread.sleep(1000);
-
-
-
-        Thread.sleep(1500);
-
-
-        robot.leftFrontDrive.setPower(.4);
-        robot.leftBackDrive.setPower(.4);
-        robot.rightFrontDrive.setPower(.4);
-        robot.rightBackDrive.setPower(.4);
-        Thread.sleep(1000);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        waitForStart();
+        robot.drive(1,1);
+        Thread.sleep(500);
+        robot.drive(0,0);
     }
 }
