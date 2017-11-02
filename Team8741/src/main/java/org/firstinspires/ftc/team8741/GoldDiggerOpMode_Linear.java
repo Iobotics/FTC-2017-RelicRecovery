@@ -68,22 +68,7 @@ public class GoldDiggerOpMode_Linear extends LinearOpMode {
                 robot.glyphPull(0, 0);
             }
 
-            if (gamepad1.x){
-                robot.elevatorLift(robot.bottomLift.getPosition() + 0.01);
-                if(robot.bottomLift.getPosition() >= robot.MAX_POS){
-                    robot.elevatorLift(robot.MAX_POS);
-                }
-                Thread.sleep(50);
-            }
-            if (gamepad1.y){
-                robot.elevatorLift(robot.bottomLift.getPosition() - 0.01);
-                if(robot.bottomLift.getPosition() <= robot.MIN_POS){
-                    robot.elevatorLift(robot.MIN_POS);
-                }
-                Thread.sleep(50);
-            }
-            telemetry.addData("position", robot.bottomLift.getPosition());
-            telemetry.update();
+
 
         }
     }

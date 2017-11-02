@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 /**
  * Created by Joshua Taufahema on 10/16/2017.
  */
-@Autonomous (name = "Gold Digger Auto", group = "Autonomous")
+@Autonomous (name = "Gold Digger Auto", group = "Linear Opmode")
 //@Disabled
 public class GoldDiggerAuto extends LinearOpMode {
    GoldDiggerBot robot = new GoldDiggerBot();
@@ -18,8 +18,6 @@ public class GoldDiggerAuto extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         robot.init(hardwareMap);
         waitForStart();
-        robot.drive(1,1);
-        Thread.sleep(500);
-        robot.drive(0,0);
+        robot.encoderDrive(32,0.4);
     }
 }
