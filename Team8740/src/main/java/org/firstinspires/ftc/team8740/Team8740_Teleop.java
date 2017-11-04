@@ -31,7 +31,6 @@ package org.firstinspires.ftc.team8740;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.util.Range;
 
 @TeleOp(name="Team 8740: Teleop Mecanum", group="Team 8740")
 //@Disabled
@@ -43,10 +42,10 @@ public class Team8740_Teleop extends LinearOpMode {
     public void runOpMode() {
 
         //Initialize the hardware variables.
-        robot.init(hardwareMap);
+        robot.init(hardwareMap, this, true);
 
         // Send telemetry message to signify robot waiting
-        telemetry.addData("Say", "Waiting for start");
+        telemetry.addData("O", "Waiting for start");
         telemetry.update();
 
         // Wait for the game to start (driver presses PLAY)
@@ -66,32 +65,34 @@ public class Team8740_Teleop extends LinearOpMode {
             // Use gamepad A to open and close the claw
             if(gamepad1.a) {
                 robot.toggleClaws();
-                sleep(100);
+                sleep(30);
             }
 
-            // Use gamepad right bumper to run intake
+            // Use gamepad right bumper and trigger to run intake
             if(gamepad1.right_bumper) {
                robot.runIntake();
-            }else if(gamepad1.right_trigger > 0.2) {
+            } else if(gamepad1.right_trigger > 0.2) {
                 robot.reverseIntake();
             }else {
                 robot.stopIntake();
             }
 
-            if(gamepad1.y) {
-                robot.lowerJewelArm();
-            } else if(gamepad1.b) {
-                robot.raiseJewelArm();
+            // Use gamepad B to lower and raise the jewel arm
+            if(gamepad1.b) {
+                robot.toggleJewelArm();
+                sleep(50);
             }
 
+            // Use gamepad left bumper and trigger to push the glyph
             if(gamepad1.left_bumper) {
-                robot.pushGlyph();
-            } else if(gamepad1.left_trigger > 0.2) {
                 robot.retractGlyph();
+            } else if(gamepad1.left_trigger > 0.2) {
+                robot.pushGlyph();
             } else {
                 robot.stopGlyph();
             }
 
+            // Use gamepad dpad to control the lift
             if(gamepad1.dpad_down) {
                 robot.lowerLift();
             } else if(gamepad1.dpad_up) {
@@ -100,19 +101,13 @@ public class Team8740_Teleop extends LinearOpMode {
                 robot.stopLift();
             }
 
+            // Use gamepad start to toggle speed control
             if(gamepad1.start) {
                 robot.toggleSpeed();
             }
 
-            // Send telemetry message to signify robot running;
-            telemetry.addData("lower limit", robot.getLowerLimit());
-            telemetry.addData("upper limit", robot.getUpperLimit());
-            //telemetry.addData("gyro status", robot.getGyroStatus());
-            //telemetry.addData("heading", robot.getGyroHeading());
-            telemetry.update();
-
-            // Pause for 40 mS each cycle = update 25 times a second.
-            sleep(40);
+            // Pause for 25 mS each cycle = update 40 times a second.
+            sleep(25);
         }
     }
 }

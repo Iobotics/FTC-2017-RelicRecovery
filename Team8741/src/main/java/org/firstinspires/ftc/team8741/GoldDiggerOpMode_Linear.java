@@ -43,7 +43,7 @@ public class GoldDiggerOpMode_Linear extends LinearOpMode {
     // TANK DRIVE NOT ARCADE
     // Have an else for every if especially for
     @Override
-    public void runOpMode() {
+    public void runOpMode() throws InterruptedException {
 
         robot.init(hardwareMap);
 
@@ -51,29 +51,25 @@ public class GoldDiggerOpMode_Linear extends LinearOpMode {
 
         while (opModeIsActive()) {
             // Setting the motors to different joysticks of controller
-            robot.drive(gamepad1.left_stick_y, gamepad1.right_stick_y);
+
+                robot.drive(-gamepad1.left_stick_y* 0.5, -gamepad1.right_stick_y * 0.5);
+
             // If the letter "A" on gamepad is HELD, robot will spin
             if (gamepad1.a == true) {
-                robot.glyphPull(-.60, -.60);
+                robot.glyphPull(-1, -1);
             } else {
                 robot.glyphPull(0, 0);
             }
 
 
             if (gamepad1.b == true) {
-                robot.glyphPull(0.60, 0.60);
+                robot.glyphPull(1, 1);
             } else {
                 robot.glyphPull(0, 0);
             }
 
-            if (gamepad1.x){
-                robot.position += 0.01;
-                robot.elevatorLift(robot.position);
-            }
-            if (gamepad1.y){
-                robot.position -= 0.01;
-                robot.elevatorLift(robot.position);
-            }
+
+
         }
     }
 }
