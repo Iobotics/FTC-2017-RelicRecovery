@@ -15,23 +15,20 @@ import com.qualcomm.robotcore.hardware.Servo;
 //Motor = An object designed to provide the driver a lot of speed, but less accuracy and precision than Servo
 public class GoldDiggerBot {
     //initialises all motors and servos
-    public DcMotor leftBackDrive = null;
-    public DcMotor leftFrontDrive = null;
-    public DcMotor rightBackDrive = null;
-    public DcMotor rightFrontDrive = null;
-    public DcMotor leftGlyphPull = null;
-    public DcMotor rightGlyphPull = null;
-    public Servo bottomLift = null;
-    public Servo topLift = null;
-    public GyroSensor gyro = null;
+    private DcMotor leftBackDrive = null;
+    private DcMotor leftFrontDrive = null;
+    private DcMotor rightBackDrive = null;
+    private DcMotor rightFrontDrive = null;
+    private DcMotor leftGlyphPull = null;
+    private DcMotor rightGlyphPull = null;
 
-    public final int TICKS_PER_REV = 560;
-    public final int WHEEL_DIAMETER = 4;
-    public final double COUNTS_PER_INCH = TICKS_PER_REV / (Math.PI * WHEEL_DIAMETER);
+    private final int TICKS_PER_REV = 560;
+    private final int WHEEL_DIAMETER = 4;
+    private final double COUNTS_PER_INCH = TICKS_PER_REV / (Math.PI * WHEEL_DIAMETER);
 
-    HardwareMap hwMap = null;
+    private HardwareMap hwMap = null;
 
-    public void init(HardwareMap ahwMap) {
+    void init(HardwareMap ahwMap) {
 
         hwMap = ahwMap;
 
@@ -43,10 +40,6 @@ public class GoldDiggerBot {
         rightGlyphPull = hwMap.get(DcMotor.class, "rightIntake");
         leftGlyphPull = hwMap.get(DcMotor.class, "leftIntake");
 
-        bottomLift = hwMap.get(Servo.class, "bottomLift");
-        topLift = hwMap.get(Servo.class, "topLift");
-
-        gyro = hwMap.get(ModernRoboticsI2cGyro.class, "gyro");
 
         //setting direction of motors and how they will spin
 
@@ -56,8 +49,6 @@ public class GoldDiggerBot {
         rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
         rightGlyphPull.setDirection(DcMotor.Direction.FORWARD);
         leftGlyphPull.setDirection(DcMotor.Direction.REVERSE);
-        bottomLift.setDirection(Servo.Direction.FORWARD);
-        topLift.setDirection(Servo.Direction.FORWARD);
 
         /* setting motor behaviour */
         leftBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -65,7 +56,6 @@ public class GoldDiggerBot {
         rightBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightFrontDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         //setting the elevator to its minumum position
-
     }
 
     public void setMode(DcMotor.RunMode mode){
@@ -73,6 +63,7 @@ public class GoldDiggerBot {
         leftFrontDrive.setMode(mode);
         rightFrontDrive.setMode(mode);
         rightBackDrive.setMode(mode);
+        //set run mode of the motors
     }
 
     public void drive(double leftPower, double rightPower) {
@@ -84,22 +75,30 @@ public class GoldDiggerBot {
     }
     public void stopDrive(){
         drive(0,0);
+        //stops the robot
     }
 
     public void glyphPull(double leftGlyphPower, double rightGlyphPower) {
         leftGlyphPull.setPower(leftGlyphPower);
         rightGlyphPull.setPower(rightGlyphPower);
-        //setspower to the intake
+        //sets power to the intake
     }
-
+    /*
+    *Autonomously moves the bot forward a set number of inches
+    *@param inches sets the amount of inches the robot goes forward
+    * @param speed sets the speed the robot moves at
+     */
     public void encoderDrive(double inches, double speed) {
         int target = rightBackDrive.getCurrentPosition() + (int) (inches*COUNTS_PER_INCH);
         drive(speed, speed );
         while(rightBackDrive.getCurrentPosition() < target){
 
         }
-        drive(0,0);
+        stopDrive();
     }
 
+    public void gyroTurn(int degrees, double speed){
+
+    }
 }
 
