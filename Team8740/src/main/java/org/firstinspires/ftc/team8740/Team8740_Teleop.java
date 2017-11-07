@@ -51,6 +51,9 @@ public class Team8740_Teleop extends LinearOpMode {
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
 
+        gamepad2.setJoystickDeadzone((float).05);
+        gamepad1.setJoystickDeadzone((float) .05);
+
         // Run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
 
@@ -63,7 +66,7 @@ public class Team8740_Teleop extends LinearOpMode {
             robot.setMecanum(x, y, rotation);
 
             // Use gamepad A to open and close the claw
-            if(gamepad1.a) {
+            if(gamepad2.a) {
                 robot.toggleClaws();
                 sleep(30);
             }
@@ -93,9 +96,9 @@ public class Team8740_Teleop extends LinearOpMode {
             }
 
             // Use gamepad dpad to control the lift
-            if(gamepad1.dpad_down) {
+            if(gamepad2.right_stick_y < -0.05) {
                 robot.lowerLift();
-            } else if(gamepad1.dpad_up) {
+            } else if(gamepad2.right_stick_y > 0.05) {
                 robot.raiseLift();
             } else {
                 robot.stopLift();
@@ -108,6 +111,9 @@ public class Team8740_Teleop extends LinearOpMode {
 
             // Pause for 25 mS each cycle = update 40 times a second.
             sleep(25);
+
+            telemetry.addData("Lift position", robot.getLiftEncoder());
+            telemetry.update();
         }
     }
 }
