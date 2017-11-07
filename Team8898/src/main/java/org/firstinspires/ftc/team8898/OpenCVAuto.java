@@ -26,13 +26,11 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/*
 package org.firstinspires.ftc.team8898;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -42,14 +40,14 @@ import ftc.vision.BeaconColorResult;
 import ftc.vision.FrameGrabber;
 import ftc.vision.ImageProcessorResult;
 
-@Autonomous(name = "TestVision" , group = "Vision")
+@Autonomous(name = "TestVision", group = "Vision")
 @Disabled
 public class OpenCVAuto extends LinearOpMode {
 
 
     static final double COUNTS_PER_MOTOR_REV = 1440.0;
     static final double WHEEL_DIAMETER_INCHES = 4.0;
-    static final double COUNTS_PER_INCH = COUNTS_PER_MOTOR_REV /(WHEEL_DIAMETER_INCHES * Math.PI);
+    static final double COUNTS_PER_INCH = COUNTS_PER_MOTOR_REV / (WHEEL_DIAMETER_INCHES * Math.PI);
 
     private ElapsedTime runtime = new ElapsedTime();
     DcMotor vertical = null;
@@ -61,12 +59,11 @@ public class OpenCVAuto extends LinearOpMode {
 
         waitForStart();
 
-        FrameGrabber frameGrabber = FtcRobotControllerActivity.frameGrabber; //Get the
-
-      frameGrabber.grabSingleFrame(); //Tell it to grab a frame
+        frameGrabber.grabSingleFrame(); //Tell it to grab a frame
         while (!frameGrabber.isResultReady()) { //Wait for the result
             Thread.sleep(5); //sleep for 5 milliseconds
         }
+
         //Get the result
         ImageProcessorResult imageProcessorResult = frameGrabber.getResult();
         BeaconColorResult result = (BeaconColorResult) imageProcessorResult.getResult();
@@ -74,10 +71,9 @@ public class OpenCVAuto extends LinearOpMode {
         BeaconColorResult.BeaconColor rightColor = result.getRightColor();
         telemetry.addData("Result", leftColor); //Display it on telemetry
         telemetry.update();
-//wait before quitting (quitting clears telemetry)
+        //wait before quitting (quitting clears telemetry)
         Thread.sleep(1000);
 
     }
 
 }
-*/
