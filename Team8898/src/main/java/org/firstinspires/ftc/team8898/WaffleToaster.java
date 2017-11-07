@@ -99,12 +99,17 @@ public class WaffleToaster extends LinearOpMode {
                 left /= max;
                 right /= max;
             }
-
-            leftFront.setPower(left);
-            leftBack.setPower(left);
-            rightFront.setPower(right);
-            rightBack.setPower(right);
-
+            if (gamepad1.left_trigger >= 0.1) {
+                leftFront.setPower(left/2);
+                leftBack.setPower(left/2);
+                rightFront.setPower(right/2);
+                rightBack.setPower(right/2);
+            } else {
+                leftFront.setPower(left);
+                leftBack.setPower(left);
+                rightFront.setPower(right);
+                rightBack.setPower(right);
+            }
             //Arm servos for grabbing (dpad down)
             if (gamepad1.dpad_down) {
                 if (ServoPower == 0.25) {
