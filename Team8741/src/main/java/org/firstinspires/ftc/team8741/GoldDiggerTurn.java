@@ -13,10 +13,10 @@ import com.qualcomm.robotcore.hardware.Servo;
 @Autonomous (name = "Gold Digger Turn", group = "Linear Opmode")
 
 public class GoldDiggerTurn extends LinearOpMode{
-    GoldDiggerBot robot = new GoldDiggerBot();
+    GoldDiggerBot robot = new GoldDiggerBot(this);
     @Override
     public void runOpMode() throws InterruptedException {
-        robot.init(hardwareMap);
+        robot.init(hardwareMap, true);
         waitForStart();
         robot.drive(0.3, 0.3);
         Thread.sleep(500);

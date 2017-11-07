@@ -38,38 +38,34 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 @TeleOp(name = "TeleOp: Gold Digger Tank Drive", group = "Linear Opmode")
 //@Disabled
 public class GoldDiggerOpMode_Linear extends LinearOpMode {
-    GoldDiggerBot robot = new GoldDiggerBot();
+    GoldDiggerBot robot = new GoldDiggerBot(this);
 
     // TANK DRIVE NOT ARCADE
     // Have an else for every if especially for
     @Override
     public void runOpMode() throws InterruptedException {
-
-        robot.init(hardwareMap);
-
+        robot.init(hardwareMap, true);
         waitForStart();
 
         while (opModeIsActive()) {
             // Setting the motors to different joysticks of controller
-
                 robot.drive(-gamepad1.left_stick_y*.5, -gamepad1.right_stick_y*.5);
-
             // If the letter "A" on gamepad is HELD, robot will spin
             if (gamepad1.right_trigger > 0.5) {
                 robot.glyphPull(-1, -1);
-            } else {
-                robot.glyphPull(0, 0);
             }
 
+            else {
+                robot.glyphPull(0, 0);
+            }
 
             if (gamepad1.right_bumper) {
                 robot.glyphPull(1, 1);
-            } else {
-                robot.glyphPull(0, 0);
             }
 
-
-
+            else {
+                robot.glyphPull(0, 0);
+            }
         }
     }
 }
