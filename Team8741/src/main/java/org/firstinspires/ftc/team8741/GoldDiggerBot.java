@@ -55,7 +55,7 @@ public class GoldDiggerBot {
         leftFrontDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightFrontDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        //setting the elevator to its minumum position
+        //setting the elevator to its minimum position
     }
 
     public void setMode(DcMotor.RunMode mode){
