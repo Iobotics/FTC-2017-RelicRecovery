@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.team8898;
+/*package org.firstinspires.ftc.team8898;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
@@ -13,9 +13,9 @@ import ftc.vision.BeaconColorResult;
 import ftc.vision.FrameGrabber;
 import ftc.vision.ImageProcessorResult;
 
-/**
+
  * Created by Jack Gonser on 10/16/2017.
- */
+
 @Autonomous(name = "WaffleToasterAutoRED", group = "Auto")
 @Disabled
 public class WaffleToasterAuto extends LinearOpMode {
@@ -86,17 +86,16 @@ public class WaffleToasterAuto extends LinearOpMode {
         while (!frameGrabber.isResultReady()) { //Wait for the result
             Thread.sleep(5); //sleep for 5 milliseconds
         }
-        //Get the result
-        ImageProcessorResult imageProcessorResult = frameGrabber.getResult();
-        BeaconColorResult result = (BeaconColorResult) imageProcessorResult.getResult();
-        BeaconColorResult.BeaconColor leftColor = result.getLeftColor();
-        BeaconColorResult.BeaconColor rightColor = result.getRightColor();
+        //get the result
+         BeaconColorResult result = (BeaconColorResult) imageProcessorResult.getResult();
+         BeaconColorResult.BeaconColor leftColor = result.getLeftColor();
+         BeaconColorResult.BeaconColor rightColor = result.getRightColor();
         telemetry.addData("Result", leftColor); //Display it on telemetry
         telemetry.update();
 
-        rightColorCheck = rightColor;
-        leftColorCheck = leftColor;
-        if (leftColorCheck == BeaconColorResult.BeaconColor.RED) {
+       // rightColorCheck = rightColor;
+       // leftColorCheck = leftColor;
+        //if (leftColorCheck == BeaconColorResult.BeaconColor.RED) {
             telemetry.addData("Going for the jewel on the left.", "Blue Jewel is on the right");
             telemetry.addData("Jewel Arm Down", "");
             telemetry.update();
@@ -131,3 +130,4 @@ public class WaffleToasterAuto extends LinearOpMode {
     }
 
 }
+*/

@@ -26,7 +26,7 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
+/*
 package org.firstinspires.ftc.team8898;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -63,7 +63,7 @@ public class OpenCVAuto extends LinearOpMode {
 
         FrameGrabber frameGrabber = FtcRobotControllerActivity.frameGrabber; //Get the
 
-        frameGrabber.grabSingleFrame(); //Tell it to grab a frame
+      frameGrabber.grabSingleFrame(); //Tell it to grab a frame
         while (!frameGrabber.isResultReady()) { //Wait for the result
             Thread.sleep(5); //sleep for 5 milliseconds
         }
@@ -80,3 +80,4 @@ public class OpenCVAuto extends LinearOpMode {
     }
 
 }
+*/
