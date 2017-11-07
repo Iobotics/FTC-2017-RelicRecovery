@@ -86,7 +86,7 @@ public class Team8740_Base {
     private final static double LIFT_DOWN_POWER = -0.4;
     private final static double LIFT_UP_POWER = 0.6;
 
-    private final static double TICKS_PER_REV   = 537.6;    // Ticks per revolution
+    private final static double TICKS_PER_REV   = 512;    // Ticks per revolution
     private final static double GEAR_REDUCTION  = 1.0;     // This is < 1.0 if geared UP
     private final static double WHEEL_DIAMETER  = 4.0;     // Inches
     private final static double TICKS_PER_INCH = (TICKS_PER_REV * GEAR_REDUCTION) * Math.sqrt(2) / (WHEEL_DIAMETER * 3.1415);
