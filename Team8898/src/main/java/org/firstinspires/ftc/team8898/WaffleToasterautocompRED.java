@@ -9,7 +9,7 @@ import ftc.vision.BeaconColorResult;
 
 /**
  * Created by Teacher on 10/28/2017.
-
+*/
 @Autonomous (name = "AUTO(allcolor)(if auto fails)",group = "RED")
 public class WaffleToasterautocompRED extends WaffleToasterAuto {
     private DcMotor leftFront = null;
@@ -60,4 +60,3 @@ public class WaffleToasterautocompRED extends WaffleToasterAuto {
         allDrive(0);
     }
 }
-*/

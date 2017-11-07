@@ -11,10 +11,10 @@ import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity
 import ftc.vision.BeaconColorResult;
 import ftc.vision.FrameGrabber;
 import ftc.vision.ImageProcessorResult;
-/*
+
 /**
  * Created by Jack Gonser on 10/16/2017.
-
+*/
 @Autonomous (name = "WaffleToasterAutoBlue", group = "WaffleAuto")
 @Disabled
 public class WaffleToasterAutoBlue extends WaffleToasterAuto
@@ -122,4 +122,3 @@ public class WaffleToasterAutoBlue extends WaffleToasterAuto
         }
     }
 }
-*/
