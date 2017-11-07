@@ -396,6 +396,10 @@ public class Team8740_Base {
         }
     }
 
+    public double getLiftEncoder() {
+        return lift.getCurrentPosition();
+    }
+
     public void raiseLift() {
         if(!upperLimit.getState()) {
             lift.setPower(0);

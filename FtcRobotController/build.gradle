@@ -6,10 +6,10 @@ android {
 
     defaultConfig {
         minSdkVersion 19
-        targetSdkVersion 19
+        targetSdkVersion 23
     }
 
-    compileSdkVersion 24
+    compileSdkVersion 23
     buildToolsVersion '26.0.2'
 
     compileOptions {
@@ -25,4 +25,5 @@ repositories {
 apply from: 'build.release.gradle'
 
 dependencies {
+    implementation project(':OpenCVLibrary331')
 }

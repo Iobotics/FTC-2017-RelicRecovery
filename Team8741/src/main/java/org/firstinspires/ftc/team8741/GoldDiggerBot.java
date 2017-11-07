@@ -77,6 +77,7 @@ public class GoldDiggerBot {
         leftGlyphPull.setDirection(DcMotor.Direction.REVERSE);
 
         /* setting motor behaviour */
+
         if(isAuto) {
             leftBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             leftFrontDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -91,7 +92,6 @@ public class GoldDiggerBot {
             rightFrontDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         }
         calibrateGyro();
-        while (isGyroCalibrating()) {}
     }
 
     public void setMode(DcMotor.RunMode mode){
