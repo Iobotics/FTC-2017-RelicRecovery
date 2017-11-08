@@ -119,8 +119,9 @@ import org.opencv.android.OpenCVLoader;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import ftc.vision.BeaconProcessor;
+//import ftc.vision.BeaconProcessor;
 import ftc.vision.FrameGrabber;
+import ftc.vision.JewelProcessor;
 
 @SuppressWarnings("WeakerAccess")
 public class FtcRobotControllerActivity extends Activity {
@@ -141,8 +142,8 @@ public class FtcRobotControllerActivity extends Activity {
 
         cameraBridgeViewBase = (JavaCameraView) findViewById(R.id.show_camera_activity_java_surface_view);
         frameGrabber = new FrameGrabber(cameraBridgeViewBase, FRAME_WIDTH_REQUEST, FRAME_HEIGHT_REQUEST);
-        frameGrabber.setImageProcessor(new BeaconProcessor());
-        frameGrabber.setSaveImages(true);
+        frameGrabber.setImageProcessor(new JewelProcessor());
+        frameGrabber.setSaveImages(false);
     }
 
     //when the "Grab" button is pressed
