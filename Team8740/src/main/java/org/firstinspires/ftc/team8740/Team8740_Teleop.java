@@ -51,11 +51,13 @@ public class Team8740_Teleop extends LinearOpMode {
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
 
-        gamepad2.setJoystickDeadzone((float).05);
-        gamepad1.setJoystickDeadzone((float) .05);
+        gamepad2.setJoystickDeadzone((float) 0.05);
+        gamepad1.setJoystickDeadzone((float) 0.05);
 
         // Run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
+
+            /* GAMEPAD 1 CONTROLS */
 
             // Mecanum drive uses left stick to strafe along X and Y, and right stick X to turn.
             double x = gamepad1.left_stick_x;
@@ -65,35 +67,72 @@ public class Team8740_Teleop extends LinearOpMode {
 
             robot.setMecanum(x, y, rotation);
 
-            // Use gamepad A to open and close the claw
-            if(gamepad2.a) {
-                robot.toggleClaws();
-                sleep(30);
+            // Use gamepad left bumper to toggle speed
+            if(gamepad1.left_bumper) {
+                robot.toggleSpeed();
             }
 
-            // Use gamepad right bumper and trigger to run intake
+            // Use gamepad right bumper to run intake
             if(gamepad1.right_bumper) {
                robot.runIntake();
-            } else if(gamepad1.right_trigger > 0.2) {
-                robot.reverseIntake();
-            }else {
+            } else {
                 robot.stopIntake();
             }
 
-            // Use gamepad B to lower and raise the jewel arm
-            if(gamepad1.b) {
-                robot.toggleJewelArm();
-                sleep(50);
+            /* GAMEPAD 2 CONTROLS */
+
+            /*
+            if(gamepad2.left_bumper) {
+                // TODO - Lift stage #1
+            } else if(gamepad2.left_trigger > 0.2) {
+                // TODO - Lift stage #2
+            } else if(gamepad2.right_bumper) {
+                // TODO - Lift stage #3
             }
 
-            // Use gamepad left bumper and trigger to push the glyph
-            if(gamepad1.left_bumper) {
-                robot.retractGlyph();
-            } else if(gamepad1.left_trigger > 0.2) {
+            // TODO - robot.relic(-gamepad2.left_stick_y);
+            // TODO - robot.setLift(-gamepad2.right_stick_y);
+
+            // Use gamepad A to toggle top outtake
+            if(gamepad2.a) {
                 robot.pushGlyph();
+                robot.toggleClaws();
+                sleep(500);
             } else {
+                robot.retractGlyph();
+                sleep(500);
                 robot.stopGlyph();
             }
+
+            // Use gamepad B to toggle all outtakes
+            if(gamepad2.b) {
+                robot.reverseIntake();
+                robot.pushGlyph();
+                robot.toggleClaws();
+                sleep(500);
+            } else {
+                robot.stopIntake();
+                robot.retractGlyph();
+                sleep(500);
+                robot.stopGlyph();
+            }
+
+            // Use gamepad X to toggle bottom outtake
+            if(gamepad2.x) {
+                robot.reverseIntake();
+                robot.toggleClaws();
+                sleep(500);
+            } else {
+                robot.stopIntake();
+            }
+
+            // Use gamepad Y to toggle program-assist sensors
+            if(gamepad2.y) {
+                // TODO - Toggle program-assist sensors
+            }
+            */
+
+            /* TEMPORARY GAMEPAD 1 CONTROLS */
 
             // Use gamepad dpad to control the lift
             if(gamepad2.right_stick_y < -0.05) {
@@ -104,9 +143,16 @@ public class Team8740_Teleop extends LinearOpMode {
                 robot.stopLift();
             }
 
-            // Use gamepad start to toggle speed control
-            if(gamepad1.start) {
-                robot.toggleSpeed();
+            if(gamepad1.left_trigger > 0.2) {
+                robot.pushGlyph();
+            } else {
+                robot.stopGlyph();
+            }
+
+            // Use gamepad B to lower and raise the jewel arm
+            if(gamepad1.b) {
+                robot.toggleJewelArm();
+                sleep(50);
             }
 
             // Pause for 25 mS each cycle = update 40 times a second.
