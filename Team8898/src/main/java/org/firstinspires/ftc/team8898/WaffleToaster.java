@@ -1,18 +1,17 @@
 package org.firstinspires.ftc.team8898;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.util.Range;
 
 /**
  * Created by Jack Gonser on 10/9/2017.
  */
 
-@TeleOp (name = "WaffleTeleOp", group = "TeleOp")
+@TeleOp(name = "WaffleTeleOp", group = "TeleOp")
 //@Disabled
 public class WaffleToaster extends LinearOpMode {
 
@@ -25,34 +24,27 @@ public class WaffleToaster extends LinearOpMode {
 
     private Servo leftServo = null;
     private Servo rightServo = null;
- 
-    private Servo jewelServo = null;
 
-    long millis = System.currentTimeMillis() % 1000;
-    long millisReset;
-    boolean openRight= false;
+    private Servo jewelServo = null;
+    private ColorSensor colorSensor = null;
+
+    boolean openRight = false;
     boolean openLeft = false;
 
-    private double ServoPower = 0;
+    private double servoPos = 0;
 
     private double drive = 0;
     private double turn = 0;
     private double left = 0;
     private double right = 0;
 
-    public void allDrive (double speed) {
-        leftBack.setPower(speed);
-        leftFront.setPower(speed);
-        rightFront.setPower(speed);
-        rightBack.setPower(speed);
-    }
-    public void allServo (double position) {
+    public void allServo(double position) {
         leftServo.setPosition(position);
         rightServo.setPosition(position);
     }
 
     @Override
-    public void runOpMode() throws InterruptedException { // set up
+    public void runOpMode() { // set up
         leftFront = hardwareMap.get(DcMotor.class, "leftFront");
         leftBack = hardwareMap.get(DcMotor.class, "leftBack");
         rightFront = hardwareMap.get(DcMotor.class, "rightFront");
@@ -64,6 +56,7 @@ public class WaffleToaster extends LinearOpMode {
         rightServo = hardwareMap.get(Servo.class, "rightServo");
 
         jewelServo = hardwareMap.get(Servo.class, "jewelServo");
+        colorSensor = hardwareMap.get(ColorSensor.class, "colorSensor");
 
         leftFront.setDirection(DcMotorSimple.Direction.FORWARD);
         leftBack.setDirection(DcMotorSimple.Direction.FORWARD);
@@ -83,42 +76,39 @@ public class WaffleToaster extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
-            millis = System.currentTimeMillis() % 1000;
-
             drive = -gamepad1.left_stick_y;
-            turn  =  gamepad1.right_stick_x;
+            turn = gamepad1.right_stick_x;
 
             // Combine drive and turn for blended motion.
-            left  = drive + turn;
+            left = drive + turn;
             right = drive - turn;
 
             // Normalize the values so neither exceed +/- 1.0
             double max = Math.max(Math.abs(left), Math.abs(right));
-            if (max > 1.0)
-            {
+            if (max > 1.0) {
                 left /= max;
                 right /= max;
             }
             if (gamepad1.left_trigger >= 0.1) {
-                leftFront.setPower(left/2);
-                leftBack.setPower(left/2);
-                rightFront.setPower(right/2);
-                rightBack.setPower(right/2);
+                leftFront.setPower(-left / 4);
+                leftBack.setPower(-left / 4);
+                rightFront.setPower(-right / 4);
+                rightBack.setPower(-right / 4);
             } else {
-                leftFront.setPower(left);
-                leftBack.setPower(left);
-                rightFront.setPower(right);
-                rightBack.setPower(right);
+                leftFront.setPower(-left);
+                leftBack.setPower(-left);
+                rightFront.setPower(-right);
+                rightBack.setPower(-right);
             }
             //Arm servos for grabbing (dpad down)
             if (gamepad1.dpad_down) {
-                if (ServoPower == 0.25) {
-                    ServoPower = 0.75;
+                if (servoPos == 0.1) {
+                    servoPos = 0.75;
                 } else {
-                    ServoPower = 0.25;
+                    servoPos = 0.1;
                 }
-                allServo(ServoPower);
-                Thread.sleep(250);
+                allServo(servoPos);
+                sleep(250);
             }
 
             //Arm code (Press a to go up b to go down and y to go up for 1 second)
@@ -130,23 +120,23 @@ public class WaffleToaster extends LinearOpMode {
                 telemetry.addData("Arm down", ""); //add data for the driver station
             } else if (gamepad1.x) {
                 arm.setPower(-0.5);
-                Thread.sleep(500);
+                sleep(500);
                 arm.setPower(0);
                 allServo(0);
                 telemetry.addData("Arm Down", "1/2 second");
             } else if (gamepad1.y) {
                 allServo(0.75);
                 arm.setPower(0.75);
-                Thread.sleep(500);
+                sleep(500);
                 arm.setPower(0);
                 telemetry.addData("Arm Up", "1/2 second"); //add data for the driver station
-            } else{
+            } else {
                 arm.setPower(.15);
                 telemetry.addData("Arm Normal", "Normal Operation");
             }
 
             //Jewel Servo (always up)
-          jewelServo.setPosition(0);
+            jewelServo.setPosition(1);
 
             //telemetry data comparisons
             if (leftServo.getPosition() == 0) {
@@ -161,7 +151,7 @@ public class WaffleToaster extends LinearOpMode {
             }
 
             if (openLeft = true) {
-                telemetry.addData("Left servo is","open");
+                telemetry.addData("Left servo is", "open");
             } else {
                 telemetry.addData("Left servo is", "closed");
             }

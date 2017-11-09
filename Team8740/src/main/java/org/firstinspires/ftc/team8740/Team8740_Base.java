@@ -67,7 +67,7 @@ import java.io.File;
 public class Team8740_Base {
     /* Constants */
     private final static double LEFT_SERVO_HOME  = 0.3;
-    private final static double RIGHT_SERVO_HOME = 0.6;
+    private final static double RIGHT_SERVO_HOME = 0.6;         //    \(._.)/
     private final static double LEFT_SERVO_CLOSED  = 0.33;
     private final static double RIGHT_SERVO_CLOSED = 0.63;
     private final static double LEFT_SERVO_OPEN  = 0.72;
