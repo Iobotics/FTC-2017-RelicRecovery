@@ -3,13 +3,9 @@ package org.firstinspires.ftc.team8741;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
-import com.qualcomm.robotcore.hardware.GyroSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.robotcore.util.ReadWriteFile;
@@ -37,6 +33,7 @@ public class GoldDiggerBot {
     private DcMotor rightFrontDrive = null;
     private DcMotor leftGlyphPull = null;
     private DcMotor rightGlyphPull = null;
+    public DcMotor conveyor = null;
 
     private final int TICKS_PER_REV = 560;
     private final int WHEEL_DIAMETER = 4;
@@ -65,16 +62,18 @@ public class GoldDiggerBot {
         rightFrontDrive = hwMap.get(DcMotor.class, "frontRight");
         rightGlyphPull = hwMap.get(DcMotor.class, "rightIntake");
         leftGlyphPull = hwMap.get(DcMotor.class, "leftIntake");
+        conveyor = hwMap.get(DcMotor.class, "conveyor");
 
 
         //setting direction of motors and how they will spin
 
-        leftBackDrive.setDirection(DcMotor.Direction.REVERSE);
-        leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
-        rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
-        rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
+        leftBackDrive.setDirection(DcMotor.Direction.FORWARD);
+        leftFrontDrive.setDirection(DcMotor.Direction.FORWARD);
+        rightBackDrive.setDirection(DcMotor.Direction.REVERSE);
+        rightFrontDrive.setDirection(DcMotor.Direction.REVERSE);
         rightGlyphPull.setDirection(DcMotor.Direction.FORWARD);
         leftGlyphPull.setDirection(DcMotor.Direction.REVERSE);
+        conveyor.setDirection(DcMotor.Direction.REVERSE);
 
         /* setting motor behaviour */
 
@@ -91,7 +90,7 @@ public class GoldDiggerBot {
             rightBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
             rightFrontDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         }
-        calibrateGyro();
+        initGyro();
     }
 
     public void setMode(DcMotor.RunMode mode){
