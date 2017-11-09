@@ -3,9 +3,12 @@ package org.firstinspires.ftc.team8898;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.I2cDevice;
 import com.qualcomm.robotcore.hardware.Servo;
+
 
 import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
 
@@ -30,6 +33,7 @@ public class WaffleToasterAuto extends LinearOpMode {
     private Servo rightServo = null;
 
     private Servo jewelServo = null;
+    private ColorSensor colorSensor = null;
 
     private BeaconColorResult.BeaconColor leftColorCheck = null;
     private BeaconColorResult.BeaconColor rightColorCheck = null;
@@ -65,6 +69,7 @@ public class WaffleToasterAuto extends LinearOpMode {
         rightServo = hardwareMap.get(Servo.class, "rightServo");
 
         jewelServo = hardwareMap.get(Servo.class, "jewelServo");
+        colorSensor = hardwareMap.get(ColorSensor.class, "colorSensor");
 
         leftFront.setDirection(DcMotorSimple.Direction.FORWARD);
         leftBack.setDirection(DcMotorSimple.Direction.FORWARD);
@@ -78,31 +83,19 @@ public class WaffleToasterAuto extends LinearOpMode {
 
         jewelServo.setDirection(Servo.Direction.FORWARD);
 
+
         waitForStart();
 
-        FrameGrabber frameGrabber = FtcRobotControllerActivity.frameGrabber; //Get the
 
-        frameGrabber.grabSingleFrame(); //Tell it to grab a frame
-        while (!frameGrabber.isResultReady()) { //Wait for the result
-            Thread.sleep(5); //sleep for 5 milliseconds
-        }
-        //get the result
-         ImageProcessorResult imageProcessorResult = frameGrabber.getResult();
-         BeaconColorResult result = (BeaconColorResult) imageProcessorResult.getResult();
-         BeaconColorResult.BeaconColor leftColor = result.getLeftColor();
-         BeaconColorResult.BeaconColor rightColor = result.getRightColor();
-        telemetry.addData("Result", leftColor); //Display it on telemetry
-        telemetry.update();
-
-        rightColorCheck = rightColor;
-        leftColorCheck = leftColor;
-        if (leftColorCheck == BeaconColorResult.BeaconColor.RED) {
+        colorSensor.enableLed(true); //activate Led on color sensor
+        jewelServo.setPosition(stop); //drop jewel arm
+        sleep(500);
+        if (colorSensor.blue() >= 50) { //Sense
             telemetry.addData("Going for the jewel on the left.", "Blue Jewel is on the right");
             telemetry.addData("Jewel Arm Down", "");
             telemetry.update();
             leftServo.setPosition(0.25);
             rightServo.setPosition(0.25);
-            jewelServo.setPosition(forward);
             arm.setPower(0.25);
             Thread.sleep(secondsToMillis(0.5));
             arm.setPower(stop);
@@ -113,12 +106,11 @@ public class WaffleToasterAuto extends LinearOpMode {
             allDrive(halfForward);
             Thread.sleep(secondsToMillis(2.5));
             allDrive(stop);
-        } else if (rightColorCheck == BeaconColorResult.BeaconColor.RED) { //senses if the blue jewel is on the left
+        } else if (colorSensor.blue() < 50) { //senses if the blue jewel is on the left
             telemetry.addData("Going for the jewel on the left.", "Blue Jewel is on the left");//adds data to package to send towards the driver station
             telemetry.update();//sends package to the driver station
             leftServo.setPosition(0.25);
             rightServo.setPosition(0.25);
-            jewelServo.setPosition(forward);
             arm.setPower(0.25);
             Thread.sleep(secondsToMillis(0.5));
             arm.setPower(stop);
