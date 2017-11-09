@@ -91,6 +91,7 @@ public class WaffleToasterAuto extends LinearOpMode {
         jewelServo.setPosition(stop); //drop jewel arm
         sleep(500);
         if (colorSensor.blue() >= 128) { //Sense
+
             telemetry.addData("Going for the jewel on the left.", "Blue Jewel is on the right");
             telemetry.addData("Jewel Arm Down", "");
             telemetry.update();
@@ -107,6 +108,7 @@ public class WaffleToasterAuto extends LinearOpMode {
             Thread.sleep(secondsToMillis(2.5));
             allDrive(stop);
         } else if (colorSensor.blue() < 128) { //senses if the blue jewel is on the left
+
             telemetry.addData("Going for the jewel on the left.", "Blue Jewel is on the left");//adds data to package to send towards the driver station
             telemetry.update();//sends package to the driver station
             leftServo.setPosition(0.25);
