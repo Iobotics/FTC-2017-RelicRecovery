@@ -28,14 +28,11 @@ public class GoldDiggerAuto extends LinearOpMode {
         robot.gyroDrive(0.3, 32, 0);
         //goes into glyph box or at least go up to it
 
-        robot.gyroTurn(0.2, 180);
-        //turn to have the back face the box
-
-        robot.conveyor.setPower(0.5);
+        robot.glyphPull(-0.5, -0.5);
         Thread.sleep(1500);
         //put preloaded glyph into the crypto box
 
-        robot.conveyor.setPower(0);
+        robot.glyphPull(0, 0);
         //turn off glyph pull motors
 
 
