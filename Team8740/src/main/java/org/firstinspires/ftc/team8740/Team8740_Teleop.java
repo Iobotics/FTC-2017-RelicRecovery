@@ -75,13 +75,14 @@ public class Team8740_Teleop extends LinearOpMode {
             // Use gamepad right bumper to run intake
             if(gamepad1.right_bumper) {
                robot.runIntake();
+            } else if(gamepad1.right_trigger > 0.2) {
+                robot.reverseIntake();
             } else {
                 robot.stopIntake();
             }
 
             /* GAMEPAD 2 CONTROLS */
 
-            /*
             if(gamepad2.left_bumper) {
                 // TODO - Lift stage #1
             } else if(gamepad2.left_trigger > 0.2) {
@@ -97,10 +98,11 @@ public class Team8740_Teleop extends LinearOpMode {
             if(gamepad2.a) {
                 robot.pushGlyph();
                 robot.toggleClaws();
-                sleep(500);
-            } else {
+                sleep(250);
                 robot.retractGlyph();
-                sleep(500);
+                sleep(250);
+                robot.stopGlyph();
+            } else {
                 robot.stopGlyph();
             }
 
@@ -109,11 +111,12 @@ public class Team8740_Teleop extends LinearOpMode {
                 robot.reverseIntake();
                 robot.pushGlyph();
                 robot.toggleClaws();
-                sleep(500);
-            } else {
+                sleep(250);
                 robot.stopIntake();
                 robot.retractGlyph();
-                sleep(500);
+                sleep(250);
+                robot.stopGlyph();
+            } else {
                 robot.stopGlyph();
             }
 
@@ -121,7 +124,7 @@ public class Team8740_Teleop extends LinearOpMode {
             if(gamepad2.x) {
                 robot.reverseIntake();
                 robot.toggleClaws();
-                sleep(500);
+                sleep(250);
             } else {
                 robot.stopIntake();
             }
@@ -130,12 +133,11 @@ public class Team8740_Teleop extends LinearOpMode {
             if(gamepad2.y) {
                 // TODO - Toggle program-assist sensors
             }
-            */
 
             /* TEMPORARY GAMEPAD 1 CONTROLS */
 
             // Use gamepad dpad to control the lift
-            if(gamepad2.right_stick_y < -0.05) {
+            /*if(gamepad2.right_stick_y < -0.05) {
                 robot.lowerLift();
             } else if(gamepad2.right_stick_y > 0.05) {
                 robot.raiseLift();
@@ -153,7 +155,7 @@ public class Team8740_Teleop extends LinearOpMode {
             if(gamepad1.b) {
                 robot.toggleJewelArm();
                 sleep(50);
-            }
+            }*/
 
             // Pause for 25 mS each cycle = update 40 times a second.
             sleep(25);
