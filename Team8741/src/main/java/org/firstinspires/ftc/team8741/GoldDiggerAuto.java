@@ -39,7 +39,8 @@ public class GoldDiggerAuto extends LinearOpMode {
         //turn off glyph pull motors
 
 
-        //THIS IS THE AUTO FOR THE BLUE NEXT TO ONLY ONE CRYPTO BOX
+        //THIS IS THE AUTO FOR THE BLUE NEXT TO ONLY ONE CRYPTO BOX AND GETS INTO THE TRIANGLE OF POINTS
+
 
 
 
