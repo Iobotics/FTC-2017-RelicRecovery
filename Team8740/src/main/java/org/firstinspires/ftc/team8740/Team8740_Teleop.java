@@ -81,81 +81,62 @@ public class Team8740_Teleop extends LinearOpMode {
                 robot.stopIntake();
             }
 
-            /* GAMEPAD 2 CONTROLS */
-
-            if(gamepad2.left_bumper) {
-                // TODO - Lift stage #1
-            } else if(gamepad2.left_trigger > 0.2) {
-                // TODO - Lift stage #2
-            } else if(gamepad2.right_bumper) {
-                // TODO - Lift stage #3
-            }
-
-            // TODO - robot.relic(-gamepad2.left_stick_y);
-            // TODO - robot.setLift(-gamepad2.right_stick_y);
-
             // Use gamepad A to toggle top outtake
-            if(gamepad2.a) {
+            if(gamepad1.a) {
                 robot.pushGlyph();
                 robot.toggleClaws();
-                sleep(250);
+                sleep(1430);
                 robot.retractGlyph();
-                sleep(250);
+                sleep(1430);
                 robot.stopGlyph();
             } else {
                 robot.stopGlyph();
             }
 
             // Use gamepad B to toggle all outtakes
-            if(gamepad2.b) {
+            if(gamepad1.b) {
                 robot.reverseIntake();
                 robot.pushGlyph();
                 robot.toggleClaws();
-                sleep(250);
+                sleep(1430);
                 robot.stopIntake();
                 robot.retractGlyph();
-                sleep(250);
+                sleep(1430);
                 robot.stopGlyph();
             } else {
                 robot.stopGlyph();
             }
 
             // Use gamepad X to toggle bottom outtake
-            if(gamepad2.x) {
+            if(gamepad1.x) {
                 robot.reverseIntake();
                 robot.toggleClaws();
-                sleep(250);
+                sleep(500);
             } else {
                 robot.stopIntake();
             }
 
+            /* GAMEPAD 2 CONTROLS */
+
+            if(gamepad2.left_bumper) {
+                robot.setLiftPosition(Team8740_Base.LiftPosition.BOTTOM);
+            } else if(gamepad2.left_trigger > 0.2) {
+                robot.setLiftPosition(Team8740_Base.LiftPosition.MIDDLE);
+            } else if(gamepad2.right_bumper) {
+                robot.setLiftPosition(Team8740_Base.LiftPosition.TOP);
+            }
+
+            // TODO - robot.setRelicServo(gamepad2.left_stick_y);
+            robot.setLiftPower(-gamepad2.right_stick_y);
+
+            // TODO - Gamepad2 A extends motor 3 (Hub 1)
+
+            // TODO - Gamepad2 X Toggle relic claw
+
             // Use gamepad Y to toggle program-assist sensors
             if(gamepad2.y) {
-                // TODO - Toggle program-assist sensors
+                // TODO - Toggle program-assist sensors (color/prox sensor resets when detect block)
             }
-
-            /* TEMPORARY GAMEPAD 1 CONTROLS */
-
-            // Use gamepad dpad to control the lift
-            /*if(gamepad2.right_stick_y < -0.05) {
-                robot.lowerLift();
-            } else if(gamepad2.right_stick_y > 0.05) {
-                robot.raiseLift();
-            } else {
-                robot.stopLift();
-            }
-
-            if(gamepad1.left_trigger > 0.2) {
-                robot.pushGlyph();
-            } else {
-                robot.stopGlyph();
-            }
-
-            // Use gamepad B to lower and raise the jewel arm
-            if(gamepad1.b) {
-                robot.toggleJewelArm();
-                sleep(50);
-            }*/
 
             // Pause for 25 mS each cycle = update 40 times a second.
             sleep(25);

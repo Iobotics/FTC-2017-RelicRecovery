@@ -42,6 +42,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.robotcore.util.ReadWriteFile;
 
+import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
 import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
@@ -59,6 +60,10 @@ import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 
 import java.io.File;
 
+import ftc.vision.FrameGrabber;
+import ftc.vision.ImageProcessorResult;
+import ftc.vision.JewelColorResult;
+
 /**
  * Team 8740 base class
  *
@@ -66,11 +71,11 @@ import java.io.File;
  */
 public class Team8740_Base {
     /* Constants */
-    private final static double LEFT_SERVO_HOME  = 0.3;
+    private final static double LEFT_SERVO_HOME = 0.3;
     private final static double RIGHT_SERVO_HOME = 0.6;         //    \(._.)/
-    private final static double LEFT_SERVO_CLOSED  = 0.33;
+    private final static double LEFT_SERVO_CLOSED = 0.33;
     private final static double RIGHT_SERVO_CLOSED = 0.63;
-    private final static double LEFT_SERVO_OPEN  = 0.72;
+    private final static double LEFT_SERVO_OPEN = 0.72;
     private final static double RIGHT_SERVO_OPEN = 1.25;
 
     private final static double JEWEL_SERVO_HOME = 0.45;
@@ -83,17 +88,23 @@ public class Team8740_Base {
 
     private final static double GLYPH_POWER = 1.0;
 
-    private final static double LIFT_DOWN_POWER = -0.4;
-    private final static double LIFT_UP_POWER = 0.6;
+    private final static double LIFT_POWER = 0.6;
 
-    private final static double TICKS_PER_REV   = 512;    // Ticks per revolution
-    private final static double GEAR_REDUCTION  = 1.0;     // This is < 1.0 if geared UP
-    private final static double WHEEL_DIAMETER  = 4.0;     // Inches
-    private final static double TICKS_PER_INCH = (TICKS_PER_REV * GEAR_REDUCTION) * Math.sqrt(2) / (WHEEL_DIAMETER * 3.1415);
+    private final static double LIFT_TICKS_PER_REV = 560;    // Ticks per revolution
+    private final static double LIFT_GEAR_REDUCTION = 100.0; // This is < 1.0 if geared UP
+    private final static double LIFT_GEAR_DIAMETER = 1.504;    // Inches
+    private final static double LIFT_TICKS_PER_INCH = (LIFT_TICKS_PER_REV * LIFT_GEAR_REDUCTION) / (LIFT_GEAR_DIAMETER * 3.1415);
 
-    private final static double HEADING_THRESHOLD = 1;      // As tight as we can make it with an integer gyro
-    private final static double P_TURN_COEFF       = 0.05;     // Larger is more responsive, but also less stable
-    private final static double P_DRIVE_COEFF      = 0.05;    // Larger is more responsive, but also less stable
+    private final static int LIFT_POS_MIDDLE = Math.round((float) (LIFT_TICKS_PER_INCH * 6.5));
+
+    private final static double DRIVE_TICKS_PER_REV = 512;  // Ticks per revolution
+    private final static double DRIVE_GEAR_REDUCTION = 1.0; // This is < 1.0 if geared UP
+    private final static double DRIVE_WHEEL_DIAMETER = 4.0; // Inches
+    private final static double DRIVE_TICKS_PER_INCH = (DRIVE_TICKS_PER_REV * DRIVE_GEAR_REDUCTION) * Math.sqrt(2) / (DRIVE_WHEEL_DIAMETER * 3.1415);
+
+    private final static double HEADING_THRESHOLD = 1; // As tight as we can make it with an integer gyro
+    private final static double P_TURN_COEFF = 0.05;   // Larger is more responsive, but also less stable
+    private final static double P_DRIVE_COEFF = 0.05;  // Larger is more responsive, but also less stable
 
     // TODO - Find thresholds
     private final static double RED_THRESHOLD = 180;
@@ -107,19 +118,25 @@ public class Team8740_Base {
         UNKNOWN
     }
 
+    public enum LiftPosition {
+        TOP,
+        MIDDLE,
+        BOTTOM
+    }
+
 
     /* OpMode members */
-    private DcMotor frontLeftDrive  = null;
+    private DcMotor frontLeftDrive = null;
     private DcMotor frontRightDrive = null;
-    private DcMotor backLeftDrive   = null;
-    private DcMotor backRightDrive  = null;
+    private DcMotor backLeftDrive = null;
+    private DcMotor backRightDrive = null;
 
-    private DcMotor intakeLeft  = null;
+    private DcMotor intakeLeft = null;
     private DcMotor intakeRight = null;
 
     private DcMotor lift = null;
 
-    private Servo leftServo  = null;
+    private Servo leftServo = null;
     private Servo rightServo = null;
 
     private Servo jewelServo = null;
@@ -135,12 +152,14 @@ public class Team8740_Base {
     private BNO055IMU imu = null;
 
     // State used for updating telemetry
-    private Orientation angles   = null;
+    private Orientation angles = null;
     private Acceleration gravity = null;
 
     private VuforiaLocalizer vuforia = null;
     private VuforiaTrackables relicTrackables = null;
     private VuforiaTrackable relicTemplate = null;
+
+    private FrameGrabber frameGrabber = null;
 
     private HardwareMap hwMap = null;
 
@@ -178,20 +197,20 @@ public class Team8740_Base {
         initIntake();
         initLift();
         initServos();
-        if(!teleop) initColorSensor();
+        if (!teleop) initColorSensor();
         //initVuforia();
-        if(!teleop) initGyro();
+        if (!teleop) initGyro();
     }
 
     private void initDrive() {
         // Define and initialize motors
-        frontLeftDrive  = hwMap.dcMotor.get("frontLeft");
+        frontLeftDrive = hwMap.dcMotor.get("frontLeft");
         frontRightDrive = hwMap.dcMotor.get("frontRight");
-        backLeftDrive   = hwMap.dcMotor.get("backLeft");
-        backRightDrive  = hwMap.dcMotor.get("backRight");
+        backLeftDrive = hwMap.dcMotor.get("backLeft");
+        backRightDrive = hwMap.dcMotor.get("backRight");
 
         // Reverse left motors
-        if(teleop) {
+        if (teleop) {
             frontLeftDrive.setDirection(DcMotor.Direction.REVERSE);
             backLeftDrive.setDirection(DcMotor.Direction.REVERSE);
         }
@@ -211,7 +230,7 @@ public class Team8740_Base {
 
     private void initIntake() {
         // Define the intake motors
-        intakeLeft  = hwMap.dcMotor.get("intakeLeft");
+        intakeLeft = hwMap.dcMotor.get("intakeLeft");
         intakeRight = hwMap.dcMotor.get("intakeRight");
 
         // Reverse the right intake motor
@@ -221,6 +240,9 @@ public class Team8740_Base {
     private void initLift() {
         // Define the lift motor
         lift = hwMap.dcMotor.get("lift");
+
+        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // Define limit switches
         lowerLimit = hwMap.digitalChannel.get("lowerLimit");
@@ -233,7 +255,7 @@ public class Team8740_Base {
 
     private void initServos() {
         // Define and initialize ALL installed servos
-        leftServo  = hwMap.servo.get("grabLeft");
+        leftServo = hwMap.servo.get("grabLeft");
         rightServo = hwMap.servo.get("grabRight");
 
         jewelServo = hwMap.servo.get("jewelArm");
@@ -253,6 +275,7 @@ public class Team8740_Base {
     }
 
     private void initColorSensor() {
+        frameGrabber = FtcRobotControllerActivity.frameGrabber;
         color_sensor = hwMap.get(ColorSensor.class, "color");
     }
 
@@ -315,10 +338,10 @@ public class Team8740_Base {
         double backLeftPower;
         double backRightPower;
 
-        frontLeftPower  = Range.clip(x + y - rotation, -1.0, 1.0);
+        frontLeftPower = Range.clip(x + y - rotation, -1.0, 1.0);
         frontRightPower = Range.clip(-x + y + rotation, -1.0, 1.0);
-        backLeftPower   = Range.clip(-x + y - rotation, -1.0, 1.0);
-        backRightPower  = Range.clip(x + y + rotation, -1.0, 1.0);
+        backLeftPower = Range.clip(-x + y - rotation, -1.0, 1.0);
+        backRightPower = Range.clip(x + y + rotation, -1.0, 1.0);
 
         // Send calculated power to wheels
         setPower(frontLeftPower, frontRightPower, backLeftPower, backRightPower);
@@ -357,11 +380,12 @@ public class Team8740_Base {
 
     /**
      * Converts inches to ticks
+     *
      * @param inches
      * @return ticks
      */
     public double inchesToTicks(double inches) {
-        double ticks = inches * TICKS_PER_INCH;
+        double ticks = inches * DRIVE_TICKS_PER_INCH;
         return ticks;
     }
 
@@ -388,28 +412,54 @@ public class Team8740_Base {
         intakeRight.setPower(0);
     }
 
-    public void lowerLift() {
-        if(!lowerLimit.getState()) {
-            lift.setPower(0);
-        } else {
-            lift.setPower(LIFT_DOWN_POWER);
-        }
-    }
-
     public double getLiftEncoder() {
         return lift.getCurrentPosition();
     }
 
-    public void raiseLift() {
-        if(!upperLimit.getState()) {
+    public void lowerLift() {
+        if (!lowerLimit.getState()) {
             lift.setPower(0);
         } else {
-            lift.setPower(LIFT_UP_POWER);
+            lift.setPower(-LIFT_POWER);
+        }
+    }
+
+    public void raiseLift() {
+        if (getUpperLimit()) {
+            lift.setPower(0);
+        } else {
+            lift.setPower(LIFT_POWER);
         }
     }
 
     public void stopLift() {
         lift.setPower(0);
+    }
+
+    public void setLiftPower(double power) {
+        lift.setPower(power);
+    }
+
+    public void setLiftPosition(LiftPosition position) {
+        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        switch(position) {
+            case TOP:
+                while(!getUpperLimit()) {
+                    lift.setPower(LIFT_POWER);
+                }
+                lift.setPower(0);
+                break;
+            case MIDDLE:
+                lift.setTargetPosition(LIFT_POS_MIDDLE);
+                lift.setPower(LIFT_POWER);
+                break;
+            case BOTTOM:
+                lift.setTargetPosition(0);
+                lift.setPower(LIFT_POWER);
+                break;
+        }
     }
 
     /**
@@ -418,7 +468,7 @@ public class Team8740_Base {
      * @return lowerLimitState
      */
     public boolean getLowerLimit() {
-        boolean lowerLimitState = lowerLimit.getState();
+        boolean lowerLimitState = !lowerLimit.getState();
         return lowerLimitState;
     }
 
@@ -428,7 +478,7 @@ public class Team8740_Base {
      * @return upperLimitState
      */
     public boolean getUpperLimit() {
-        boolean upperLimitState = upperLimit.getState();
+        boolean upperLimitState = !upperLimit.getState();
         return upperLimitState;
     }
 
@@ -466,13 +516,24 @@ public class Team8740_Base {
 
     /**
      * Gets color from the color sensor
+     *
      * @return color
      */
     public Color getColor() {
+        frameGrabber.grabSingleFrame(); //Tell it to grab a frame
+        while (!frameGrabber.isResultReady()) { //Wait for the result
+            opmode.sleep(5); //sleep for 5 milliseconds
+        }
+        //Get the result
+        ImageProcessorResult imageProcessorResult = frameGrabber.getResult();
+        JewelColorResult result = (JewelColorResult) imageProcessorResult.getResult();
+        JewelColorResult.JewelColor leftColor = result.getLeftColor();
+        JewelColorResult.JewelColor rightColor = result.getRightColor();
+
         Color color;
-        if(color_sensor.red() > RED_THRESHOLD) {
+        if (color_sensor.red() > RED_THRESHOLD || leftColor == JewelColorResult.JewelColor.BLUE && rightColor == JewelColorResult.JewelColor.RED) {
             color = Color.RED;
-        } else if(color_sensor.blue() > BLUE_THRESHOLD) {
+        } else if (color_sensor.blue() > BLUE_THRESHOLD || leftColor == JewelColorResult.JewelColor.RED && rightColor == JewelColorResult.JewelColor.BLUE) {
             color = Color.BLUE;
         } else {
             color = Color.UNKNOWN;
@@ -497,7 +558,7 @@ public class Team8740_Base {
                 /* For fun, we also exhibit the navigational pose. In the Relic Recovery game,
                  * it is perhaps unlikely that you will actually need to act on this pose information, but
                  * we illustrate it nevertheless, for completeness. */
-            OpenGLMatrix pose = ((VuforiaTrackableDefaultListener)relicTemplate.getListener()).getPose();
+            OpenGLMatrix pose = ((VuforiaTrackableDefaultListener) relicTemplate.getListener()).getPose();
             String formattedPose = (pose != null) ? pose.formatAsTransform() : "null";
             opmode.telemetry.addData("Pose", formattedPose);
 
@@ -517,8 +578,7 @@ public class Team8740_Base {
                 double rY = rot.secondAngle;
                 double rZ = rot.thirdAngle;
             }
-        }
-        else {
+        } else {
             opmode.telemetry.addData("VuMark", "not visible");
         }
 
@@ -545,8 +605,8 @@ public class Team8740_Base {
      * @return isCalibrating
      */
     public boolean isGyroCalibrating() {
-        angles   = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-        gravity  = imu.getGravity();
+        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        gravity = imu.getGravity();
         boolean isCalibrating = imu.isGyroCalibrated();
 
         return isCalibrating;
@@ -558,7 +618,7 @@ public class Team8740_Base {
      * @return heading
      */
     public double getGyroHeading() {
-        angles  = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         gravity = imu.getGravity();
         double heading = AngleUnit.DEGREES.normalize(AngleUnit.DEGREES.fromUnit(angles.angleUnit, angles.firstAngle));
         return heading;
@@ -588,7 +648,7 @@ public class Team8740_Base {
         // Ensure that the opmode is still active
         if (opmode.opModeIsActive()) {
             // Determine new target position, and pass to motor controller
-            moveCounts = distance * TICKS_PER_INCH;
+            moveCounts = distance * DRIVE_TICKS_PER_INCH;
             newLeftTarget = getLeftEncoder() + moveCounts;
             newRightTarget = getRightEncoder() + moveCounts;
 
@@ -612,7 +672,7 @@ public class Team8740_Base {
                 if (distance < 0)
                     steer *= -1.0;
 
-                leftSpeed  = speed - steer;
+                leftSpeed = speed - steer;
                 rightSpeed = speed + steer;
 
                 // Normalize speeds if either one exceeds +/- 1.0;
@@ -625,10 +685,10 @@ public class Team8740_Base {
                 setTank(leftSpeed, rightSpeed);
 
                 // Display drive status for the driver.
-                opmode.telemetry.addData("Err/St",  "%5.1f/%5.1f", error, steer);
-                opmode.telemetry.addData("Target",  "%.2f:%.2f",      newLeftTarget,  newRightTarget);
-                opmode.telemetry.addData("Actual",  "%.2f:%.2f",      getLeftEncoder(), getRightEncoder());
-                opmode.telemetry.addData("Speed",   "%5.2f:%5.2f", leftSpeed, rightSpeed);
+                opmode.telemetry.addData("Err/St", "%5.1f/%5.1f", error, steer);
+                opmode.telemetry.addData("Target", "%.2f:%.2f", newLeftTarget, newRightTarget);
+                opmode.telemetry.addData("Actual", "%.2f:%.2f", getLeftEncoder(), getRightEncoder());
+                opmode.telemetry.addData("Speed", "%5.2f:%5.2f", leftSpeed, rightSpeed);
                 opmode.telemetry.update();
             }
 
@@ -708,13 +768,13 @@ public class Team8740_Base {
 
         if (Math.abs(error) <= HEADING_THRESHOLD) {
             steer = 0.0;
-            leftSpeed  = 0.0;
+            leftSpeed = 0.0;
             rightSpeed = 0.0;
             onTarget = true;
         } else {
             steer = getSteer(error, PCoeff);
             rightSpeed = speed * steer;
-            leftSpeed  = -rightSpeed;
+            leftSpeed = -rightSpeed;
         }
 
         // Send desired speeds to motors
@@ -741,7 +801,7 @@ public class Team8740_Base {
 
         // calculate error in -179 to +180 range  (
         robotError = targetAngle - getGyroHeading();
-        while (robotError > 180)   robotError -= 360;
+        while (robotError > 180) robotError -= 360;
         while (robotError <= -180) robotError += 360;
         return robotError;
     }
