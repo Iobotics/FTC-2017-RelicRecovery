@@ -50,7 +50,6 @@ public class GoldDiggerOpMode_Linear extends LinearOpMode {
         while (opModeIsActive()) {
             // Setting the motors to different joysticks of controller
                 robot.drive(-gamepad1.left_stick_y*.5, -gamepad1.right_stick_y*.5);
-            // If the letter "A" on gamepad is HELD, robot will spin
             if (gamepad1.right_trigger > 0.5) {
                 robot.glyphPull(-1, -1);
             }
