@@ -8,41 +8,43 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
 /**
- * Created by Joshua Taufahema on 10/16/2017.
+ * Created by Joshua Taufahema on 11/8/2017.
  */
 @Autonomous (name = "Gold Digger Auto", group = "Linear Opmode")
 //@Disabled
-public class GoldDiggerAuto extends LinearOpMode {
-   GoldDiggerBot robot = new GoldDiggerBot(this);
+public class GoldDiggerAuto2 extends LinearOpMode {
+    GoldDiggerBot robot = new GoldDiggerBot(this);
+
     @Override
     public void runOpMode() throws InterruptedException {
         robot.init(hardwareMap, true);
         waitForStart();
 
-        robot.gyroDrive(0.3, 25, 0);
-        //goes forward
+        robot.gyroDrive(0.3, 36, 0);
+        //go forward
 
-        robot.gyroDrive(0.2,0, 90);
-        //turns to be parallel to the glyph box
+        robot.gyroTurn(0.2, 90);
+        //turn towards the crypto box
 
-        robot.gyroDrive(0.3, 32, 0);
-        //goes into glyph box or at least go up to it
+        robot.encoderDrive(10, 0.3);
+        //go up to crypto box
 
-        robot.gyroTurn(0.2, 180);
-        //turn to have the back face the box
+        robot.gyroTurn(0.3, 180);
+        //turn to have back face glyph box
 
         robot.conveyor.setPower(0.5);
         Thread.sleep(1500);
-        //put preloaded glyph into the crypto box
+        //put pre-loaded glyph into the crypto box
 
         robot.conveyor.setPower(0);
-        //turn off glyph pull motors
+        //turn off glyph motors
 
 
-        //THIS IS THE AUTO FOR THE BLUE NEXT TO ONLY ONE CRYPTO BOX AND GETS INTO THE TRIANGLE OF POINTS
+        //THIS IS FOR THE STAND NEAREST TO BOTH CRYPTO BOXES AND PUTS ON GLYPH AND GETS INTO THE TRIANGLE OF POINTS
 
 
 
 
     }
+
 }
