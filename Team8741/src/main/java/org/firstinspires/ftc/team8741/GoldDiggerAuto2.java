@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 /**
  * Created by Joshua Taufahema on 11/8/2017.
  */
-@Autonomous (name = "Gold Digger Auto", group = "Linear Opmode")
+@Autonomous (name = "Gold Digger Auto 2jj", group = "Linear Opmode")
 //@Disabled
 public class GoldDiggerAuto2 extends LinearOpMode {
     GoldDiggerBot robot = new GoldDiggerBot(this);
@@ -20,27 +20,27 @@ public class GoldDiggerAuto2 extends LinearOpMode {
         robot.init(hardwareMap, true);
         waitForStart();
 
-        robot.gyroDrive(0.3, 36, 0);
+        robot.gyroDrive(0.5, 36, 0);
         //go forward
 
-        robot.gyroTurn(0.2, 90);
+        robot.gyroTurn(0.4, 90);
         //turn towards the crypto box
 
-        robot.encoderDrive(10, 0.3);
+        robot.gyroHold(0.4, 90, 0.5);
+        //gives robot time to reset
+
+        robot.gyroDrive(0.5, 10, 0);
         //go up to crypto box
 
-        robot.gyroTurn(0.3, 180);
-        //turn to have back face glyph box
-
-        robot.conveyor.setPower(0.5);
+        robot.glyphPull(-1,-1);
         Thread.sleep(1500);
         //put pre-loaded glyph into the crypto box
 
-        robot.conveyor.setPower(0);
+        robot.glyphPull(0,0);
         //turn off glyph motors
 
         //THIS IS FOR THE STAND NEAREST TO BOTH CRYPTO BOXES AND PUTS ON GLYPH AND GETS INTO THE TRIANGLE OF POINTS
-        
+
     }
 
 }

@@ -19,6 +19,8 @@ import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 
 import java.io.File;
 
+import static java.lang.Thread.sleep;
+
 
 /**
  * Created by Joshua Taufahema on 10/13/2017.
@@ -67,10 +69,10 @@ public class GoldDiggerBot {
 
         //setting direction of motors and how they will spin
 
-        leftBackDrive.setDirection(DcMotor.Direction.FORWARD);
-        leftFrontDrive.setDirection(DcMotor.Direction.FORWARD);
-        rightBackDrive.setDirection(DcMotor.Direction.REVERSE);
-        rightFrontDrive.setDirection(DcMotor.Direction.REVERSE);
+        leftBackDrive.setDirection(DcMotor.Direction.REVERSE);
+        leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
+        rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
+        rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
         rightGlyphPull.setDirection(DcMotor.Direction.FORWARD);
         leftGlyphPull.setDirection(DcMotor.Direction.REVERSE);
         conveyor.setDirection(DcMotor.Direction.REVERSE);
