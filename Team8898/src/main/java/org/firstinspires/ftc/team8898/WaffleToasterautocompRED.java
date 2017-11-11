@@ -1,11 +1,20 @@
 package org.firstinspires.ftc.team8898;
 
+import android.app.Activity;
+import android.graphics.Color;
+import android.view.View;
+
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
+import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.SwitchableLight;
 
 import ftc.vision.BeaconColorResult;
+
+import static java.lang.System.currentTimeMillis;
 
 /**
  * Created by Teacher on 10/28/2017.
@@ -23,6 +32,8 @@ public class WaffleToasterautocompRED extends WaffleToasterAuto {
     private Servo rightServo = null;
     // sets up variable for the jewel servo
     private Servo jewelServo = null;
+    NormalizedColorSensor colorSensor;
+    View relativeLayout;
 
 
     public void runOpMode() throws InterruptedException { //set up for the phone tp
@@ -38,10 +49,15 @@ public class WaffleToasterautocompRED extends WaffleToasterAuto {
 
         jewelServo = hardwareMap.get(Servo.class, "jewelServo");
 
-        leftFront.setDirection(DcMotorSimple.Direction.FORWARD);
-        leftBack.setDirection(DcMotorSimple.Direction.FORWARD);
-        rightBack.setDirection(DcMotorSimple.Direction.REVERSE);
-        rightFront.setDirection(DcMotorSimple.Direction.REVERSE);
+        int relativeLayoutId = hardwareMap.appContext.getResources().getIdentifier("RelativeLayout", "id", hardwareMap.appContext.getPackageName());
+        relativeLayout = ((Activity) hardwareMap.appContext).findViewById(relativeLayoutId);
+
+
+
+        leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
+        leftBack.setDirection(DcMotorSimple.Direction.REVERSE);
+        rightBack.setDirection(DcMotorSimple.Direction.FORWARD);
+        rightFront.setDirection(DcMotorSimple.Direction.FORWARD);
 
         arm.setDirection(DcMotorSimple.Direction.FORWARD);
 
@@ -50,13 +66,67 @@ public class WaffleToasterautocompRED extends WaffleToasterAuto {
 
         jewelServo.setDirection(Servo.Direction.FORWARD);
 
+        colorSensor = hardwareMap.get(NormalizedColorSensor.class, "colorSensor");
+
+        // If possible, turn the light on in the beginning (it might already be on anyway,
+        // we just make sure it is if we can).
+        if (colorSensor instanceof SwitchableLight) {
+            ((SwitchableLight)colorSensor).enableLight(true);
+        }
+
         waitForStart();
+
         leftServo.setPosition(0.25);
         rightServo.setPosition(0.25);
+        jewelServo.setPosition(.4);
         arm.setPower(0.25);
         Thread.sleep(500);
-        allDrive(1);
-        Thread.sleep(2000);
-        allDrive(0);
+        NormalizedRGBA colors = colorSensor.getNormalizedColors();
+        int color = colors.toColor();
+        long startTime = currentTimeMillis();
+        while(Color.red(color) < 3 && currentTimeMillis()- startTime < 900) {
+            colors = colorSensor.getNormalizedColors();
+            color = colors.toColor();
+            leftFront.setPower(-.1);
+            leftBack.setPower(-.1);
+            rightFront.setPower(-.1);
+            rightBack.setPower(-.1);
+        }
+        leftFront.setPower(0);
+        leftBack.setPower(0);
+        rightFront.setPower(0);
+        rightBack.setPower(0);
+        Thread.sleep(100);
+        telemetry.addData("Red", Color.red(color));
+        if(Color.red(color) < 3){
+            leftFront.setPower(-.4);
+            leftBack.setPower(-.4);
+            rightFront.setPower(-.4);
+            rightBack.setPower(-.4);
+        }
+        else{
+            leftFront.setPower(.4);
+            leftBack.setPower(.4);
+            rightFront.setPower(.4);
+            rightBack.setPower(.4);
+        }
+        Thread.sleep(200);
+
+        leftFront.setPower(0);
+        leftBack.setPower(0);
+        rightFront.setPower(0);
+        rightBack.setPower(0);
+        jewelServo.setPosition(1);
+        Thread.sleep(200);
+
+        leftFront.setPower(.4);
+        leftBack.setPower(.4);
+        rightFront.setPower(.4);
+        rightBack.setPower(.4);
+        Thread.sleep(1500);
+        leftFront.setPower(0);
+        leftBack.setPower(0);
+        rightFront.setPower(0);
+        rightBack.setPower(0);
     }
 }
