@@ -29,15 +29,9 @@
 
 package org.firstinspires.ftc.team8740;
 
-import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Range;
-
-import org.firstinspires.ftc.robotcontroller.external.samples.HardwarePushbot;
 
 /**
  * This file illustrates the concept of driving a path based on Gyro heading and encoder counts.
@@ -92,14 +86,10 @@ public class Team8740_LeftRedAuto extends LinearOpMode {
          */
         robot.init(hardwareMap, this);
 
-        // Ensure the robot is stationary, then reset the encoders
-        robot.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
         // Send telemetry message to alert driver that we are calibrating
         telemetry.addData("X", "Calibrating Gyro");
+        telemetry.addData("X", "Resetting encoders");
         telemetry.update();
-
-        robot.calibrateGyro();
 
         // make sure the gyro is calibrated before continuing
         while (!isStopRequested() && robot.isGyroCalibrating())  {
@@ -107,10 +97,11 @@ public class Team8740_LeftRedAuto extends LinearOpMode {
             idle();
         }
 
-        telemetry.addData("O", "Robot Ready");
-        telemetry.update();
+        // Ensure the robot is stationary, then reset the encoders
+        robot.setDriveMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        idle();
 
-        robot.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        robot.setDriveMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         // Wait for the game to start (Display Gyro value), and reset gyro before we move
         while (!isStarted()) {

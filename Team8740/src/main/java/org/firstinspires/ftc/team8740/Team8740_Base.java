@@ -72,14 +72,20 @@ import ftc.vision.JewelColorResult;
 public class Team8740_Base {
     /* Constants */
     private final static double LEFT_SERVO_HOME = 0.3;
-    private final static double RIGHT_SERVO_HOME = 0.6;         //    \(._.)/
+    private final static double RIGHT_SERVO_HOME = 0.6;
+
     private final static double LEFT_SERVO_CLOSED = 0.33;
     private final static double RIGHT_SERVO_CLOSED = 0.63;
+
     private final static double LEFT_SERVO_OPEN = 0.72;
     private final static double RIGHT_SERVO_OPEN = 1.25;
 
     private final static double JEWEL_SERVO_HOME = 0.45;
     private final static double JEWEL_SERVO_DOWN = 0.85;
+
+    // TODO - Find relic servo positions
+    private final static double RELIC_SERVO_CLOSED = 0.0;
+    private final static double RELIC_SERVO_OPEN = 1.0;
 
     private final static double LOW_SPEED = 0.4;
     private final static double HIGH_SPEED = 0.7;
@@ -90,12 +96,14 @@ public class Team8740_Base {
 
     private final static double LIFT_POWER = 0.6;
 
+    private final static double RELIC_ARM_SPEED = 0.5;
+
     private final static double LIFT_TICKS_PER_REV = 560;    // Ticks per revolution
     private final static double LIFT_GEAR_REDUCTION = 100.0; // This is < 1.0 if geared UP
-    private final static double LIFT_GEAR_DIAMETER = 1.504;    // Inches
+    private final static double LIFT_GEAR_DIAMETER = 1.504;  // Inches
     private final static double LIFT_TICKS_PER_INCH = (LIFT_TICKS_PER_REV * LIFT_GEAR_REDUCTION) / (LIFT_GEAR_DIAMETER * 3.1415);
 
-    private final static int LIFT_POS_MIDDLE = Math.round((float) (LIFT_TICKS_PER_INCH * 6.5));
+    private final static double LIFT_POS_MIDDLE = 6.5; /// Inches
 
     private final static double DRIVE_TICKS_PER_REV = 512;  // Ticks per revolution
     private final static double DRIVE_GEAR_REDUCTION = 1.0; // This is < 1.0 if geared UP
@@ -107,8 +115,11 @@ public class Team8740_Base {
     private final static double P_DRIVE_COEFF = 0.05;  // Larger is more responsive, but also less stable
 
     // TODO - Find thresholds
-    private final static double RED_THRESHOLD = 180;
-    private final static double BLUE_THRESHOLD = 150;
+    private final static double RED_MIN_THRESHOLD = 140;
+    private final static double RED_MAX_THRESHOLD = 180;
+
+    private final static double BLUE_MIN_THRESHOLD = 150;
+    private final static double BLUE_MAX_THRESHOLD = 150;
 
     private final static String VUFORIA_LICENSE = "AY0QHQL/////AAAAGddY2lrlhEkenq0T04cRoVVmq/FAquH7DThEnayFrV+ojyjel8qTCn03vKe+FaZt0FwnE4tKdbimF0i47pzVuCQm2lRVdy5m1W03vvMN+8SA0RoXquxc1ddQLNyw297Ei3yWCJLV74UsEtfBwYKqr4ys3d2b2vPgaWnaZX6SNzD+x7AfKsaTSEIFqWfH8GOBoyw0kJ6qSCL384ylCcId6fVJbO8s9WccvuQYsCgCizdr0N/wOdEn76wY7fiNuR+5oReDCaIgfw5L35mD8EtQ0UHmNZGeDndtPDd6ZfNVlU3gyzch7nj5cmPBTleaoiCjyR9AputQHRH3qXnf3k76MvozmMGTE/j5o1HBA6BMSPwH";
 
@@ -136,10 +147,14 @@ public class Team8740_Base {
 
     private DcMotor lift = null;
 
+    private DcMotor relicArm = null;
+
     private Servo leftServo = null;
     private Servo rightServo = null;
 
     private Servo jewelServo = null;
+
+    private Servo relicServo = null;
 
     private CRServo pushServo = null;
 
@@ -161,26 +176,23 @@ public class Team8740_Base {
 
     private FrameGrabber frameGrabber = null;
 
+    /* Local OpMode members. */
     private HardwareMap hwMap = null;
 
     private LinearOpMode opmode = null;
 
     private ElapsedTime time = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
 
+    private LiftPosition liftPosition = LiftPosition.BOTTOM;
 
-    /* Local OpMode members. */
     private boolean isLowSpeed = false;
-    private boolean jewelStatus = false;
-    private boolean clawStatus = false;
+    private boolean jewelArmUp = false;
+    private boolean relicClawOpen  = false;
+    private boolean intakeClawOpen = false;
     private boolean teleop = false;
 
     private double speedMultiplier = HIGH_SPEED;
 
-
-    /* Initialize standard Hardware interfaces */
-    public void init(HardwareMap hwMap) {
-        this.init(hwMap, null);
-    }
 
     /* Initialize standard Hardware interfaces */
     public void init(HardwareMap hwMap, LinearOpMode opmode) {
@@ -197,17 +209,20 @@ public class Team8740_Base {
         initIntake();
         initLift();
         initServos();
-        if (!teleop) initColorSensor();
-        //initVuforia();
-        if (!teleop) initGyro();
+        if (!teleop) {
+            initRelic();
+            initColorSensor();
+            initVuforia();
+            initGyro();
+        }
     }
 
     private void initDrive() {
         // Define and initialize motors
-        frontLeftDrive = hwMap.dcMotor.get("frontLeft");
+        frontLeftDrive  = hwMap.dcMotor.get("frontLeft");
         frontRightDrive = hwMap.dcMotor.get("frontRight");
-        backLeftDrive = hwMap.dcMotor.get("backLeft");
-        backRightDrive = hwMap.dcMotor.get("backRight");
+        backLeftDrive   = hwMap.dcMotor.get("backLeft");
+        backRightDrive  = hwMap.dcMotor.get("backRight");
 
         // Reverse left motors
         if (teleop) {
@@ -222,10 +237,10 @@ public class Team8740_Base {
         backRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // Set all motors to run without encoders
-        setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        setDriveMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         // Set all motors to zero power
-        this.setPower(0, 0, 0, 0);
+        setPower(0, 0, 0, 0);
     }
 
     private void initIntake() {
@@ -241,8 +256,9 @@ public class Team8740_Base {
         // Define the lift motor
         lift = hwMap.dcMotor.get("lift");
 
-        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        opmode.idle();
 
         // Define limit switches
         lowerLimit = hwMap.digitalChannel.get("lowerLimit");
@@ -274,8 +290,15 @@ public class Team8740_Base {
         jewelServo.setPosition(JEWEL_SERVO_HOME);
     }
 
+    private void initRelic() {
+        relicArm = hwMap.dcMotor.get("relicArm");
+
+        relicArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+    }
+
     private void initColorSensor() {
         frameGrabber = FtcRobotControllerActivity.frameGrabber;
+
         color_sensor = hwMap.get(ColorSensor.class, "color");
     }
 
@@ -286,9 +309,9 @@ public class Team8740_Base {
         parameters.vuforiaLicenseKey = VUFORIA_LICENSE;
         parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
 
-        this.vuforia = ClassFactory.createVuforiaLocalizer(parameters);
+        vuforia = ClassFactory.createVuforiaLocalizer(parameters);
 
-        relicTrackables = this.vuforia.loadTrackablesFromAsset("RelicVuMark");
+        relicTrackables = vuforia.loadTrackablesFromAsset("RelicVuMark");
         relicTemplate = relicTrackables.get(0);
         relicTemplate.setName("relicVuMarkTemplate");
     }
@@ -301,7 +324,7 @@ public class Team8740_Base {
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
         parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
         parameters.calibrationDataFile = "BNO055IMUCalibration.json"; // see the calibration sample opmode
-        parameters.loggingEnabled = true;
+        parameters.loggingEnabled = false;
         parameters.loggingTag = "IMU";
         parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
 
@@ -310,8 +333,6 @@ public class Team8740_Base {
         // and named "imu".
         imu = hwMap.get(BNO055IMU.class, "imu");
         imu.initialize(parameters);
-
-        calibrateGyro();
     }
 
     /**
@@ -338,10 +359,10 @@ public class Team8740_Base {
         double backLeftPower;
         double backRightPower;
 
-        frontLeftPower = Range.clip(x + y - rotation, -1.0, 1.0);
+        frontLeftPower  = Range.clip(x + y - rotation, -1.0, 1.0);
         frontRightPower = Range.clip(-x + y + rotation, -1.0, 1.0);
-        backLeftPower = Range.clip(-x + y - rotation, -1.0, 1.0);
-        backRightPower = Range.clip(x + y + rotation, -1.0, 1.0);
+        backLeftPower   = Range.clip(-x + y - rotation, -1.0, 1.0);
+        backRightPower  = Range.clip(x + y + rotation, -1.0, 1.0);
 
         // Send calculated power to wheels
         setPower(frontLeftPower, frontRightPower, backLeftPower, backRightPower);
@@ -378,18 +399,7 @@ public class Team8740_Base {
         frontRightDrive.setTargetPosition(Math.round((float) position));
     }
 
-    /**
-     * Converts inches to ticks
-     *
-     * @param inches
-     * @return ticks
-     */
-    public double inchesToTicks(double inches) {
-        double ticks = inches * DRIVE_TICKS_PER_INCH;
-        return ticks;
-    }
-
-    public void setMode(DcMotor.RunMode mode) {
+    public void setDriveMode(DcMotor.RunMode mode) {
         frontLeftDrive.setMode(mode);
         frontRightDrive.setMode(mode);
         backLeftDrive.setMode(mode);
@@ -406,10 +416,14 @@ public class Team8740_Base {
         intakeRight.setPower(-INTAKE_POWER);
     }
 
-
     public void stopIntake() {
         intakeLeft.setPower(0);
         intakeRight.setPower(0);
+    }
+
+    public void setIntakePower(double power) {
+        intakeLeft.setPower(power);
+        intakeRight.setPower(power);
     }
 
     public double getLiftEncoder() {
@@ -441,25 +455,36 @@ public class Team8740_Base {
     }
 
     public void setLiftPosition(LiftPosition position) {
-        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-        switch(position) {
+        liftPosition = position;
+        switch (position) {
             case TOP:
-                while(!getUpperLimit()) {
+                while (!getUpperLimit()) {
                     lift.setPower(LIFT_POWER);
                 }
                 lift.setPower(0);
                 break;
             case MIDDLE:
-                lift.setTargetPosition(LIFT_POS_MIDDLE);
+                lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                opmode.idle();
+                lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+                int ticks = Math.round((float) (LIFT_TICKS_PER_INCH * LIFT_POS_MIDDLE));
+                lift.setTargetPosition(ticks);
                 lift.setPower(LIFT_POWER);
+
+                lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 break;
             case BOTTOM:
-                lift.setTargetPosition(0);
-                lift.setPower(LIFT_POWER);
+                while (!getLowerLimit()) {
+                    lift.setPower(-LIFT_POWER);
+                }
+                lift.setPower(0);
                 break;
         }
+    }
+
+    public LiftPosition getLiftPosition() {
+        return liftPosition;
     }
 
     /**
@@ -483,18 +508,18 @@ public class Team8740_Base {
     }
 
     /**
-     * Checks if claws are open
+     * Checks if intake claws are open
      *
-     * @return clawStatus
+     * @return intakeClawOpen
      */
-    public boolean getClawStatus() {
-        return clawStatus;
+    public boolean getIntakeClawStatus() {
+        return intakeClawOpen;
     }
 
-    public void toggleClaws() {
-        leftServo.setPosition(clawStatus ? LEFT_SERVO_CLOSED : LEFT_SERVO_OPEN);
-        rightServo.setPosition(clawStatus ? RIGHT_SERVO_CLOSED : RIGHT_SERVO_OPEN);
-        clawStatus = !clawStatus;
+    public void toggleIntakeClaws() {
+        leftServo.setPosition(intakeClawOpen ? LEFT_SERVO_CLOSED : LEFT_SERVO_OPEN);
+        rightServo.setPosition(intakeClawOpen ? RIGHT_SERVO_CLOSED : RIGHT_SERVO_OPEN);
+        intakeClawOpen = !intakeClawOpen;
     }
 
     public void pushGlyph() {
@@ -509,9 +534,34 @@ public class Team8740_Base {
         pushServo.setPower(0);
     }
 
+    /**
+     * Checks if the jewel arm is up
+     * @return jewelArmUp
+     */
+    public boolean getJewelArmStatus() {
+        return jewelArmUp;
+    }
+
     public void toggleJewelArm() {
-        jewelServo.setPosition(jewelStatus ? JEWEL_SERVO_DOWN : JEWEL_SERVO_HOME);
-        jewelStatus = !jewelStatus;
+        jewelServo.setPosition(jewelArmUp ? JEWEL_SERVO_DOWN : JEWEL_SERVO_HOME);
+        jewelArmUp = !jewelArmUp;
+    }
+
+    public void extendRelicArm() {
+        relicArm.setPower(RELIC_ARM_SPEED);
+    }
+
+    public void stopRelicArm() {
+        relicArm.setPower(0);
+    }
+
+    public void setRelicServo(double position) {
+        relicServo.setPosition(position);
+    }
+
+    public void toggleRelicServo() {
+        relicServo.setPosition(relicClawOpen ? RELIC_SERVO_CLOSED : RELIC_SERVO_OPEN);
+        relicClawOpen = !relicClawOpen;
     }
 
     /**
@@ -531,9 +581,9 @@ public class Team8740_Base {
         JewelColorResult.JewelColor rightColor = result.getRightColor();
 
         Color color;
-        if (color_sensor.red() > RED_THRESHOLD || leftColor == JewelColorResult.JewelColor.BLUE && rightColor == JewelColorResult.JewelColor.RED) {
+        if (leftColor == JewelColorResult.JewelColor.BLUE && rightColor == JewelColorResult.JewelColor.RED) {
             color = Color.RED;
-        } else if (color_sensor.blue() > BLUE_THRESHOLD || leftColor == JewelColorResult.JewelColor.RED && rightColor == JewelColorResult.JewelColor.BLUE) {
+        } else if (leftColor == JewelColorResult.JewelColor.RED && rightColor == JewelColorResult.JewelColor.BLUE) {
             color = Color.BLUE;
         } else {
             color = Color.UNKNOWN;
@@ -544,6 +594,10 @@ public class Team8740_Base {
 
     public void activateVuforia() {
         relicTrackables.activate();
+    }
+
+    public void deactivateVuforia() {
+        relicTrackables.deactivate();
     }
 
     public void trackVuMarks() {
@@ -585,28 +639,12 @@ public class Team8740_Base {
         opmode.telemetry.update();
     }
 
-    public void calibrateGyro() {
-        // Get the calibration data
-        BNO055IMU.CalibrationData calibrationData = imu.readCalibrationData();
-
-        // Save the calibration data to a file. You can choose whatever file
-        // name you wish here, but you'll want to indicate the same file name
-        // when you initialize the IMU in an opmode in which it is used. If you
-        // have more than one IMU on your robot, you'll of course want to use
-        // different configuration file names for each.
-        String filename = "BNO055IMUCalibration.json";
-        File file = AppUtil.getInstance().getSettingsFile(filename);
-        ReadWriteFile.writeFile(file, calibrationData.serialize());
-    }
-
     /**
      * Checks if the gyro is calibrating
      *
      * @return isCalibrating
      */
     public boolean isGyroCalibrating() {
-        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-        gravity = imu.getGravity();
         boolean isCalibrating = imu.isGyroCalibrated();
 
         return isCalibrating;
@@ -656,7 +694,7 @@ public class Team8740_Base {
             setLeftEncoder(newLeftTarget);
             setRightEncoder(newRightTarget);
 
-            setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            setDriveMode(DcMotor.RunMode.RUN_TO_POSITION);
 
             // start motion.
             speed = Range.clip(Math.abs(speed), 0.0, 1.0);
@@ -696,7 +734,7 @@ public class Team8740_Base {
             setTank(0, 0);
 
             // Turn off RUN_TO_POSITION
-            setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            setDriveMode(DcMotor.RunMode.RUN_USING_ENCODER);
         }
     }
 

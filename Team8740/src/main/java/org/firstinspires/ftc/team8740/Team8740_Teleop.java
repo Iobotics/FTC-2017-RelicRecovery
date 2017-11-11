@@ -74,7 +74,7 @@ public class Team8740_Teleop extends LinearOpMode {
 
             // Use gamepad right bumper to run intake
             if(gamepad1.right_bumper) {
-               robot.runIntake();
+                robot.runIntake();
             } else if(gamepad1.right_trigger > 0.2) {
                 robot.reverseIntake();
             } else {
@@ -84,7 +84,7 @@ public class Team8740_Teleop extends LinearOpMode {
             // Use gamepad A to toggle top outtake
             if(gamepad1.a) {
                 robot.pushGlyph();
-                robot.toggleClaws();
+                robot.toggleIntakeClaws();
                 sleep(1430);
                 robot.retractGlyph();
                 sleep(1430);
@@ -97,7 +97,7 @@ public class Team8740_Teleop extends LinearOpMode {
             if(gamepad1.b) {
                 robot.reverseIntake();
                 robot.pushGlyph();
-                robot.toggleClaws();
+                robot.toggleIntakeClaws();
                 sleep(1430);
                 robot.stopIntake();
                 robot.retractGlyph();
@@ -110,8 +110,9 @@ public class Team8740_Teleop extends LinearOpMode {
             // Use gamepad X to toggle bottom outtake
             if(gamepad1.x) {
                 robot.reverseIntake();
-                robot.toggleClaws();
+                robot.toggleIntakeClaws();
                 sleep(500);
+                robot.stopIntake();
             } else {
                 robot.stopIntake();
             }
@@ -130,18 +131,23 @@ public class Team8740_Teleop extends LinearOpMode {
             robot.setLiftPower(-gamepad2.right_stick_y);
 
             // TODO - Gamepad2 A extends motor 3 (Hub 1)
+            if(gamepad2.a) {
+                robot.extendRelicArm();
+            } else {
+                robot.stopRelicArm();
+            }
 
             // TODO - Gamepad2 X Toggle relic claw
-
-            // Use gamepad Y to toggle program-assist sensors
-            if(gamepad2.y) {
-                // TODO - Toggle program-assist sensors (color/prox sensor resets when detect block)
+            if(gamepad2.x) {
+                robot.toggleRelicServo();
             }
+
+            // TODO Gamepad2 Y Toggle program-assist sensors (color/prox sensor resets when detect block)
 
             // Pause for 25 mS each cycle = update 40 times a second.
             sleep(25);
 
-            telemetry.addData("Lift position", robot.getLiftEncoder());
+            telemetry.addData("Lift position", robot.getLiftPosition());
             telemetry.update();
         }
     }

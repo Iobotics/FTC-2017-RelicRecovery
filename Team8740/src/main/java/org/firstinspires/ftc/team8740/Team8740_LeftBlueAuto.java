@@ -86,14 +86,10 @@ public class Team8740_LeftBlueAuto extends LinearOpMode {
          */
         robot.init(hardwareMap, this);
 
-        // Ensure the robot is stationary, then reset the encoders
-        robot.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
         // Send telemetry message to alert driver that we are calibrating
         telemetry.addData("X", "Calibrating Gyro");
+        telemetry.addData("X", "Resetting encoders");
         telemetry.update();
-
-        robot.calibrateGyro();
 
         // make sure the gyro is calibrated before continuing
         while (!isStopRequested() && robot.isGyroCalibrating())  {
@@ -101,10 +97,11 @@ public class Team8740_LeftBlueAuto extends LinearOpMode {
             idle();
         }
 
-        telemetry.addData("O", "Robot Ready");
-        telemetry.update();
+        // Ensure the robot is stationary, then reset the encoders
+        robot.setDriveMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        idle();
 
-        robot.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        robot.setDriveMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         // Wait for the game to start (Display Gyro value), and reset gyro before we move
         while (!isStarted()) {
