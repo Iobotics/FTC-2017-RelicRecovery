@@ -123,4 +123,3 @@ public class WaffleToasterAuto extends LinearOpMode {
     }
 
 }
-
