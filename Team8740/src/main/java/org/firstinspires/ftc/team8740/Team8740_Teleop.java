@@ -148,6 +148,7 @@ public class Team8740_Teleop extends LinearOpMode {
             sleep(25);
 
             telemetry.addData("Lift position", robot.getLiftPosition());
+            telemetry.addData("Gyro position", robot.getGyroHeading());
             telemetry.update();
         }
     }

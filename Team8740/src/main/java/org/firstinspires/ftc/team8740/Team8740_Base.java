@@ -29,6 +29,8 @@
 
 package org.firstinspires.ftc.team8740;
 
+import android.graphics.Color;
+
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -121,9 +123,14 @@ public class Team8740_Base {
     private final static double BLUE_MIN_THRESHOLD = 150;
     private final static double BLUE_MAX_THRESHOLD = 150;
 
+    private final static double STAGE_ONE_POSITION = 0;
+    private final static double STAGE_TWO_POSITION = 0;
+    private final static double STAGE_THREE_POSITION = 0;
+    private final static double ONE_INCH_INTERVAL = 0;
+
     private final static String VUFORIA_LICENSE = "AY0QHQL/////AAAAGddY2lrlhEkenq0T04cRoVVmq/FAquH7DThEnayFrV+ojyjel8qTCn03vKe+FaZt0FwnE4tKdbimF0i47pzVuCQm2lRVdy5m1W03vvMN+8SA0RoXquxc1ddQLNyw297Ei3yWCJLV74UsEtfBwYKqr4ys3d2b2vPgaWnaZX6SNzD+x7AfKsaTSEIFqWfH8GOBoyw0kJ6qSCL384ylCcId6fVJbO8s9WccvuQYsCgCizdr0N/wOdEn76wY7fiNuR+5oReDCaIgfw5L35mD8EtQ0UHmNZGeDndtPDd6ZfNVlU3gyzch7nj5cmPBTleaoiCjyR9AputQHRH3qXnf3k76MvozmMGTE/j5o1HBA6BMSPwH";
 
-    private enum Color {
+    public enum Color {
         RED,
         BLUE,
         UNKNOWN
@@ -135,6 +142,10 @@ public class Team8740_Base {
         BOTTOM
     }
 
+    public enum Team {
+        RED_TEAM,
+        BLUE_TEAM
+    }
 
     /* OpMode members */
     private DcMotor frontLeftDrive = null;
@@ -592,6 +603,43 @@ public class Team8740_Base {
         return color;
     }
 
+    /** TODO - The negative angles will make the robot go in a straight line or curve
+     * This method will knock the opposite jewel to the team color
+     * @return false if it has not knocked it off the jewel to make
+     */
+    public boolean jewelKnock() {
+        toggleJewelArm();
+        if (1 == 1) {
+            if (1==1) {
+                opmode.telemetry.addData("test", "test");
+                opmode.telemetry.update();
+                gyroTurn(.6, 10);
+                gyroTurn(.6, -10);
+                return true;
+            }
+            else {
+                gyroTurn(.6, 10);
+                gyroTurn(.6, -10);
+                return true;
+            }
+        }
+        else if(1 == 2){
+            if (getColor().equals(Color.RED)) {
+                gyroTurn(.6, 10);
+                gyroTurn(.6, -10);
+                toggleJewelArm();
+                return true;
+            } else {
+                gyroTurn(.6, 10);
+                gyroTurn(.6, -10);
+                toggleJewelArm();
+                return true;
+            }
+        }
+        toggleJewelArm();
+        return false;
+    }
+
     public void activateVuforia() {
         relicTrackables.activate();
     }
@@ -812,7 +860,7 @@ public class Team8740_Base {
         } else {
             steer = getSteer(error, PCoeff);
             rightSpeed = speed * steer;
-            leftSpeed = -rightSpeed;
+            leftSpeed = rightSpeed; //Ethan- changed this to positive because with negative it would go straight/arc
         }
 
         // Send desired speeds to motors
