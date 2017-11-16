@@ -29,8 +29,6 @@
 
 package org.firstinspires.ftc.team8740;
 
-import android.graphics.Color;
-
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -42,7 +40,6 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
-import com.qualcomm.robotcore.util.ReadWriteFile;
 
 import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
@@ -58,9 +55,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
-import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
-
-import java.io.File;
 
 import ftc.vision.FrameGrabber;
 import ftc.vision.ImageProcessorResult;
@@ -89,8 +83,8 @@ public class Team8740_Base {
     private final static double RELIC_SERVO_CLOSED = 0.0;
     private final static double RELIC_SERVO_OPEN = 1.0;
 
-    private final static double LOW_SPEED = 0.4;
-    private final static double HIGH_SPEED = 0.7;
+    private final static double LOW_SPEED = 0.5;
+    private final static double HIGH_SPEED = 0.8;
 
     private final static double INTAKE_POWER = 1.0;
 
@@ -220,11 +214,11 @@ public class Team8740_Base {
         initIntake();
         initLift();
         initServos();
+        initGyro();
         if (!teleop) {
             initRelic();
             initColorSensor();
             initVuforia();
-            initGyro();
         }
     }
 
@@ -235,7 +229,7 @@ public class Team8740_Base {
         backLeftDrive   = hwMap.dcMotor.get("backLeft");
         backRightDrive  = hwMap.dcMotor.get("backRight");
 
-        // Reverse left motors
+        // Reverse left motors if in teleop mode
         if (teleop) {
             frontLeftDrive.setDirection(DcMotor.Direction.REVERSE);
             backLeftDrive.setDirection(DcMotor.Direction.REVERSE);
@@ -247,8 +241,9 @@ public class Team8740_Base {
         backLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        // Set all motors to run without encoders
-        setDriveMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        // Set all motors to run using encoders
+        setDriveMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        setDriveMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         // Set all motors to zero power
         setPower(0, 0, 0, 0);
@@ -268,8 +263,11 @@ public class Team8740_Base {
         lift = hwMap.dcMotor.get("lift");
 
         lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
         lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        opmode.idle();
+        lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        lift.setPower(0);
 
         // Define limit switches
         lowerLimit = hwMap.digitalChannel.get("lowerLimit");
@@ -284,20 +282,16 @@ public class Team8740_Base {
         // Define and initialize ALL installed servos
         leftServo = hwMap.servo.get("grabLeft");
         rightServo = hwMap.servo.get("grabRight");
-
         jewelServo = hwMap.servo.get("jewelArm");
-
         pushServo = hwMap.crservo.get("pushServo");
 
         // Reverse the right servo and jewel servo
         rightServo.setDirection(Servo.Direction.REVERSE);
-
         jewelServo.setDirection(Servo.Direction.REVERSE);
 
         // Home the servos
         leftServo.setPosition(LEFT_SERVO_HOME);
         rightServo.setPosition(RIGHT_SERVO_HOME);
-
         jewelServo.setPosition(JEWEL_SERVO_HOME);
     }
 
@@ -442,7 +436,7 @@ public class Team8740_Base {
     }
 
     public void lowerLift() {
-        if (!lowerLimit.getState()) {
+        if (getLowerLimit()) {
             lift.setPower(0);
         } else {
             lift.setPower(-LIFT_POWER);
@@ -475,15 +469,20 @@ public class Team8740_Base {
                 lift.setPower(0);
                 break;
             case MIDDLE:
-                lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                opmode.idle();
-                lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
                 int ticks = Math.round((float) (LIFT_TICKS_PER_INCH * LIFT_POS_MIDDLE));
                 lift.setTargetPosition(ticks);
+
+                lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
                 lift.setPower(LIFT_POWER);
 
-                lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                while(opmode.opModeIsActive() && lift.isBusy()) {
+                    opmode.idle();
+                }
+
+                lift.setPower(0);
+
+                lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 break;
             case BOTTOM:
                 while (!getLowerLimit()) {
@@ -603,41 +602,31 @@ public class Team8740_Base {
         return color;
     }
 
-    /** TODO - The negative angles will make the robot go in a straight line or curve
+    /** FIXME - The negative angles will make the robot go in a straight line or curve
      * This method will knock the opposite jewel to the team color
-     * @return false if it has not knocked it off the jewel to make
      */
-    public boolean jewelKnock() {
+    public void jewelKnock() {
         toggleJewelArm();
         if (1 == 1) {
             if (1==1) {
-                opmode.telemetry.addData("test", "test");
-                opmode.telemetry.update();
                 gyroTurn(.6, 10);
-                gyroTurn(.6, -10);
-                return true;
+                gyroTurn(.6, 0);
             }
             else {
-                gyroTurn(.6, 10);
                 gyroTurn(.6, -10);
-                return true;
+                gyroTurn(.6, 0);
             }
         }
         else if(1 == 2){
             if (getColor().equals(Color.RED)) {
                 gyroTurn(.6, 10);
                 gyroTurn(.6, -10);
-                toggleJewelArm();
-                return true;
             } else {
                 gyroTurn(.6, 10);
                 gyroTurn(.6, -10);
-                toggleJewelArm();
-                return true;
             }
         }
         toggleJewelArm();
-        return false;
     }
 
     public void activateVuforia() {
@@ -648,43 +637,10 @@ public class Team8740_Base {
         relicTrackables.deactivate();
     }
 
-    public void trackVuMarks() {
+    public RelicRecoveryVuMark getVuMark() {
         RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
-        if (vuMark != RelicRecoveryVuMark.UNKNOWN) {
 
-                /* Found an instance of the template. In the actual game, you will probably
-                 * loop until this condition occurs, then move on to act accordingly depending
-                 * on which VuMark was visible. */
-            opmode.telemetry.addData("VuMark", "%s visible", vuMark);
-
-                /* For fun, we also exhibit the navigational pose. In the Relic Recovery game,
-                 * it is perhaps unlikely that you will actually need to act on this pose information, but
-                 * we illustrate it nevertheless, for completeness. */
-            OpenGLMatrix pose = ((VuforiaTrackableDefaultListener) relicTemplate.getListener()).getPose();
-            String formattedPose = (pose != null) ? pose.formatAsTransform() : "null";
-            opmode.telemetry.addData("Pose", formattedPose);
-
-                /* We further illustrate how to decompose the pose into useful rotational and
-                 * translational components */
-            if (pose != null) {
-                VectorF trans = pose.getTranslation();
-                Orientation rot = Orientation.getOrientation(pose, AxesReference.EXTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES);
-
-                // Extract the X, Y, and Z components of the offset of the target relative to the robot
-                double tX = trans.get(0);
-                double tY = trans.get(1);
-                double tZ = trans.get(2);
-
-                // Extract the rotational components of the target relative to the robot
-                double rX = rot.firstAngle;
-                double rY = rot.secondAngle;
-                double rZ = rot.thirdAngle;
-            }
-        } else {
-            opmode.telemetry.addData("VuMark", "not visible");
-        }
-
-        opmode.telemetry.update();
+        return vuMark;
     }
 
     /**
@@ -693,7 +649,7 @@ public class Team8740_Base {
      * @return isCalibrating
      */
     public boolean isGyroCalibrating() {
-        boolean isCalibrating = imu.isGyroCalibrated();
+        boolean isCalibrating = !imu.isGyroCalibrated();
 
         return isCalibrating;
     }
@@ -704,8 +660,10 @@ public class Team8740_Base {
      * @return heading
      */
     public double getGyroHeading() {
+        // Update gyro
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         gravity = imu.getGravity();
+
         double heading = AngleUnit.DEGREES.normalize(AngleUnit.DEGREES.fromUnit(angles.angleUnit, angles.firstAngle));
         return heading;
     }
@@ -860,7 +818,7 @@ public class Team8740_Base {
         } else {
             steer = getSteer(error, PCoeff);
             rightSpeed = speed * steer;
-            leftSpeed = rightSpeed; //Ethan- changed this to positive because with negative it would go straight/arc
+            leftSpeed = rightSpeed; //Ethan changed this to positive because with negative it would go straight/arc
         }
 
         // Send desired speeds to motors
