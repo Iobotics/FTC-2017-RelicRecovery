@@ -43,8 +43,6 @@ import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
-import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
-import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
@@ -53,7 +51,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 
 import ftc.vision.FrameGrabber;
@@ -80,8 +77,11 @@ public class Team8740_Base {
     private final static double JEWEL_SERVO_DOWN = 0.85;
 
     // TODO - Find relic servo positions
-    private final static double RELIC_SERVO_CLOSED = 0.0;
-    private final static double RELIC_SERVO_OPEN = 1.0;
+    private final static double RELIC_WRIST_DOWN = 0.77;
+    private final static double RELIC_WRIST_UP = 0.0;
+
+    private final static double RELIC_CLAW_CLOSED = 0.0;
+    private final static double RELIC_CLAW_OPEN = 1.0;
 
     private final static double LOW_SPEED = 0.5;
     private final static double HIGH_SPEED = 0.8;
@@ -94,12 +94,12 @@ public class Team8740_Base {
 
     private final static double RELIC_ARM_SPEED = 0.5;
 
-    private final static double LIFT_TICKS_PER_REV = 560;    // Ticks per revolution
+    private final static double LIFT_TICKS_PER_REV = 28;    // Ticks per revolution
     private final static double LIFT_GEAR_REDUCTION = 100.0; // This is < 1.0 if geared UP
     private final static double LIFT_GEAR_DIAMETER = 1.504;  // Inches
     private final static double LIFT_TICKS_PER_INCH = (LIFT_TICKS_PER_REV * LIFT_GEAR_REDUCTION) / (LIFT_GEAR_DIAMETER * 3.1415);
 
-    private final static double LIFT_POS_MIDDLE = 6.5; /// Inches
+    private final static double LIFT_POS_MIDDLE = 2; // 6.5 Inches
 
     private final static double DRIVE_TICKS_PER_REV = 512;  // Ticks per revolution
     private final static double DRIVE_GEAR_REDUCTION = 1.0; // This is < 1.0 if geared UP
@@ -116,11 +116,6 @@ public class Team8740_Base {
 
     private final static double BLUE_MIN_THRESHOLD = 150;
     private final static double BLUE_MAX_THRESHOLD = 150;
-
-    private final static double STAGE_ONE_POSITION = 0;
-    private final static double STAGE_TWO_POSITION = 0;
-    private final static double STAGE_THREE_POSITION = 0;
-    private final static double ONE_INCH_INTERVAL = 0;
 
     private final static String VUFORIA_LICENSE = "AY0QHQL/////AAAAGddY2lrlhEkenq0T04cRoVVmq/FAquH7DThEnayFrV+ojyjel8qTCn03vKe+FaZt0FwnE4tKdbimF0i47pzVuCQm2lRVdy5m1W03vvMN+8SA0RoXquxc1ddQLNyw297Ei3yWCJLV74UsEtfBwYKqr4ys3d2b2vPgaWnaZX6SNzD+x7AfKsaTSEIFqWfH8GOBoyw0kJ6qSCL384ylCcId6fVJbO8s9WccvuQYsCgCizdr0N/wOdEn76wY7fiNuR+5oReDCaIgfw5L35mD8EtQ0UHmNZGeDndtPDd6ZfNVlU3gyzch7nj5cmPBTleaoiCjyR9AputQHRH3qXnf3k76MvozmMGTE/j5o1HBA6BMSPwH";
 
@@ -142,24 +137,25 @@ public class Team8740_Base {
     }
 
     /* OpMode members */
-    private DcMotor frontLeftDrive = null;
+    private DcMotor frontLeftDrive  = null;
     private DcMotor frontRightDrive = null;
-    private DcMotor backLeftDrive = null;
-    private DcMotor backRightDrive = null;
+    private DcMotor backLeftDrive   = null;
+    private DcMotor backRightDrive  = null;
 
-    private DcMotor intakeLeft = null;
+    private DcMotor intakeLeft  = null;
     private DcMotor intakeRight = null;
 
     private DcMotor lift = null;
 
     private DcMotor relicArm = null;
 
-    private Servo leftServo = null;
+    private Servo leftServo  = null;
     private Servo rightServo = null;
 
     private Servo jewelServo = null;
 
-    private Servo relicServo = null;
+    private Servo relicWrist = null;
+    private Servo relicClaw  = null;
 
     private CRServo pushServo = null;
 
@@ -172,7 +168,7 @@ public class Team8740_Base {
     private BNO055IMU imu = null;
 
     // State used for updating telemetry
-    private Orientation angles = null;
+    private Orientation angles   = null;
     private Acceleration gravity = null;
 
     private VuforiaLocalizer vuforia = null;
@@ -192,11 +188,15 @@ public class Team8740_Base {
 
     private boolean isLowSpeed = false;
     private boolean jewelArmUp = false;
+    private boolean relicWristUp = false;
     private boolean relicClawOpen  = false;
     private boolean intakeClawOpen = false;
     private boolean teleop = false;
 
     private double speedMultiplier = HIGH_SPEED;
+
+    private double xPosition = 0.0;
+    private double yPosition = 0.0;
 
 
     /* Initialize standard Hardware interfaces */
@@ -206,7 +206,7 @@ public class Team8740_Base {
 
     /* Initialize standard Hardware interfaces */
     public void init(HardwareMap hwMap, LinearOpMode opmode, boolean teleop) {
-        this.hwMap = hwMap;
+        this.hwMap  = hwMap;
         this.opmode = opmode;
         this.teleop = teleop;
 
@@ -215,8 +215,8 @@ public class Team8740_Base {
         initLift();
         initServos();
         initGyro();
+        initRelic();
         if (!teleop) {
-            initRelic();
             initColorSensor();
             initVuforia();
         }
@@ -241,9 +241,8 @@ public class Team8740_Base {
         backLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        // Set all motors to run using encoders
-        setDriveMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        setDriveMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        // Set all motors to run without encoders
+        setDriveMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         // Set all motors to zero power
         setPower(0, 0, 0, 0);
@@ -280,10 +279,10 @@ public class Team8740_Base {
 
     private void initServos() {
         // Define and initialize ALL installed servos
-        leftServo = hwMap.servo.get("grabLeft");
+        leftServo  = hwMap.servo.get("grabLeft");
         rightServo = hwMap.servo.get("grabRight");
         jewelServo = hwMap.servo.get("jewelArm");
-        pushServo = hwMap.crservo.get("pushServo");
+        pushServo  = hwMap.crservo.get("pushServo");
 
         // Reverse the right servo and jewel servo
         rightServo.setDirection(Servo.Direction.REVERSE);
@@ -296,7 +295,14 @@ public class Team8740_Base {
     }
 
     private void initRelic() {
-        relicArm = hwMap.dcMotor.get("relicArm");
+        relicWrist = hwMap.servo.get("relicWrist");
+        relicClaw  = hwMap.servo.get("relicClaw");
+        relicArm   = hwMap.dcMotor.get("relicArm");
+
+        relicClaw.setDirection(Servo.Direction.REVERSE);
+
+        relicWrist.setPosition(0.62);
+        relicClaw.setPosition(0);
 
         relicArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
@@ -388,19 +394,19 @@ public class Team8740_Base {
         isLowSpeed = !isLowSpeed;
     }
 
-    public double getLeftEncoder() {
+    public double getXPosition() {
         return frontLeftDrive.getCurrentPosition();
     }
 
-    public double getRightEncoder() {
+    public double getYPosition() {
         return frontRightDrive.getCurrentPosition();
     }
 
-    public void setLeftEncoder(double position) {
+    public void setXPosition(double position) {
         frontLeftDrive.setTargetPosition(Math.round((float) position));
     }
 
-    public void setRightEncoder(double position) {
+    public void setYPosition(double position) {
         frontRightDrive.setTargetPosition(Math.round((float) position));
     }
 
@@ -476,9 +482,7 @@ public class Team8740_Base {
 
                 lift.setPower(LIFT_POWER);
 
-                while(opmode.opModeIsActive() && lift.isBusy()) {
-                    opmode.idle();
-                }
+                while(opmode.opModeIsActive() && lift.isBusy()) { }
 
                 lift.setPower(0);
 
@@ -565,13 +569,22 @@ public class Team8740_Base {
         relicArm.setPower(0);
     }
 
-    public void setRelicServo(double position) {
-        relicServo.setPosition(position);
+    public void setRelicClaw(double position) {
+        relicClaw.setPosition(position);
     }
 
-    public void toggleRelicServo() {
-        relicServo.setPosition(relicClawOpen ? RELIC_SERVO_CLOSED : RELIC_SERVO_OPEN);
+    public void toggleRelicClaw() {
+        relicClaw.setPosition(relicClawOpen ? RELIC_CLAW_CLOSED : RELIC_CLAW_OPEN);
         relicClawOpen = !relicClawOpen;
+    }
+
+    public void setRelicWrist(double position) {
+        relicWrist.setPosition(position);
+    }
+
+    public void toggleRelicWrist() {
+        relicWrist.setPosition(relicWristUp ? RELIC_WRIST_DOWN : RELIC_WRIST_UP);
+        relicWristUp = !relicWristUp;
     }
 
     /**
@@ -680,9 +693,8 @@ public class Team8740_Base {
      *                 0 = fwd. +ve is CCW from fwd. -ve is CW from forward.
      *                 If a relative angle is required, add/subtract from current heading.
      */
-    public void gyroDrive(double speed, double distance, double angle) {
-        double newLeftTarget;
-        double newRightTarget;
+    public void driveStraight(double speed, double distance, double angle) {
+        double newTarget;
         double moveCounts;
         double max;
         double error;
@@ -693,33 +705,31 @@ public class Team8740_Base {
         if (opmode.opModeIsActive()) {
             // Determine new target position, and pass to motor controller
             moveCounts = distance * DRIVE_TICKS_PER_INCH;
-            newLeftTarget = getLeftEncoder() + moveCounts;
-            newRightTarget = getRightEncoder() + moveCounts;
+            newTarget = getYPosition() + moveCounts;
 
             // Set Target and Turn On RUN_TO_POSITION
-            setLeftEncoder(newLeftTarget);
-            setRightEncoder(newRightTarget);
+            frontRightDrive.setTargetPosition(Math.round((float) newTarget));
 
-            setDriveMode(DcMotor.RunMode.RUN_TO_POSITION);
+            frontRightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-            // start motion.
+            // Start motion
             speed = Range.clip(Math.abs(speed), 0.0, 1.0);
             setTank(speed, speed);
 
-            // keep looping while we are still active, and BOTH motors are running.
-            while (opmode.opModeIsActive() && (frontLeftDrive.isBusy() && frontRightDrive.isBusy())) {
-                // adjust relative speed based on heading error.
+            // Keep looping while we are still active, and BOTH motors are running.
+            while (opmode.opModeIsActive() && frontRightDrive.isBusy()) {
+                // Adjust relative speed based on heading error
                 error = getError(angle);
                 steer = getSteer(error, P_DRIVE_COEFF);
 
-                // if driving in reverse, the motor correction also needs to be reversed
+                // If driving in reverse, the motor correction also needs to be reversed
                 if (distance < 0)
                     steer *= -1.0;
 
                 leftSpeed = speed - steer;
                 rightSpeed = speed + steer;
 
-                // Normalize speeds if either one exceeds +/- 1.0;
+                // Normalize speeds if either one exceeds +/- 1.0
                 max = Math.max(Math.abs(leftSpeed), Math.abs(rightSpeed));
                 if (max > 1.0) {
                     leftSpeed /= max;
@@ -730,8 +740,82 @@ public class Team8740_Base {
 
                 // Display drive status for the driver.
                 opmode.telemetry.addData("Err/St", "%5.1f/%5.1f", error, steer);
-                opmode.telemetry.addData("Target", "%.2f:%.2f", newLeftTarget, newRightTarget);
-                opmode.telemetry.addData("Actual", "%.2f:%.2f", getLeftEncoder(), getRightEncoder());
+                opmode.telemetry.addData("Target", "%.2f", newTarget);
+                opmode.telemetry.addData("Actual", "%.2f:%.2f", getXPosition(), getYPosition());
+                opmode.telemetry.addData("Speed", "%5.2f:%5.2f", leftSpeed, rightSpeed);
+                opmode.telemetry.update();
+            }
+
+            // Stop all motion;
+            setTank(0, 0);
+
+            // Turn off RUN_TO_POSITION
+            setDriveMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        }
+    }
+
+    /**
+     * Method to drive on a fixed compass bearing (angle), based on encoder counts.
+     * Move will stop if either of these conditions occur:
+     * 1) Move gets to the desired position
+     * 2) Driver stops the opmode running.
+     *
+     * @param speed    Target speed for forward motion.  Should allow for _/- variance for adjusting heading
+     * @param distance Distance (in inches) to move from current position.  Negative distance means move backwards.
+     * @param angle    Absolute Angle (in Degrees) relative to last gyro reset.
+     *                 0 = fwd. +ve is CCW from fwd. -ve is CW from forward.
+     *                 If a relative angle is required, add/subtract from current heading.
+     */
+    public void driveStrafe(double speed, double distance, double angle) {
+        double newTarget;
+        double moveCounts;
+        double max;
+        double error;
+        double steer;
+        double leftSpeed;
+        double rightSpeed;
+        double initAngle = getGyroHeading();
+        // Ensure that the opmode is still active
+        if (opmode.opModeIsActive()) {
+            // Determine new target position, and pass to motor controller
+            moveCounts = distance * DRIVE_TICKS_PER_INCH;
+            newYTarget = getYPosition() + moveCounts;
+
+            // Set Target and Turn On RUN_TO_POSITION
+            frontRightDrive.setTargetPosition(Math.round((float) newYTarget));
+
+            frontRightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            // Start motion
+            speed = Range.clip(Math.abs(speed), 0.0, 1.0);
+            setTank(speed, speed);
+
+            // Keep looping while we are still active, and BOTH motors are running.
+            while (opmode.opModeIsActive()) {
+                // Adjust relative speed based on heading error
+                error = getError(initAngle);
+                steer = getSteer(error, P_DRIVE_COEFF);
+
+                // If driving in reverse, the motor correction also needs to be reversed
+                if (distance < 0)
+                    steer *= -1.0;
+
+                leftSpeed = speed - steer;
+                rightSpeed = speed + steer;
+
+                // Normalize speeds if either one exceeds +/- 1.0
+                max = Math.max(Math.abs(leftSpeed), Math.abs(rightSpeed));
+                if (max > 1.0) {
+                    leftSpeed /= max;
+                    rightSpeed /= max;
+                }
+
+                setTank(leftSpeed, rightSpeed);
+
+                // Display drive status for the driver.
+                opmode.telemetry.addData("Err/St", "%5.1f/%5.1f", error, steer);
+                opmode.telemetry.addData("Target", "%.2f", newTarget);
+                opmode.telemetry.addData("Actual", "%.2f:%.2f", getXPosition(), getYPosition());
                 opmode.telemetry.addData("Speed", "%5.2f:%5.2f", leftSpeed, rightSpeed);
                 opmode.telemetry.update();
             }

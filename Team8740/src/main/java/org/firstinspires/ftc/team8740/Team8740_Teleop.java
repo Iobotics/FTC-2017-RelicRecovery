@@ -51,8 +51,8 @@ public class Team8740_Teleop extends LinearOpMode {
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
 
-        gamepad2.setJoystickDeadzone((float) 0.05);
         gamepad1.setJoystickDeadzone((float) 0.05);
+        gamepad2.setJoystickDeadzone((float) 0.05);
 
         // Run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
@@ -127,10 +127,13 @@ public class Team8740_Teleop extends LinearOpMode {
                 robot.setLiftPosition(Team8740_Base.LiftPosition.TOP);
             }
 
-            // TODO - robot.setRelicServo(gamepad2.left_stick_y);
+            if(gamepad2.right_trigger > 0.2) {
+                robot.toggleRelicWrist();
+                sleep(100);
+            }
+
             robot.setLiftPower(-gamepad2.right_stick_y);
 
-            // TODO - Gamepad2 A extends motor 3 (Hub 1)
             if(gamepad2.a) {
                 robot.extendRelicArm();
             } else {
@@ -139,16 +142,19 @@ public class Team8740_Teleop extends LinearOpMode {
 
             // TODO - Gamepad2 X Toggle relic claw
             if(gamepad2.x) {
-                robot.toggleRelicServo();
+                robot.toggleRelicClaw();
+                sleep(75);
             }
 
             // TODO Gamepad2 Y Toggle program-assist sensors (color/prox sensor resets when detect block)
 
-            // Pause for 25 mS each cycle = update 40 times a second.
-            sleep(25);
+            // Pause for 10 mS each cycle = update 100 times a second.
+            sleep(10);
 
+            telemetry.addData("Lift encoder", robot.getLiftEncoder());
             telemetry.addData("Lift position", robot.getLiftPosition());
             telemetry.addData("Gyro position", robot.getGyroHeading());
+            telemetry.addData("Relic wrist", -gamepad2.left_stick_y);
             telemetry.update();
         }
     }

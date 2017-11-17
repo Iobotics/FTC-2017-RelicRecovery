@@ -124,24 +124,16 @@ public class Team8740_LeftBlueAutoCopy extends LinearOpMode {
 
         /*
         //robot.toggleJewelArm();
-        robot.gyroDrive(DRIVE_SPEED, -15.0, 0.0);
+        robot.driveStraight(DRIVE_SPEED, -15.0, 0.0);
         //robot.toggleJewelArm();
         robot.gyroTurn(TURN_SPEED, 90.0);
         robot.gyroHold(TURN_SPEED, 90.0, 0.5);
-        robot.gyroDrive(DRIVE_SPEED, -12.0, 90.0);
+        robot.driveStraight(DRIVE_SPEED, -12.0, 90.0);
         robot.gyroTurn(TURN_SPEED, 180.0);
         robot.gyroHold(TURN_SPEED, 180.0, 0.5);
-        robot.gyroDrive(DRIVE_SPEED, 6.0, 180.0);
+        robot.driveStraight(DRIVE_SPEED, 6.0, 180.0);
         */
-        telemetry.addData("Is it working: ", "Yep");
-        telemetry.update();
-        do {
-            if (!jewelKnocked){
-                jewelKnocked = robot.jewelKnock();
-            }
-            telemetry.addData("Is it working: ", "Yep");
-            telemetry.update();
-        }while(!jewelKnocked);
+        robot.jewelKnock();
 
         requestOpModeStop();
     }
