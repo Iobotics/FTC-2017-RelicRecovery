@@ -118,14 +118,14 @@ public class Team8740_RightRedAuto extends LinearOpMode {
         // Put a hold after each turn
 
         //robot.toggleJewelArm();
-        robot.gyroDrive(DRIVE_SPEED, 15.0, 0.0);
+        robot.driveStraight(DRIVE_SPEED, 15.0, 0.0);
         //robot.toggleJewelArm();
         robot.gyroTurn(TURN_SPEED, 90);
         robot.gyroHold(TURN_SPEED, 90.0, 0.5);
-        robot.gyroDrive(DRIVE_SPEED, 6.0, 90.0);
+        robot.driveStraight(DRIVE_SPEED, 6.0, 90.0);
         robot.gyroTurn(TURN_SPEED, 0.0);
         robot.gyroHold(TURN_SPEED, 0.0, 0.5);
-        robot.gyroDrive(DRIVE_SPEED, 6.0, 0.0);
+        robot.driveStraight(DRIVE_SPEED, 6.0, 0.0);
 
         requestOpModeStop();
     }

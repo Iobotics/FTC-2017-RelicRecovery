@@ -29,9 +29,13 @@
 
 package org.firstinspires.ftc.team8740;
 
+import android.graphics.Color;
+
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+
+import static org.firstinspires.ftc.team8740.Team8740_Base.Team.BLUE_TEAM;
 
 /**
  * This file illustrates the concept of driving a path based on Gyro heading and encoder counts.
@@ -66,9 +70,9 @@ import com.qualcomm.robotcore.hardware.DcMotor;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@Autonomous(name="Team 8740: Left Red Auto", group="Team 8740")
+@Autonomous(name="Team 8740: Left Blue Auto Copy", group="Team 8740")
 //@Disabled
-public class Team8740_LeftRedAuto extends LinearOpMode {
+public class Team8740_LeftBlueAutoCopy extends LinearOpMode {
 
     /* Declare OpMode members */
     Team8740_Base         robot   = new Team8740_Base();
@@ -77,6 +81,7 @@ public class Team8740_LeftRedAuto extends LinearOpMode {
     // The can/should be tweaked to suite the specific robot drive train.
     static final double     DRIVE_SPEED             = 0.5;     // Nominal speed for better accuracy.
     static final double     TURN_SPEED              = 0.4;     // Nominal half speed for better accuracy.
+    boolean jewelKnocked = false;
 
     @Override
     public void runOpMode() {
@@ -117,14 +122,19 @@ public class Team8740_LeftRedAuto extends LinearOpMode {
         // Note: Reverse movement is obtained by setting a negative distance (not speed)
         // Put a hold after each turn
 
+        /*
         //robot.toggleJewelArm();
-        robot.driveStraight(DRIVE_SPEED, 24.0, 0.0);
+        robot.driveStraight(DRIVE_SPEED, -15.0, 0.0);
         //robot.toggleJewelArm();
-        robot.gyroTurn(TURN_SPEED, -90.0);
-        robot.gyroHold(TURN_SPEED, -90.0, 0.5);
-        robot.driveStraight(DRIVE_SPEED, 12.0, -90.0);
+        robot.gyroTurn(TURN_SPEED, 90.0);
+        robot.gyroHold(TURN_SPEED, 90.0, 0.5);
+        robot.driveStraight(DRIVE_SPEED, -12.0, 90.0);
+        robot.gyroTurn(TURN_SPEED, 180.0);
+        robot.gyroHold(TURN_SPEED, 180.0, 0.5);
+        robot.driveStraight(DRIVE_SPEED, 6.0, 180.0);
+        */
+        robot.jewelKnock();
 
         requestOpModeStop();
     }
-
 }

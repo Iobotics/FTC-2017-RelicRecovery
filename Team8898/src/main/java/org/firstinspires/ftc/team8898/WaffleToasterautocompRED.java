@@ -19,7 +19,7 @@ import static java.lang.System.currentTimeMillis;
 /**
  * Created by Teacher on 10/28/2017.
 */
-@Autonomous (name = "AUTO(allcolor)(if auto fails)",group = "RED")
+@Autonomous (name = "AUTO(RED)(if auto fails)",group = "RED")
 public class WaffleToasterautocompRED extends WaffleToasterAuto {
     private DcMotor leftFront = null;
     private DcMotor leftBack = null;
@@ -87,10 +87,10 @@ public class WaffleToasterautocompRED extends WaffleToasterAuto {
         while(Color.red(color) < 3 && currentTimeMillis()- startTime < 900) {
             colors = colorSensor.getNormalizedColors();
             color = colors.toColor();
-            leftFront.setPower(-.1);
-            leftBack.setPower(-.1);
-            rightFront.setPower(-.1);
-            rightBack.setPower(-.1);
+            leftFront.setPower(0);
+            leftBack.setPower(0);
+            rightFront.setPower(0);
+            rightBack.setPower(0);
         }
         leftFront.setPower(0);
         leftBack.setPower(0);
@@ -98,19 +98,22 @@ public class WaffleToasterautocompRED extends WaffleToasterAuto {
         rightBack.setPower(0);
         Thread.sleep(100);
         telemetry.addData("Red", Color.red(color));
+        int timeDiff;
         if(Color.red(color) < 3){
             leftFront.setPower(-.4);
             leftBack.setPower(-.4);
             rightFront.setPower(-.4);
             rightBack.setPower(-.4);
+            timeDiff = -350;
         }
         else{
             leftFront.setPower(.4);
             leftBack.setPower(.4);
             rightFront.setPower(.4);
             rightBack.setPower(.4);
+            timeDiff = 350;
         }
-        Thread.sleep(200);
+        Thread.sleep(500);
 
         leftFront.setPower(0);
         leftBack.setPower(0);
@@ -123,7 +126,7 @@ public class WaffleToasterautocompRED extends WaffleToasterAuto {
         leftBack.setPower(.4);
         rightFront.setPower(.4);
         rightBack.setPower(.4);
-        Thread.sleep(1500);
+        Thread.sleep(1750-timeDiff);
         leftFront.setPower(0);
         leftBack.setPower(0);
         rightFront.setPower(0);

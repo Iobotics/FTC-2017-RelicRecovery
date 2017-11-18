@@ -20,7 +20,7 @@ import ftc.vision.ImageProcessorResult;
  * Created by Jack Gonser on 10/16/2017.
 */
 @Autonomous(name = "WaffleToasterAutoRED", group = "Auto")
-@Disabled
+//@Disabled
 public class WaffleToasterAuto extends LinearOpMode {
     private DcMotor leftFront = null;
     private DcMotor leftBack = null;

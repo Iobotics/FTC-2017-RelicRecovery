@@ -37,12 +37,12 @@ public class GoldDiggerBot {
     private DcMotor rightGlyphPull = null;
     public DcMotor conveyor = null;
 
-    private final int TICKS_PER_REV = 560;
+    private final int TICKS_PER_REV = 1120;
     private final int WHEEL_DIAMETER = 4;
     private final double COUNTS_PER_INCH = TICKS_PER_REV / (Math.PI * WHEEL_DIAMETER);
     private final static double HEADING_THRESHOLD = 1;      // As tight as we can make it with an integer gyro
-    private final static double P_TURN_COEFF       = 0.05;     // Larger is more responsive, but also less stable
-    private final static double P_DRIVE_COEFF      = 0.05;    // Larger is more responsive, but also less stable
+    private final static double P_TURN_COEFF       = 0.1;     // Larger is more responsive, but also less stable
+    private final static double P_DRIVE_COEFF      = 0.1;    // Larger is more responsive, but also less stable
 
     private HardwareMap hwMap = null;
     private LinearOpMode opMode = null;
@@ -142,9 +142,9 @@ public class GoldDiggerBot {
     * @param speed sets the speed the robot moves at
      */
     public void encoderDrive(double inches, double speed) {
-        int target = rightBackDrive.getCurrentPosition() + (int) (inches*COUNTS_PER_INCH);
+        int target = rightFrontDrive.getCurrentPosition() + (int) (inches*COUNTS_PER_INCH);
         drive(speed, speed );
-        while(rightBackDrive.getCurrentPosition() <= target){
+        while(rightFrontDrive.getCurrentPosition() <= target){
 
         }
         stopDrive();
@@ -287,7 +287,7 @@ public class GoldDiggerBot {
     public void gyroTurn(double speed, double angle) {
 
         // keep looping while we are still active, and not on heading.
-        while (opMode.opModeIsActive() && !onHeading(speed, angle, P_TURN_COEFF)) {
+        while (!onHeading(speed, angle, P_TURN_COEFF)) {
             // Update telemetry & Allow time for other processes to run.
             opMode.telemetry.update();
         }
@@ -309,7 +309,7 @@ public class GoldDiggerBot {
 
         // keep looping while we have time remaining.
         holdTimer.reset();
-        while (opMode.opModeIsActive() && (holdTimer.time() < holdTime)) {
+        while ((holdTimer.time() < holdTime)) {
             // Update telemetry & Allow time for other processes to run.
             onHeading(speed, angle, P_TURN_COEFF);
             opMode.telemetry.update();
@@ -358,6 +358,9 @@ public class GoldDiggerBot {
         opMode.telemetry.addData("Speed.", "%5.2f:%5.2f", leftSpeed, rightSpeed);
 
         return onTarget;
+    }
+    public void turnGyro(int degrees, double speed){
+
     }
 }
 
