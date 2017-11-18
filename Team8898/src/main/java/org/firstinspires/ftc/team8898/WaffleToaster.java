@@ -130,6 +130,8 @@ public class WaffleToaster extends LinearOpMode {
                 sleep(500);
                 arm.setPower(0);
                 telemetry.addData("Arm Up", "1/2 second"); //add data for the driver station
+            } else if (gamepad1.right_stick_button) {
+                telemetry.addData("Current Value:", arm.getCurrentPosition());
             } else {
                 arm.setPower(.15);
                 telemetry.addData("Arm Normal", "Normal Operation");
