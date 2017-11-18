@@ -402,6 +402,14 @@ public class Team8740_Base {
         return frontRightDrive.getCurrentPosition();
     }
 
+    public boolean xTargetReached(int position) {
+        return false;
+    }
+
+    public boolean yTargetReached(int position) {
+        return false;
+    }
+
     public void setXPosition(double position) {
         frontLeftDrive.setTargetPosition(Math.round((float) position));
     }
@@ -746,7 +754,7 @@ public class Team8740_Base {
                 opmode.telemetry.update();
             }
 
-            // Stop all motion;
+            // Stop all motion
             setTank(0, 0);
 
             // Turn off RUN_TO_POSITION
@@ -760,71 +768,69 @@ public class Team8740_Base {
      * 1) Move gets to the desired position
      * 2) Driver stops the opmode running.
      *
-     * @param speed    Target speed for forward motion.  Should allow for _/- variance for adjusting heading
+     * @param speed    Target speed for motion.  Should allow for _/- variance for adjusting heading
      * @param distance Distance (in inches) to move from current position.  Negative distance means move backwards.
      * @param angle    Absolute Angle (in Degrees) relative to last gyro reset.
      *                 0 = fwd. +ve is CCW from fwd. -ve is CW from forward.
      *                 If a relative angle is required, add/subtract from current heading.
      */
     public void driveStrafe(double speed, double distance, double angle) {
-        double newTarget;
-        double moveCounts;
+        int newXTarget;
+        int newYTarget;
+        double xMoveCounts;
+        double yMoveCounts;
         double max;
         double error;
         double steer;
-        double leftSpeed;
-        double rightSpeed;
-        double initAngle = getGyroHeading();
+        double xSpeed;
+        double ySpeed;
+        double rotation;
         // Ensure that the opmode is still active
         if (opmode.opModeIsActive()) {
             // Determine new target position, and pass to motor controller
-            moveCounts = distance * DRIVE_TICKS_PER_INCH;
-            newYTarget = getYPosition() + moveCounts;
+            xMoveCounts = distance * Math.sin(angle) * DRIVE_TICKS_PER_INCH;
+            newXTarget = Math.round((float) (getXPosition() + xMoveCounts));
 
-            // Set Target and Turn On RUN_TO_POSITION
-            frontRightDrive.setTargetPosition(Math.round((float) newYTarget));
-
-            frontRightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            yMoveCounts = distance * Math.cos(angle) * DRIVE_TICKS_PER_INCH;
+            newYTarget = Math.round((float) (getYPosition() + yMoveCounts));
 
             // Start motion
-            speed = Range.clip(Math.abs(speed), 0.0, 1.0);
-            setTank(speed, speed);
+            xSpeed = Range.clip(Math.abs(speed * Math.sin(angle)), 0.0, 1.0);
+            ySpeed = Range.clip(Math.abs(speed * Math.cos(angle)), 0.0, 1.0);
+            rotation = 0;
+            setMecanum(xSpeed, ySpeed, rotation);
 
-            // Keep looping while we are still active, and BOTH motors are running.
-            while (opmode.opModeIsActive()) {
+            // Keep looping while we are still active
+            while (opmode.opModeIsActive() && !xTargetReached(newXTarget) && !yTargetReached(newYTarget)) {
                 // Adjust relative speed based on heading error
-                error = getError(initAngle);
+                error = getError(angle);
                 steer = getSteer(error, P_DRIVE_COEFF);
 
                 // If driving in reverse, the motor correction also needs to be reversed
                 if (distance < 0)
                     steer *= -1.0;
 
-                leftSpeed = speed - steer;
-                rightSpeed = speed + steer;
+                rotation = steer;
 
                 // Normalize speeds if either one exceeds +/- 1.0
-                max = Math.max(Math.abs(leftSpeed), Math.abs(rightSpeed));
+                max = Math.max(Math.abs(xSpeed), Math.abs(ySpeed));
                 if (max > 1.0) {
-                    leftSpeed /= max;
-                    rightSpeed /= max;
+                    xSpeed /= max;
+                    ySpeed /= max;
                 }
 
-                setTank(leftSpeed, rightSpeed);
+                setMecanum(xSpeed, ySpeed, rotation);
 
                 // Display drive status for the driver.
                 opmode.telemetry.addData("Err/St", "%5.1f/%5.1f", error, steer);
-                opmode.telemetry.addData("Target", "%.2f", newTarget);
+                opmode.telemetry.addData("Target", "%d:%d", newXTarget, newYTarget);
                 opmode.telemetry.addData("Actual", "%.2f:%.2f", getXPosition(), getYPosition());
-                opmode.telemetry.addData("Speed", "%5.2f:%5.2f", leftSpeed, rightSpeed);
+                opmode.telemetry.addData("Speed", "%5.2f:%5.2f", xSpeed, ySpeed);
                 opmode.telemetry.update();
             }
 
-            // Stop all motion;
-            setTank(0, 0);
-
-            // Turn off RUN_TO_POSITION
-            setDriveMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            // Stop all motion
+            setMecanum(0, 0, 0);
         }
     }
 

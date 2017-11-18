@@ -140,13 +140,12 @@ public class Team8740_Teleop extends LinearOpMode {
                 robot.stopRelicArm();
             }
 
-            // TODO - Gamepad2 X Toggle relic claw
             if(gamepad2.x) {
                 robot.toggleRelicClaw();
                 sleep(75);
             }
 
-            // TODO Gamepad2 Y Toggle program-assist sensors (color/prox sensor resets when detect block)
+            // TODO - Gamepad2 Y Toggle program-assist sensors (color/prox sensor resets when detect block)
 
             // Pause for 10 mS each cycle = update 100 times a second.
             sleep(10);
@@ -154,7 +153,7 @@ public class Team8740_Teleop extends LinearOpMode {
             telemetry.addData("Lift encoder", robot.getLiftEncoder());
             telemetry.addData("Lift position", robot.getLiftPosition());
             telemetry.addData("Gyro position", robot.getGyroHeading());
-            telemetry.addData("Relic wrist", -gamepad2.left_stick_y);
+            telemetry.addLine("Encoders").addData("X", robot.getXPosition()).addData("Y", robot.getYPosition());
             telemetry.update();
         }
     }
