@@ -7,6 +7,13 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
+
+import ftc.vision.BeaconColorResult;
+import ftc.vision.FrameGrabber;
+import ftc.vision.ImageProcessorResult;
+import ftc.vision.JewelColorResult;
+
 /**
  * Created by Joshua Taufahema on 10/16/2017.
  */
@@ -19,24 +26,29 @@ public class GoldDiggerAuto extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         robot.init(hardwareMap, true);
         waitForStart();
+        FrameGrabber frameGrabber = FtcRobotControllerActivity.frameGrabber; //Get the frameGrabber
 
-        robot.gyroDrive(0.5, 25, 0);
-        //goes forward
+        frameGrabber.grabSingleFrame(); //Tell it to grab a frame
+        while (!frameGrabber.isResultReady()) { //Wait for the result
+            Thread.sleep(5); //sleep for 5 milliseconds
+        }
 
-        robot.gyroTurn(0.4, 90);
-        //turns to be parallel to the glyph box
+//Get the result
+        ImageProcessorResult imageProcessorResult = frameGrabber.getResult();
+        JewelColorResult result = (JewelColorResult) imageProcessorResult.getResult();
 
-        robot.gyroDrive(0.5, 32, 0);
-        //goes into glyph box or at least go up to it
+        JewelColorResult.JewelColor leftColor = result.getLeftColor();
+        JewelColorResult.JewelColor rightColor = result.getRightColor();
 
-        robot.glyphPull(-1, -1);
-        Thread.sleep(1500);
-        //put preloaded glyph into the crypto box
+        telemetry.addData("Result", result); //Display it on telemetry
+        telemetry.update();
+//wait before quitting (quitting clears telemetry)
+        Thread.sleep(1000);
 
-        robot.glyphPull(0, 0);
-        //turn off glyph pull motors
 
-        //THIS IS THE AUTO FOR THE BLUE NEXT TO ONLY ONE CRYPTO BOX AND GETS INTO THE TRIANGLE OF POINTS
+        robot.gyroTurn(0.3, 90);
+        robot.gyroHold(0.3,90,0.5);
+        robot.encoderDrive(10, 0.4);
 
     }
 }

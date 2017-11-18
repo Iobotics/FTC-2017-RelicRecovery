@@ -65,7 +65,7 @@ public class GoldDiggerOpMode_Linear extends LinearOpMode {
                 robot.glyphPull(0, 0);
             }
             if (gamepad1.left_trigger >= 0.5){
-                robot.conveyor.setPower(1);
+                robot.conveyor.setPower(.7);
             }
             else if(gamepad1.left_bumper){
                 robot.conveyor.setPower(-1);
