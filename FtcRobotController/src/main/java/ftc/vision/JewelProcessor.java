@@ -42,11 +42,11 @@ public class JewelProcessor implements ImageProcessor<JewelColorResult> {
         List<Scalar> hsvMax = new ArrayList<>();
 
         //hsvMin.add(new Scalar(  H,   S,   V  ));
-        hsvMin.add(new Scalar(346/2,  150, 140)); //red min
-        hsvMax.add(new Scalar( 14/2, 255, 255)); //red max
+        hsvMin.add(new Scalar(345/2,  150, 140)); //red min
+        hsvMax.add(new Scalar( 15/2, 255, 255));  //red max
 
-        hsvMin.add(new Scalar(196/2,  127, 60)); //blue min
-        hsvMax.add(new Scalar(220/2, 255, 165)); //blue max
+        hsvMin.add(new Scalar(195/2,  127.5, 60)); //blue min
+        hsvMax.add(new Scalar(220/2, 255, 165));   //blue max
 
         // make a list of channels that are blank (used for combining binary images)
         List<Mat> rgbaChannels = new ArrayList<>();

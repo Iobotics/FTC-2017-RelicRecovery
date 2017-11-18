@@ -66,7 +66,7 @@ public class OpenCVAuto extends LinearOpMode {
 
         //Get the result
         ImageProcessorResult imageProcessorResult = frameGrabber.getResult();
-        BeaconColorResult result = (BeaconColorResult) imageProcessorResult.getResult();
+        BeaconColorResult result = (BeaconColorResult)imageProcessorResult.getResult();
         BeaconColorResult.BeaconColor leftColor = result.getLeftColor();
         BeaconColorResult.BeaconColor rightColor = result.getRightColor();
         telemetry.addData("Result", leftColor); //Display it on telemetry
