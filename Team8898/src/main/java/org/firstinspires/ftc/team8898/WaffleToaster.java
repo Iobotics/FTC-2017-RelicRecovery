@@ -102,10 +102,10 @@ public class WaffleToaster extends LinearOpMode {
             }
             //Arm servos for grabbing (dpad down)
             if (gamepad1.dpad_down) {
-                if (servoPos == 0.1) {
-                    servoPos = 0.75;
+                if (servoPos == 0) {
+                    servoPos = 0.8;
                 } else {
-                    servoPos = 0.1;
+                    servoPos = 0;
                 }
                 allServo(servoPos);
                 sleep(250);
@@ -161,7 +161,7 @@ public class WaffleToaster extends LinearOpMode {
                 telemetry.addData("Right servo is", "closed");
             }
 
-            if (jewelServo.getPosition() == 0) {
+            if (jewelServo.getPosition() == 1) {
                 telemetry.addData("Jewel Servo is ", "up.");
             } else {
                 telemetry.addData("Jewel Servo is", "down.");
