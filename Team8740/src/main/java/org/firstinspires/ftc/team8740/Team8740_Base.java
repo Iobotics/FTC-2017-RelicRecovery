@@ -573,6 +573,10 @@ public class Team8740_Base {
         relicArm.setPower(RELIC_ARM_SPEED);
     }
 
+    public void retractRelicArm() {
+        relicArm.setPower(-RELIC_ARM_SPEED);
+    }
+
     public void stopRelicArm() {
         relicArm.setPower(0);
     }

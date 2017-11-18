@@ -136,6 +136,8 @@ public class Team8740_Teleop extends LinearOpMode {
 
             if(gamepad2.a) {
                 robot.extendRelicArm();
+            } else if(gamepad2.b) {
+                robot.retractRelicArm();
             } else {
                 robot.stopRelicArm();
             }
