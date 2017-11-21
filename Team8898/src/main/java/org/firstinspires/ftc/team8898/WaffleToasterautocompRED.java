@@ -20,7 +20,7 @@ import static java.lang.System.currentTimeMillis;
  * Created by Teacher on 10/28/2017.
 */
 @Autonomous (name = "AUTO(RED)(if auto fails)",group = "RED")
-public class WaffleToasterautocompRED extends WaffleToasterAuto {
+public class WaffleToasterautocompRED extends WaffleToaster {
     private DcMotor leftFront = null;
     private DcMotor leftBack = null;
     private DcMotor rightFront = null;
@@ -36,7 +36,7 @@ public class WaffleToasterautocompRED extends WaffleToasterAuto {
     View relativeLayout;
 
 
-    public void runOpMode() throws InterruptedException { //set up for the phone tp
+    public void runOpMode()  { //set up for the phone tp
         leftFront = hardwareMap.get(DcMotor.class, "leftFront");
         leftBack = hardwareMap.get(DcMotor.class, "leftBack");
         rightFront = hardwareMap.get(DcMotor.class, "rightFront");
@@ -80,7 +80,7 @@ public class WaffleToasterautocompRED extends WaffleToasterAuto {
         rightServo.setPosition(0.25);
         jewelServo.setPosition(.4);
         arm.setPower(0.25);
-        Thread.sleep(500);
+        sleep(500);
         NormalizedRGBA colors = colorSensor.getNormalizedColors();
         int color = colors.toColor();
         long startTime = currentTimeMillis();
@@ -96,40 +96,25 @@ public class WaffleToasterautocompRED extends WaffleToasterAuto {
         leftBack.setPower(0);
         rightFront.setPower(0);
         rightBack.setPower(0);
-        Thread.sleep(100);
+        sleep(100);
         telemetry.addData("Red", Color.red(color));
         int timeDiff;
         if(Color.red(color) < 3){
-            leftFront.setPower(-.4);
-            leftBack.setPower(-.4);
-            rightFront.setPower(-.4);
-            rightBack.setPower(-.4);
+            allDrive(-0.4,-0.4);
             timeDiff = -350;
         }
         else{
-            leftFront.setPower(.4);
-            leftBack.setPower(.4);
-            rightFront.setPower(.4);
-            rightBack.setPower(.4);
+            allDrive(0.4,0.4);
             timeDiff = 350;
         }
-        Thread.sleep(500);
+        sleep(500);
 
-        leftFront.setPower(0);
-        leftBack.setPower(0);
-        rightFront.setPower(0);
-        rightBack.setPower(0);
+        allDrive(0,0);
         jewelServo.setPosition(1);
-        Thread.sleep(200);
+        sleep(200);
 
-        leftFront.setPower(.4);
-        leftBack.setPower(.4);
-        rightFront.setPower(.4);
-        rightBack.setPower(.4);
-        Thread.sleep(1750-timeDiff);
-        leftFront.setPower(0);
-        leftBack.setPower(0);
-        rightFront.setPower(0);
-        rightBack.setPower(0);
+        allDrive(0.4, 0.4);
+        sleep(1750-timeDiff);
+        allDrive(0,0);
     }
 }

@@ -20,7 +20,7 @@ import static java.lang.System.currentTimeMillis;
  * Created by Teacher on 10/28/2017.
  */
 @Autonomous (name = "AUTO(BLUE)(if auto fails)",group = "BLUE")
-public class WaffleToasterautocompBLUE extends WaffleToasterAuto {
+public class WaffleToasterautocompBLUE extends WaffleToaster {
     private DcMotor leftFront = null;
     private DcMotor leftBack = null;
     private DcMotor rightFront = null;
@@ -36,7 +36,7 @@ public class WaffleToasterautocompBLUE extends WaffleToasterAuto {
     View relativeLayout;
 
 
-    public void runOpMode() throws InterruptedException { //set up for the phone tp
+    public void runOpMode() { //set up for the phone tp
         leftFront = hardwareMap.get(DcMotor.class, "leftFront");
         leftBack = hardwareMap.get(DcMotor.class, "leftBack");
         rightFront = hardwareMap.get(DcMotor.class, "rightFront");
@@ -80,7 +80,7 @@ public class WaffleToasterautocompBLUE extends WaffleToasterAuto {
         rightServo.setPosition(0.25);
         jewelServo.setPosition(.4);
         arm.setPower(0.25);
-        Thread.sleep(500);
+        sleep(500);
         NormalizedRGBA colors = colorSensor.getNormalizedColors();
         int color = colors.toColor();
         long startTime = currentTimeMillis();
@@ -96,7 +96,7 @@ public class WaffleToasterautocompBLUE extends WaffleToasterAuto {
         leftBack.setPower(0);
         rightFront.setPower(0);
         rightBack.setPower(0);
-        Thread.sleep(100);
+        sleep(100);
         int timeDiff;
         telemetry.addData("Red", Color.red(color));
         if(Color.red(color) > 3){
@@ -113,23 +113,13 @@ public class WaffleToasterautocompBLUE extends WaffleToasterAuto {
             rightBack.setPower(.4);
             timeDiff = -350;
         }
-        Thread.sleep(350);
+        sleep(350);
 
-        leftFront.setPower(0);
-        leftBack.setPower(0);
-        rightFront.setPower(0);
-        rightBack.setPower(0);
+        allDrive(0,0);
         jewelServo.setPosition(1);
-        Thread.sleep(200);
-
-        leftFront.setPower(-.4);
-        leftBack.setPower(-.4);
-        rightFront.setPower(-.4);
-        rightBack.setPower(-.4);
-        Thread.sleep(1750-timeDiff);
-        leftFront.setPower(0);
-        leftBack.setPower(0);
-        rightFront.setPower(0);
-        rightBack.setPower(0);
+        sleep(200);
+        allDrive(0.4,0.4);
+        sleep(1750-timeDiff);
+        allDrive(0,0);
     }
 }
