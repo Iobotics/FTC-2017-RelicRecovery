@@ -12,11 +12,11 @@ import com.qualcomm.robotcore.hardware.Servo;
  */
 @Autonomous (name = "Gold Digger Auto 2jj", group = "Linear Opmode")
 //@Disabled
-public class GoldDiggerAuto2 extends LinearOpMode {
-    GoldDiggerBot robot = new GoldDiggerBot(this);
+        public class GoldDiggerAuto2 extends LinearOpMode {
+            GoldDiggerBot robot = new GoldDiggerBot(this);
 
-    @Override
-    public void runOpMode() throws InterruptedException {
+            @Override
+            public void runOpMode() throws InterruptedException {
         robot.init(hardwareMap, true);
         waitForStart();
 
