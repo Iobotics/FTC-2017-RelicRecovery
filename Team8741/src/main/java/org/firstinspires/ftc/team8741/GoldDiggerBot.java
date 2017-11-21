@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.robotcore.util.ReadWriteFile;
@@ -36,6 +37,7 @@ public class GoldDiggerBot {
     private DcMotor leftGlyphPull = null;
     private DcMotor rightGlyphPull = null;
     public DcMotor conveyor = null;
+    public Servo jewelServo = null;
 
     private final int TICKS_PER_REV = 1120;
     private final int WHEEL_DIAMETER = 4;
@@ -43,6 +45,8 @@ public class GoldDiggerBot {
     private final static double HEADING_THRESHOLD = 1;      // As tight as we can make it with an integer gyro
     private final static double P_TURN_COEFF       = 0.1;     // Larger is more responsive, but also less stable
     private final static double P_DRIVE_COEFF      = 0.1;    // Larger is more responsive, but also less stable
+    public final double JEWEL_ARM_DOWN      = -1;
+    public final double JEWEL_ARM_UP    = 0;
 
     private HardwareMap hwMap = null;
     private LinearOpMode opMode = null;
@@ -65,6 +69,7 @@ public class GoldDiggerBot {
         rightGlyphPull = hwMap.get(DcMotor.class, "rightIntake");
         leftGlyphPull = hwMap.get(DcMotor.class, "leftIntake");
         conveyor = hwMap.get(DcMotor.class, "conveyor");
+        jewelServo = hwMap.get(Servo.class, "jewelServo");
 
 
         //setting direction of motors and how they will spin
@@ -76,6 +81,7 @@ public class GoldDiggerBot {
         rightGlyphPull.setDirection(DcMotor.Direction.FORWARD);
         leftGlyphPull.setDirection(DcMotor.Direction.REVERSE);
         conveyor.setDirection(DcMotor.Direction.REVERSE);
+        jewelServo.setDirection(Servo.Direction.FORWARD);
 
         /* setting motor behaviour */
 
@@ -86,12 +92,6 @@ public class GoldDiggerBot {
             rightFrontDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         }
 
-        else{
-            leftBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-            leftFrontDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-            rightBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-            rightFrontDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        }
         initGyro();
     }
 

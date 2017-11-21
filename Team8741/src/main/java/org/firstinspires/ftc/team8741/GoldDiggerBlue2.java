@@ -9,18 +9,17 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
 
-import ftc.vision.BeaconColorResult;
 import ftc.vision.FrameGrabber;
 import ftc.vision.ImageProcessorResult;
 import ftc.vision.JewelColorResult;
 
 /**
- * Created by Joshua Taufahema on 10/16/2017.
+ * Created by Joshua Taufahema on 11/8/2017.
  */
-@Autonomous (name = "Gold Digger Auto", group = "Linear Opmode")
+@Autonomous (name = "Gold Digger Auto 2jj", group = "Linear Opmode")
 //@Disabled
-public class GoldDiggerAuto extends LinearOpMode {
-    GoldDiggerBot robot = new GoldDiggerBot(this);
+        public class GoldDiggerBlue2 extends LinearOpMode {
+            GoldDiggerBot robot = new GoldDiggerBot(this);
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -45,10 +44,6 @@ public class GoldDiggerAuto extends LinearOpMode {
 //wait before quitting (quitting clears telemetry)
         Thread.sleep(1000);
 
-
-        robot.gyroTurn(0.3, 90);
-        robot.gyroHold(0.3,90,0.5);
-        robot.encoderDrive(10, 0.4);
-
     }
+
 }
