@@ -110,13 +110,6 @@ public class Team8740_Base {
     private final static double P_TURN_COEFF = 0.05;   // Larger is more responsive, but also less stable
     private final static double P_DRIVE_COEFF = 0.05;  // Larger is more responsive, but also less stable
 
-    // TODO - Find thresholds
-    private final static double RED_MIN_THRESHOLD = 140;
-    private final static double RED_MAX_THRESHOLD = 180;
-
-    private final static double BLUE_MIN_THRESHOLD = 150;
-    private final static double BLUE_MAX_THRESHOLD = 150;
-
     private final static String VUFORIA_LICENSE = "AY0QHQL/////AAAAGddY2lrlhEkenq0T04cRoVVmq/FAquH7DThEnayFrV+ojyjel8qTCn03vKe+FaZt0FwnE4tKdbimF0i47pzVuCQm2lRVdy5m1W03vvMN+8SA0RoXquxc1ddQLNyw297Ei3yWCJLV74UsEtfBwYKqr4ys3d2b2vPgaWnaZX6SNzD+x7AfKsaTSEIFqWfH8GOBoyw0kJ6qSCL384ylCcId6fVJbO8s9WccvuQYsCgCizdr0N/wOdEn76wY7fiNuR+5oReDCaIgfw5L35mD8EtQ0UHmNZGeDndtPDd6ZfNVlU3gyzch7nj5cmPBTleaoiCjyR9AputQHRH3qXnf3k76MvozmMGTE/j5o1HBA6BMSPwH";
 
     public enum Color {
@@ -161,8 +154,6 @@ public class Team8740_Base {
 
     private DigitalChannel lowerLimit = null;
     private DigitalChannel upperLimit = null;
-
-    private ColorSensor color_sensor = null;
 
     // The IMU sensor object
     private BNO055IMU imu = null;
@@ -309,13 +300,12 @@ public class Team8740_Base {
 
     private void initColorSensor() {
         frameGrabber = FtcRobotControllerActivity.frameGrabber;
-
-        color_sensor = hwMap.get(ColorSensor.class, "color");
     }
 
     private void initVuforia() {
-        int cameraMonitorViewId = hwMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hwMap.appContext.getPackageName());
-        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
+        //int cameraMonitorViewId = hwMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hwMap.appContext.getPackageName());
+        //VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
+        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
 
         parameters.vuforiaLicenseKey = VUFORIA_LICENSE;
         parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
@@ -402,11 +392,11 @@ public class Team8740_Base {
         return frontRightDrive.getCurrentPosition();
     }
 
-    public boolean xTargetReached(int position) {
+    public boolean xTargetReached(double position) {
         return false;
     }
 
-    public boolean yTargetReached(int position) {
+    public boolean yTargetReached(double position) {
         return false;
     }
 
@@ -629,8 +619,11 @@ public class Team8740_Base {
         return color;
     }
 
-    public void stopFrameGrabber() {
-        frameGrabber.stopFrameGrabber();
+    public void resetFrameGrabber() {
+        frameGrabber.throwAwayFrames();
+        while (!frameGrabber.isResultReady()) { //Wait for the result
+            opmode.sleep(5); //sleep for 5 milliseconds
+        }
     }
 
     /**
@@ -718,6 +711,7 @@ public class Team8740_Base {
         double steer;
         double leftSpeed;
         double rightSpeed;
+        double direction = 1;
         // Ensure that the opmode is still active
         if (opmode.opModeIsActive()) {
             // Determine new target position, and pass to motor controller
@@ -727,14 +721,16 @@ public class Team8740_Base {
             // Set Target and Turn On RUN_TO_POSITION
             frontRightDrive.setTargetPosition(Math.round((float) newTarget));
 
-            frontRightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            if (frontRightDrive.getCurrentPosition() > frontRightDrive.getTargetPosition()) {
+                direction = -1;
+            }
 
             // Start motion
             speed = Range.clip(Math.abs(speed), 0.0, 1.0);
-            setTank(speed, speed);
+            setTank(speed * direction, speed * direction);
 
-            // Keep looping while we are still active, and BOTH motors are running.
-            while (opmode.opModeIsActive() && frontRightDrive.isBusy()) {
+            // Keep looping while we are still active, and the front right motor is running.
+            while (opmode.opModeIsActive() && !((direction < 0 && frontRightDrive.getCurrentPosition() < frontRightDrive.getTargetPosition()) || (direction > 0 && frontRightDrive.getCurrentPosition() > frontRightDrive.getTargetPosition()))) {
                 // Adjust relative speed based on heading error
                 error = getError(angle);
                 steer = getSteer(error, P_DRIVE_COEFF);
@@ -753,21 +749,18 @@ public class Team8740_Base {
                     rightSpeed /= max;
                 }
 
-                setTank(leftSpeed, rightSpeed);
+                setTank(leftSpeed * direction, rightSpeed * direction);
 
                 // Display drive status for the driver.
                 opmode.telemetry.addData("Err/St", "%5.1f/%5.1f", error, steer);
                 opmode.telemetry.addData("Target", "%.2f", newTarget);
                 opmode.telemetry.addData("Actual", "%.2f:%.2f", getXPosition(), getYPosition());
-                opmode.telemetry.addData("Speed", "%5.2f:%5.2f", leftSpeed, rightSpeed);
+                opmode.telemetry.addData("Speed", "%5.2f:%5.2f", leftSpeed * direction, rightSpeed * direction);
                 opmode.telemetry.update();
             }
 
             // Stop all motion
             setTank(0, 0);
-
-            // Turn off RUN_TO_POSITION
-            setDriveMode(DcMotor.RunMode.RUN_USING_ENCODER);
         }
     }
 

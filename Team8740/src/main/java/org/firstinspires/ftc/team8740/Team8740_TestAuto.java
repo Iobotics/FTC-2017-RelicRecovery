@@ -104,13 +104,13 @@ public class Team8740_TestAuto extends LinearOpMode {
 
         if(!isStopRequested()) {
             color = robot.getColor();
-            robot.stopFrameGrabber();
         }
 
         // Wait for the game to start (Display Gyro value), and reset gyro before we move
         while (!isStarted()) {
             if(isStopRequested()) {
                 robot.deactivateVuforia();
+                robot.resetFrameGrabber();
                 return;
             }
 
@@ -137,6 +137,6 @@ public class Team8740_TestAuto extends LinearOpMode {
         robot.gyroHold(TURN_SPEED, 180.0, 0.5);
         robot.driveStraight(DRIVE_SPEED, 6.0, 180.0);
         */
-        robot.jewelKnock();
+        //robot.jewelKnock();
     }
 }
