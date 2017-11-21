@@ -42,7 +42,7 @@ public class Team8740_Teleop extends LinearOpMode {
     public void runOpMode() {
 
         //Initialize the hardware variables.
-        robot.init(hardwareMap, this, true);
+        robot.initRobot(hardwareMap, this, true);
 
         // Send telemetry message to signify robot waiting
         telemetry.addData("O", "Waiting for start");

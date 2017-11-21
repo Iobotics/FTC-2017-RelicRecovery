@@ -137,25 +137,25 @@ public class Team8740_Base {
     }
 
     /* OpMode members */
-    private DcMotor frontLeftDrive  = null;
+    private DcMotor frontLeftDrive = null;
     private DcMotor frontRightDrive = null;
-    private DcMotor backLeftDrive   = null;
-    private DcMotor backRightDrive  = null;
+    private DcMotor backLeftDrive = null;
+    private DcMotor backRightDrive = null;
 
-    private DcMotor intakeLeft  = null;
+    private DcMotor intakeLeft = null;
     private DcMotor intakeRight = null;
 
     private DcMotor lift = null;
 
     private DcMotor relicArm = null;
 
-    private Servo leftServo  = null;
+    private Servo leftServo = null;
     private Servo rightServo = null;
 
     private Servo jewelServo = null;
 
     private Servo relicWrist = null;
-    private Servo relicClaw  = null;
+    private Servo relicClaw = null;
 
     private CRServo pushServo = null;
 
@@ -168,7 +168,7 @@ public class Team8740_Base {
     private BNO055IMU imu = null;
 
     // State used for updating telemetry
-    private Orientation angles   = null;
+    private Orientation angles = null;
     private Acceleration gravity = null;
 
     private VuforiaLocalizer vuforia = null;
@@ -182,14 +182,14 @@ public class Team8740_Base {
 
     private LinearOpMode opmode = null;
 
-    private ElapsedTime time = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
+    public ElapsedTime time = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
 
     private LiftPosition liftPosition = LiftPosition.BOTTOM;
 
     private boolean isLowSpeed = false;
     private boolean jewelArmUp = false;
     private boolean relicWristUp = false;
-    private boolean relicClawOpen  = false;
+    private boolean relicClawOpen = false;
     private boolean intakeClawOpen = false;
     private boolean teleop = false;
 
@@ -200,13 +200,13 @@ public class Team8740_Base {
 
 
     /* Initialize standard Hardware interfaces */
-    public void init(HardwareMap hwMap, LinearOpMode opmode) {
-        this.init(hwMap, opmode, false);
+    public void initRobot(HardwareMap hwMap, LinearOpMode opmode) {
+        this.initRobot(hwMap, opmode, false);
     }
 
     /* Initialize standard Hardware interfaces */
-    public void init(HardwareMap hwMap, LinearOpMode opmode, boolean teleop) {
-        this.hwMap  = hwMap;
+    public void initRobot(HardwareMap hwMap, LinearOpMode opmode, boolean teleop) {
+        this.hwMap = hwMap;
         this.opmode = opmode;
         this.teleop = teleop;
 
@@ -224,10 +224,10 @@ public class Team8740_Base {
 
     private void initDrive() {
         // Define and initialize motors
-        frontLeftDrive  = hwMap.dcMotor.get("frontLeft");
+        frontLeftDrive = hwMap.dcMotor.get("frontLeft");
         frontRightDrive = hwMap.dcMotor.get("frontRight");
-        backLeftDrive   = hwMap.dcMotor.get("backLeft");
-        backRightDrive  = hwMap.dcMotor.get("backRight");
+        backLeftDrive = hwMap.dcMotor.get("backLeft");
+        backRightDrive = hwMap.dcMotor.get("backRight");
 
         // Reverse left motors if in teleop mode
         if (teleop) {
@@ -279,10 +279,10 @@ public class Team8740_Base {
 
     private void initServos() {
         // Define and initialize ALL installed servos
-        leftServo  = hwMap.servo.get("grabLeft");
+        leftServo = hwMap.servo.get("grabLeft");
         rightServo = hwMap.servo.get("grabRight");
         jewelServo = hwMap.servo.get("jewelArm");
-        pushServo  = hwMap.crservo.get("pushServo");
+        pushServo = hwMap.crservo.get("pushServo");
 
         // Reverse the right servo and jewel servo
         rightServo.setDirection(Servo.Direction.REVERSE);
@@ -296,8 +296,8 @@ public class Team8740_Base {
 
     private void initRelic() {
         relicWrist = hwMap.servo.get("relicWrist");
-        relicClaw  = hwMap.servo.get("relicClaw");
-        relicArm   = hwMap.dcMotor.get("relicArm");
+        relicClaw = hwMap.servo.get("relicClaw");
+        relicArm = hwMap.dcMotor.get("relicArm");
 
         relicClaw.setDirection(Servo.Direction.REVERSE);
 
@@ -370,10 +370,10 @@ public class Team8740_Base {
         double backLeftPower;
         double backRightPower;
 
-        frontLeftPower  = Range.clip(x + y - rotation, -1.0, 1.0);
+        frontLeftPower = Range.clip(x + y - rotation, -1.0, 1.0);
         frontRightPower = Range.clip(-x + y + rotation, -1.0, 1.0);
-        backLeftPower   = Range.clip(-x + y - rotation, -1.0, 1.0);
-        backRightPower  = Range.clip(x + y + rotation, -1.0, 1.0);
+        backLeftPower = Range.clip(-x + y - rotation, -1.0, 1.0);
+        backRightPower = Range.clip(x + y + rotation, -1.0, 1.0);
 
         // Send calculated power to wheels
         setPower(frontLeftPower, frontRightPower, backLeftPower, backRightPower);
@@ -490,7 +490,8 @@ public class Team8740_Base {
 
                 lift.setPower(LIFT_POWER);
 
-                while(opmode.opModeIsActive() && lift.isBusy()) { }
+                while (opmode.opModeIsActive() && lift.isBusy()) {
+                }
 
                 lift.setPower(0);
 
@@ -558,6 +559,7 @@ public class Team8740_Base {
 
     /**
      * Checks if the jewel arm is up
+     *
      * @return jewelArmUp
      */
     public boolean getJewelArmStatus() {
@@ -604,7 +606,7 @@ public class Team8740_Base {
      *
      * @return color
      */
-    public Color getColor() {
+    public JewelColorResult.JewelColor getColor() {
         frameGrabber.grabSingleFrame(); //Tell it to grab a frame
         while (!frameGrabber.isResultReady()) { //Wait for the result
             opmode.sleep(5); //sleep for 5 milliseconds
@@ -615,34 +617,37 @@ public class Team8740_Base {
         JewelColorResult.JewelColor leftColor = result.getLeftColor();
         JewelColorResult.JewelColor rightColor = result.getRightColor();
 
-        Color color;
+        JewelColorResult.JewelColor color;
         if (leftColor == JewelColorResult.JewelColor.BLUE && rightColor == JewelColorResult.JewelColor.RED) {
-            color = Color.RED;
+            color = JewelColorResult.JewelColor.RED;
         } else if (leftColor == JewelColorResult.JewelColor.RED && rightColor == JewelColorResult.JewelColor.BLUE) {
-            color = Color.BLUE;
+            color = JewelColorResult.JewelColor.BLUE;
         } else {
-            color = Color.UNKNOWN;
+            color = JewelColorResult.JewelColor.UNKNOWN;
         }
 
         return color;
     }
 
-    /** FIXME - The negative angles will make the robot go in a straight line or curve
+    public void stopFrameGrabber() {
+        frameGrabber.stopFrameGrabber();
+    }
+
+    /**
+     * FIXME - The negative angles will make the robot go in a straight line or curve
      * This method will knock the opposite jewel to the team color
      */
     public void jewelKnock() {
         toggleJewelArm();
         if (1 == 1) {
-            if (1==1) {
+            if (1 == 1) {
                 gyroTurn(.6, 10);
                 gyroTurn(.6, 0);
-            }
-            else {
+            } else {
                 gyroTurn(.6, -10);
                 gyroTurn(.6, 0);
             }
-        }
-        else if(1 == 2){
+        } else if (1 == 2) {
             if (getColor().equals(Color.RED)) {
                 gyroTurn(.6, 10);
                 gyroTurn(.6, -10);
@@ -953,5 +958,13 @@ public class Team8740_Base {
      */
     public double getSteer(double error, double PCoeff) {
         return Range.clip(error * PCoeff, -1, 1);
+    }
+
+    public void resetTimer() {
+        time.reset();
+    }
+
+    public double getElapsedTime() {
+        return time.milliseconds();
     }
 }

@@ -31,7 +31,6 @@ package org.firstinspires.ftc.team8740;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
 
 /**
  * This file illustrates the concept of driving a path based on Gyro heading and encoder counts.
@@ -82,9 +81,9 @@ public class Team8740_LeftRedAuto extends LinearOpMode {
     public void runOpMode() {
         /*
          * Initialize the standard drive system variables.
-         * The init() method of the hardware class does most of the work here
+         * The initRobot() method of the hardware class does most of the work here
          */
-        robot.init(hardwareMap, this);
+        robot.initRobot(hardwareMap, this);
 
         // Send telemetry message to alert driver that we are calibrating
         telemetry.addData("X", "Calibrating Gyro");
@@ -97,16 +96,10 @@ public class Team8740_LeftRedAuto extends LinearOpMode {
             idle();
         }
 
-        // Ensure the robot is stationary, then reset the encoders
-        robot.setDriveMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        idle();
-
-        robot.setDriveMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
         // Wait for the game to start (Display Gyro value), and reset gyro before we move
         while (!isStarted()) {
             telemetry.addData("O", "Robot Ready");
-            telemetry.addLine("encoders").addData("left", robot.getLeftEncoder()).addData("right", robot.getRightEncoder());
+            telemetry.addLine("encoders").addData("X", robot.getXPosition()).addData("Y", robot.getYPosition());
             telemetry.addData(">", "Robot Heading = %.2f", robot.getGyroHeading());
             telemetry.update();
         }

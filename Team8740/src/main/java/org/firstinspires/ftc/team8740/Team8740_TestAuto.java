@@ -29,13 +29,10 @@
 
 package org.firstinspires.ftc.team8740;
 
-import android.graphics.Color;
-
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
 
-import static org.firstinspires.ftc.team8740.Team8740_Base.Team.BLUE_TEAM;
+import ftc.vision.JewelColorResult;
 
 /**
  * This file illustrates the concept of driving a path based on Gyro heading and encoder counts.
@@ -70,12 +67,13 @@ import static org.firstinspires.ftc.team8740.Team8740_Base.Team.BLUE_TEAM;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@Autonomous(name="Team 8740: Left Blue Auto Copy", group="Team 8740")
+@Autonomous(name="Team 8740: Test Auto", group="Team 8740")
 //@Disabled
-public class Team8740_LeftBlueAutoCopy extends LinearOpMode {
+public class Team8740_TestAuto extends LinearOpMode {
 
     /* Declare OpMode members */
     Team8740_Base         robot   = new Team8740_Base();
+    JewelColorResult.JewelColor color = null;
 
     // These constants define the desired driving/control characteristics
     // The can/should be tweaked to suite the specific robot drive train.
@@ -87,9 +85,11 @@ public class Team8740_LeftBlueAutoCopy extends LinearOpMode {
     public void runOpMode() {
         /*
          * Initialize the standard drive system variables.
-         * The init() method of the hardware class does most of the work here
+         * The initRobot() method of the hardware class does most of the work here
          */
-        robot.init(hardwareMap, this);
+        robot.initRobot(hardwareMap, this);
+
+        robot.activateVuforia();
 
         // Send telemetry message to alert driver that we are calibrating
         telemetry.addData("X", "Calibrating Gyro");
@@ -102,21 +102,25 @@ public class Team8740_LeftBlueAutoCopy extends LinearOpMode {
             idle();
         }
 
-        // Ensure the robot is stationary, then reset the encoders
-        robot.setDriveMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        idle();
-
-        robot.setDriveMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        if(!isStopRequested()) {
+            color = robot.getColor();
+            robot.stopFrameGrabber();
+        }
 
         // Wait for the game to start (Display Gyro value), and reset gyro before we move
         while (!isStarted()) {
+            if(isStopRequested()) {
+                robot.deactivateVuforia();
+                return;
+            }
+
             telemetry.addData("O", "Robot Ready");
-            telemetry.addLine("encoders").addData("left", robot.getLeftEncoder()).addData("right", robot.getRightEncoder());
+            telemetry.addLine("encoders").addData("X", robot.getXPosition()).addData("Y", robot.getYPosition());
             telemetry.addData(">", "Robot Heading = %.2f", robot.getGyroHeading());
+            telemetry.addData("Color", color);
+            telemetry.addData("VuMark", robot.getVuMark());
             telemetry.update();
         }
-
-        //robot.activateVuforia();
 
         // Step through each leg of the path,
         // Note: Reverse movement is obtained by setting a negative distance (not speed)
@@ -134,7 +138,5 @@ public class Team8740_LeftBlueAutoCopy extends LinearOpMode {
         robot.driveStraight(DRIVE_SPEED, 6.0, 180.0);
         */
         robot.jewelKnock();
-
-        requestOpModeStop();
     }
 }
