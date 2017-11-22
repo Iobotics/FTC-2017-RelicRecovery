@@ -336,7 +336,7 @@ public class Team8740_Base {
     public boolean isStopRequested() {
         boolean stopRequested = opmode.isStopRequested();
 
-        if(stopRequested) {
+        if (stopRequested) {
             deactivateVuforia();
         }
 
@@ -484,7 +484,7 @@ public class Team8740_Base {
         switch (position) {
             case TOP:
                 while (!getUpperLimit()) {
-                    if(isStopRequested()) return;
+                    if (isStopRequested()) return;
                     lift.setPower(LIFT_POWER);
                 }
                 lift.setPower(0);
@@ -498,7 +498,7 @@ public class Team8740_Base {
                 lift.setPower(LIFT_POWER);
 
                 while (lift.isBusy()) {
-                    if(isStopRequested()) return;
+                    if (isStopRequested()) return;
                 }
 
                 lift.setPower(0);
@@ -507,7 +507,7 @@ public class Team8740_Base {
                 break;
             case BOTTOM:
                 while (!getLowerLimit()) {
-                    if(isStopRequested()) return;
+                    if (isStopRequested()) return;
                     lift.setPower(-LIFT_POWER);
                 }
                 lift.setPower(0);
@@ -639,7 +639,7 @@ public class Team8740_Base {
         opmode.telemetry.update();
 
         while (!frameGrabber.isResultReady()) { //Wait for the result
-            if(isStopRequested()) return JewelColorResult.JewelColor.UNKNOWN;
+            if (isStopRequested()) return JewelColorResult.JewelColor.UNKNOWN;
             opmode.sleep(5); //sleep for 5 milliseconds
         }
 
@@ -696,7 +696,7 @@ public class Team8740_Base {
     }
 
     public void deactivateVuforia() {
-        if(relicTrackables != null) relicTrackables.deactivate();
+        if (relicTrackables != null) relicTrackables.deactivate();
     }
 
     public RelicRecoveryVuMark getVuMark() {
@@ -833,7 +833,7 @@ public class Team8740_Base {
             newXTarget = Math.round((float) (getXPosition() + xMoveCounts));
             newYTarget = 0;
 
-            if(frontLeftDrive.getCurrentPosition() > newXTarget) {
+            if (frontLeftDrive.getCurrentPosition() > newXTarget) {
                 direction = -1;
             }
 

@@ -32,7 +32,7 @@ package org.firstinspires.ftc.team8740;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-@TeleOp(name="Team 8740: Teleop Mecanum", group="Team 8740")
+@TeleOp(name = "Team 8740: Teleop Mecanum", group = "Team 8740")
 //@Disabled
 public class Team8740_Teleop extends LinearOpMode {
 
@@ -68,21 +68,21 @@ public class Team8740_Teleop extends LinearOpMode {
             robot.setMecanum(x, y, rotation);
 
             // Use gamepad left bumper to toggle speed
-            if(gamepad1.left_bumper) {
+            if (gamepad1.left_bumper) {
                 robot.toggleSpeed();
             }
 
             // Use gamepad right bumper to run intake
-            if(gamepad1.right_bumper) {
+            if (gamepad1.right_bumper) {
                 robot.runIntake();
-            } else if(gamepad1.right_trigger > 0.2) {
+            } else if (gamepad1.right_trigger > 0.2) {
                 robot.reverseIntake();
             } else {
                 robot.stopIntake();
             }
 
             // Use gamepad A to toggle top outtake
-            if(gamepad1.a) {
+            if (gamepad1.a) {
                 robot.pushGlyph();
                 robot.toggleIntakeClaws();
                 sleep(1430);
@@ -94,7 +94,7 @@ public class Team8740_Teleop extends LinearOpMode {
             }
 
             // Use gamepad B to toggle all outtakes
-            if(gamepad1.b) {
+            if (gamepad1.b) {
                 robot.reverseIntake();
                 robot.pushGlyph();
                 robot.toggleIntakeClaws();
@@ -108,7 +108,7 @@ public class Team8740_Teleop extends LinearOpMode {
             }
 
             // Use gamepad X to toggle bottom outtake
-            if(gamepad1.x) {
+            if (gamepad1.x) {
                 robot.reverseIntake();
                 robot.toggleIntakeClaws();
                 sleep(500);
@@ -119,35 +119,35 @@ public class Team8740_Teleop extends LinearOpMode {
 
             /* GAMEPAD 2 CONTROLS */
 
-            if(gamepad2.left_bumper) {
+            if (gamepad2.left_bumper) {
                 robot.setLiftPosition(Team8740_Base.LiftPosition.BOTTOM);
-            } else if(gamepad2.left_trigger > 0.2) {
+            } else if (gamepad2.left_trigger > 0.2) {
                 robot.setLiftPosition(Team8740_Base.LiftPosition.MIDDLE);
-            } else if(gamepad2.right_bumper) {
+            } else if (gamepad2.right_bumper) {
                 robot.setLiftPosition(Team8740_Base.LiftPosition.TOP);
             }
 
-            if(gamepad2.right_trigger > 0.2) {
+            if (gamepad2.right_trigger > 0.2) {
                 robot.toggleRelicWrist();
                 sleep(100);
             }
 
             robot.setLiftPower(-gamepad2.right_stick_y);
 
-            if(gamepad2.a) {
+            if (gamepad2.a) {
                 robot.extendRelicArm();
-            } else if(gamepad2.b) {
+            } else if (gamepad2.b) {
                 robot.retractRelicArm();
             } else {
                 robot.stopRelicArm();
             }
 
-            if(gamepad2.x) {
+            if (gamepad2.x) {
                 robot.toggleRelicClaw();
                 sleep(75);
             }
 
-            if(gamepad2.y) {
+            if (gamepad2.y) {
                 robot.toggleProgramAssist();
                 sleep(75);
             }
