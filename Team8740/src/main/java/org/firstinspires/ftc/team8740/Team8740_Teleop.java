@@ -147,7 +147,10 @@ public class Team8740_Teleop extends LinearOpMode {
                 sleep(75);
             }
 
-            // TODO - Gamepad2 Y Toggle program-assist sensors (color/prox sensor resets when detect block)
+            if(gamepad2.y) {
+                robot.toggleProgramAssist();
+                sleep(75);
+            }
 
             // Pause for 10 mS each cycle = update 100 times a second.
             sleep(10);
@@ -155,6 +158,8 @@ public class Team8740_Teleop extends LinearOpMode {
             telemetry.addData("Lift encoder", robot.getLiftEncoder());
             telemetry.addData("Lift position", robot.getLiftPosition());
             telemetry.addData("Gyro position", robot.getGyroHeading());
+            telemetry.addData("Distance", robot.getDistance());
+            telemetry.addData("Program assist", robot.assistEnabled());
             telemetry.addLine("Encoders").addData("X", robot.getXPosition()).addData("Y", robot.getYPosition());
             telemetry.update();
         }

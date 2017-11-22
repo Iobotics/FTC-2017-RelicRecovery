@@ -79,7 +79,6 @@ public class Team8740_TestAuto extends LinearOpMode {
     // The can/should be tweaked to suite the specific robot drive train.
     static final double     DRIVE_SPEED             = 0.5;     // Nominal speed for better accuracy.
     static final double     TURN_SPEED              = 0.4;     // Nominal half speed for better accuracy.
-    boolean jewelKnocked = false;
 
     @Override
     public void runOpMode() {
@@ -97,27 +96,23 @@ public class Team8740_TestAuto extends LinearOpMode {
         telemetry.update();
 
         // make sure the gyro is calibrated before continuing
-        while (!isStopRequested() && robot.isGyroCalibrating())  {
+        while (robot.isGyroCalibrating())  {
+            if(robot.isStopRequested()) return;
+
             sleep(50);
             idle();
         }
 
-        if(!isStopRequested()) {
-            color = robot.getColor();
-        }
+        //color = robot.getColor();
 
         // Wait for the game to start (Display Gyro value), and reset gyro before we move
         while (!isStarted()) {
-            if(isStopRequested()) {
-                robot.deactivateVuforia();
-                robot.resetFrameGrabber();
-                return;
-            }
+            if(robot.isStopRequested()) return;
 
             telemetry.addData("O", "Robot Ready");
             telemetry.addLine("encoders").addData("X", robot.getXPosition()).addData("Y", robot.getYPosition());
             telemetry.addData(">", "Robot Heading = %.2f", robot.getGyroHeading());
-            telemetry.addData("Color", color);
+            //telemetry.addData("Color", color);
             telemetry.addData("VuMark", robot.getVuMark());
             telemetry.update();
         }
@@ -126,17 +121,15 @@ public class Team8740_TestAuto extends LinearOpMode {
         // Note: Reverse movement is obtained by setting a negative distance (not speed)
         // Put a hold after each turn
 
-        /*
-        //robot.toggleJewelArm();
+        robot.toggleJewelArm();
         robot.driveStraight(DRIVE_SPEED, -15.0, 0.0);
-        //robot.toggleJewelArm();
-        robot.gyroTurn(TURN_SPEED, 90.0);
-        robot.gyroHold(TURN_SPEED, 90.0, 0.5);
-        robot.driveStraight(DRIVE_SPEED, -12.0, 90.0);
-        robot.gyroTurn(TURN_SPEED, 180.0);
-        robot.gyroHold(TURN_SPEED, 180.0, 0.5);
-        robot.driveStraight(DRIVE_SPEED, 6.0, 180.0);
-        */
+        robot.toggleJewelArm();
+        //robot.gyroTurn(TURN_SPEED, 90.0);
+        //robot.gyroHold(TURN_SPEED, 90.0, 0.5);
+        //robot.driveStraight(DRIVE_SPEED, -12.0, 90.0);
+        //robot.gyroTurn(TURN_SPEED, 180.0);
+        //robot.gyroHold(TURN_SPEED, 180.0, 0.5);
+        //robot.driveStraight(DRIVE_SPEED, 6.0, 180.0);
         //robot.jewelKnock();
     }
 }

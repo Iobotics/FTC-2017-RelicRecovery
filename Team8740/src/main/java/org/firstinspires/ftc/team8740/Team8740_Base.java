@@ -36,6 +36,7 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -47,6 +48,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
@@ -94,7 +96,7 @@ public class Team8740_Base {
 
     private final static double RELIC_ARM_SPEED = 0.5;
 
-    private final static double LIFT_TICKS_PER_REV = 28;    // Ticks per revolution
+    private final static double LIFT_TICKS_PER_REV = 28;     // Ticks per revolution
     private final static double LIFT_GEAR_REDUCTION = 100.0; // This is < 1.0 if geared UP
     private final static double LIFT_GEAR_DIAMETER = 1.504;  // Inches
     private final static double LIFT_TICKS_PER_INCH = (LIFT_TICKS_PER_REV * LIFT_GEAR_REDUCTION) / (LIFT_GEAR_DIAMETER * 3.1415);
@@ -111,12 +113,6 @@ public class Team8740_Base {
     private final static double P_DRIVE_COEFF = 0.05;  // Larger is more responsive, but also less stable
 
     private final static String VUFORIA_LICENSE = "AY0QHQL/////AAAAGddY2lrlhEkenq0T04cRoVVmq/FAquH7DThEnayFrV+ojyjel8qTCn03vKe+FaZt0FwnE4tKdbimF0i47pzVuCQm2lRVdy5m1W03vvMN+8SA0RoXquxc1ddQLNyw297Ei3yWCJLV74UsEtfBwYKqr4ys3d2b2vPgaWnaZX6SNzD+x7AfKsaTSEIFqWfH8GOBoyw0kJ6qSCL384ylCcId6fVJbO8s9WccvuQYsCgCizdr0N/wOdEn76wY7fiNuR+5oReDCaIgfw5L35mD8EtQ0UHmNZGeDndtPDd6ZfNVlU3gyzch7nj5cmPBTleaoiCjyR9AputQHRH3qXnf3k76MvozmMGTE/j5o1HBA6BMSPwH";
-
-    public enum Color {
-        RED,
-        BLUE,
-        UNKNOWN
-    }
 
     public enum LiftPosition {
         TOP,
@@ -155,6 +151,8 @@ public class Team8740_Base {
     private DigitalChannel lowerLimit = null;
     private DigitalChannel upperLimit = null;
 
+    private DistanceSensor proxSensor = null;
+
     // The IMU sensor object
     private BNO055IMU imu = null;
 
@@ -165,8 +163,6 @@ public class Team8740_Base {
     private VuforiaLocalizer vuforia = null;
     private VuforiaTrackables relicTrackables = null;
     private VuforiaTrackable relicTemplate = null;
-
-    private FrameGrabber frameGrabber = null;
 
     /* Local OpMode members. */
     private HardwareMap hwMap = null;
@@ -182,6 +178,7 @@ public class Team8740_Base {
     private boolean relicWristUp = false;
     private boolean relicClawOpen = false;
     private boolean intakeClawOpen = false;
+    private boolean programAssist = false;
     private boolean teleop = false;
 
     private double speedMultiplier = HIGH_SPEED;
@@ -207,8 +204,8 @@ public class Team8740_Base {
         initServos();
         initGyro();
         initRelic();
+        initProx();
         if (!teleop) {
-            initColorSensor();
             initVuforia();
         }
     }
@@ -292,14 +289,14 @@ public class Team8740_Base {
 
         relicClaw.setDirection(Servo.Direction.REVERSE);
 
-        relicWrist.setPosition(0.62);
+        relicWrist.setPosition(RELIC_WRIST_DOWN);
         relicClaw.setPosition(0);
 
         relicArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
-    private void initColorSensor() {
-        frameGrabber = FtcRobotControllerActivity.frameGrabber;
+    private void initProx() {
+        proxSensor = hwMap.get(DistanceSensor.class, "prox");
     }
 
     private void initVuforia() {
@@ -334,6 +331,25 @@ public class Team8740_Base {
         // and named "imu".
         imu = hwMap.get(BNO055IMU.class, "imu");
         imu.initialize(parameters);
+    }
+
+    public boolean isStopRequested() {
+        boolean stopRequested = opmode.isStopRequested();
+
+        if(stopRequested) {
+            deactivateVuforia();
+        }
+
+        return stopRequested;
+    }
+
+    public void toggleProgramAssist() {
+        //TODO - Add program-assisted methods
+        programAssist = !programAssist;
+    }
+
+    public boolean assistEnabled() {
+        return programAssist;
     }
 
     /**
@@ -468,6 +484,7 @@ public class Team8740_Base {
         switch (position) {
             case TOP:
                 while (!getUpperLimit()) {
+                    if(isStopRequested()) return;
                     lift.setPower(LIFT_POWER);
                 }
                 lift.setPower(0);
@@ -480,7 +497,8 @@ public class Team8740_Base {
 
                 lift.setPower(LIFT_POWER);
 
-                while (opmode.opModeIsActive() && lift.isBusy()) {
+                while (lift.isBusy()) {
+                    if(isStopRequested()) return;
                 }
 
                 lift.setPower(0);
@@ -489,6 +507,7 @@ public class Team8740_Base {
                 break;
             case BOTTOM:
                 while (!getLowerLimit()) {
+                    if(isStopRequested()) return;
                     lift.setPower(-LIFT_POWER);
                 }
                 lift.setPower(0);
@@ -592,18 +611,45 @@ public class Team8740_Base {
     }
 
     /**
+     * Gets the distance from the prox sensor in inches
+     *
+     * @return distance
+     */
+    public double getDistance() {
+        double distance = proxSensor.getDistance(DistanceUnit.INCH);
+
+        return distance;
+    }
+
+    /**
      * Gets color from the color sensor
      *
      * @return color
      */
     public JewelColorResult.JewelColor getColor() {
+        FrameGrabber frameGrabber = FtcRobotControllerActivity.frameGrabber; //Get the frameGrabber
+
+        opmode.telemetry.addData("Checkpoint", "4");
+        opmode.telemetry.update();
+
         frameGrabber.grabSingleFrame(); //Tell it to grab a frame
+
+        opmode.telemetry.addData("Checkpoint", "5");
+        opmode.telemetry.addData("FrameGrabber", !frameGrabber.isResultReady());
+        opmode.telemetry.update();
+
         while (!frameGrabber.isResultReady()) { //Wait for the result
+            if(isStopRequested()) return JewelColorResult.JewelColor.UNKNOWN;
             opmode.sleep(5); //sleep for 5 milliseconds
         }
+
+        opmode.telemetry.addData("Checkpoint", "6");
+        opmode.telemetry.update();
+
         //Get the result
         ImageProcessorResult imageProcessorResult = frameGrabber.getResult();
         JewelColorResult result = (JewelColorResult) imageProcessorResult.getResult();
+
         JewelColorResult.JewelColor leftColor = result.getLeftColor();
         JewelColorResult.JewelColor rightColor = result.getRightColor();
 
@@ -617,13 +663,6 @@ public class Team8740_Base {
         }
 
         return color;
-    }
-
-    public void resetFrameGrabber() {
-        frameGrabber.throwAwayFrames();
-        while (!frameGrabber.isResultReady()) { //Wait for the result
-            opmode.sleep(5); //sleep for 5 milliseconds
-        }
     }
 
     /**
@@ -641,7 +680,7 @@ public class Team8740_Base {
                 gyroTurn(.6, 0);
             }
         } else if (1 == 2) {
-            if (getColor().equals(Color.RED)) {
+            if (getColor().equals(JewelColorResult.JewelColor.RED)) {
                 gyroTurn(.6, 10);
                 gyroTurn(.6, -10);
             } else {
@@ -657,7 +696,7 @@ public class Team8740_Base {
     }
 
     public void deactivateVuforia() {
-        relicTrackables.deactivate();
+        if(relicTrackables != null) relicTrackables.deactivate();
     }
 
     public RelicRecoveryVuMark getVuMark() {
@@ -770,7 +809,7 @@ public class Team8740_Base {
      * 1) Move gets to the desired position
      * 2) Driver stops the opmode running.
      *
-     * @param speed    Target speed for motion.  Should allow for _/- variance for adjusting heading
+     * @param speed    Target speed for motion.
      * @param distance Distance (in inches) to move from current position.  Negative distance means move backwards.
      * @param angle    Absolute Angle (in Degrees) relative to last gyro reset.
      *                 0 = fwd. +ve is CCW from fwd. -ve is CW from forward.
@@ -780,30 +819,32 @@ public class Team8740_Base {
         int newXTarget;
         int newYTarget;
         double xMoveCounts;
-        double yMoveCounts;
         double max;
         double error;
         double steer;
         double xSpeed;
         double ySpeed;
         double rotation;
+        double direction = 1;
         // Ensure that the opmode is still active
         if (opmode.opModeIsActive()) {
             // Determine new target position, and pass to motor controller
-            xMoveCounts = distance * Math.sin(angle) * DRIVE_TICKS_PER_INCH;
+            xMoveCounts = distance * Math.sqrt(2) * DRIVE_TICKS_PER_INCH;
             newXTarget = Math.round((float) (getXPosition() + xMoveCounts));
+            newYTarget = 0;
 
-            yMoveCounts = distance * Math.cos(angle) * DRIVE_TICKS_PER_INCH;
-            newYTarget = Math.round((float) (getYPosition() + yMoveCounts));
+            if(frontLeftDrive.getCurrentPosition() > newXTarget) {
+                direction = -1;
+            }
 
             // Start motion
-            xSpeed = Range.clip(Math.abs(speed * Math.sin(angle)), 0.0, 1.0);
-            ySpeed = Range.clip(Math.abs(speed * Math.cos(angle)), 0.0, 1.0);
-            rotation = 0;
-            setMecanum(xSpeed, ySpeed, rotation);
+            xSpeed = Range.clip(Math.abs(speed), 0.0, 1.0);
+            ySpeed = 0;
+
+            setMecanum(xSpeed, ySpeed, 0);
 
             // Keep looping while we are still active
-            while (opmode.opModeIsActive() && !xTargetReached(newXTarget) && !yTargetReached(newYTarget)) {
+            while (opmode.opModeIsActive() && !((direction < 0 && frontLeftDrive.getCurrentPosition() < newXTarget) || (direction > 0 && frontLeftDrive.getCurrentPosition() > newXTarget))) {
                 // Adjust relative speed based on heading error
                 error = getError(angle);
                 steer = getSteer(error, P_DRIVE_COEFF);
