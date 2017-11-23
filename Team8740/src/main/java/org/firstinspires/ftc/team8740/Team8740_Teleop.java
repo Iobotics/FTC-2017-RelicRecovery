@@ -89,8 +89,6 @@ public class Team8740_Teleop extends LinearOpMode {
                 robot.retractGlyph();
                 sleep(1430);
                 robot.stopGlyph();
-            } else {
-                robot.stopGlyph();
             }
 
             // Use gamepad B to toggle all outtakes
@@ -103,8 +101,6 @@ public class Team8740_Teleop extends LinearOpMode {
                 robot.retractGlyph();
                 sleep(1430);
                 robot.stopGlyph();
-            } else {
-                robot.stopGlyph();
             }
 
             // Use gamepad X to toggle bottom outtake
@@ -112,8 +108,6 @@ public class Team8740_Teleop extends LinearOpMode {
                 robot.reverseIntake();
                 robot.toggleIntakeClaws();
                 sleep(500);
-                robot.stopIntake();
-            } else {
                 robot.stopIntake();
             }
 
