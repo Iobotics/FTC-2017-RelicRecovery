@@ -150,20 +150,20 @@ public class WaffleToasterautocompBLUE extends LinearOpMode {
         int timeDiff;
         telemetry.addData("Red", Color.red(color));
         if(Color.red(color) > 3){
-            allDrive(-.4, -.4);
-            timeDiff = 500;
+            allDrive(.4, .4);
+            timeDiff = -300;
         }
         else{
-            allDrive(.4,.4);
-            timeDiff = -350;
+            allDrive(-.4,-.4);
+            timeDiff = 550;
         }
-        sleep(350);
+        sleep(400);
 
         allDrive(0,0);
         jewelServo.setPosition(1);
         sleep(200);
         allDrive(0.4,0.4);
-        sleep(1650-timeDiff);
+        sleep(1300-timeDiff);
         turnDrive("right", 0.4);
         sleep(300);
         allDrive(0,0);
