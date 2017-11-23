@@ -17,9 +17,9 @@ import ftc.vision.BeaconColorResult;
 import static java.lang.System.currentTimeMillis;
 
 /**
- * Created by Teacher on 10/28/2017.
+ * Created by Matt Hockenberger and Jack Gonser on 10/28/2017.
 */
-@Autonomous (name = "AUTO(RED)(if auto fails)",group = "RED")
+@Autonomous (name = "AUTO(RED)",group = "RED")
 public class WaffleToasterautocompRED extends WaffleToaster {
     private DcMotor leftFront = null;
     private DcMotor leftBack = null;
@@ -75,9 +75,7 @@ public class WaffleToasterautocompRED extends WaffleToaster {
         }
 
         waitForStart();
-
-        leftServo.setPosition(0.25);
-        rightServo.setPosition(0.25);
+        allServo(0.25);
         jewelServo.setPosition(.4);
         arm.setPower(0.25);
         sleep(500);
@@ -87,15 +85,9 @@ public class WaffleToasterautocompRED extends WaffleToaster {
         while(Color.red(color) < 3 && currentTimeMillis()- startTime < 900) {
             colors = colorSensor.getNormalizedColors();
             color = colors.toColor();
-            leftFront.setPower(0);
-            leftBack.setPower(0);
-            rightFront.setPower(0);
-            rightBack.setPower(0);
+            allDrive(0, 0);
         }
-        leftFront.setPower(0);
-        leftBack.setPower(0);
-        rightFront.setPower(0);
-        rightBack.setPower(0);
+        allDrive(0, 0);
         sleep(100);
         telemetry.addData("Red", Color.red(color));
         int timeDiff;
@@ -114,7 +106,10 @@ public class WaffleToasterautocompRED extends WaffleToaster {
         sleep(200);
 
         allDrive(0.4, 0.4);
-        sleep(1750-timeDiff);
+        sleep(1850-timeDiff);
+        turnDrive("right", 0.4);
+        sleep(300);
         allDrive(0,0);
+        allServo(0);
     }
 }

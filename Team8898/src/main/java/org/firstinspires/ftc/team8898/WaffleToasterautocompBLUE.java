@@ -87,30 +87,18 @@ public class WaffleToasterautocompBLUE extends WaffleToaster {
         while(Color.red(color) <= 3 && currentTimeMillis()- startTime < 500) {
             colors = colorSensor.getNormalizedColors();
             color = colors.toColor();
-            leftFront.setPower(0);
-            leftBack.setPower(0);
-            rightFront.setPower(0);
-            rightBack.setPower(0);
+            allDrive(0,0);
         }
-        leftFront.setPower(0);
-        leftBack.setPower(0);
-        rightFront.setPower(0);
-        rightBack.setPower(0);
+        allDrive(0,0);
         sleep(100);
         int timeDiff;
         telemetry.addData("Red", Color.red(color));
         if(Color.red(color) > 3){
-            leftFront.setPower(-.4);
-            leftBack.setPower(-.4);
-            rightFront.setPower(-.4);
-            rightBack.setPower(-.4);
+            allDrive(-.4, -.4);
             timeDiff = 500;
         }
         else{
-            leftFront.setPower(.4);
-            leftBack.setPower(.4);
-            rightFront.setPower(.4);
-            rightBack.setPower(.4);
+            allDrive(.4,.4);
             timeDiff = -350;
         }
         sleep(350);
@@ -120,6 +108,9 @@ public class WaffleToasterautocompBLUE extends WaffleToaster {
         sleep(200);
         allDrive(0.4,0.4);
         sleep(1750-timeDiff);
+        turnDrive("left", 0.4);
+        sleep(300);
         allDrive(0,0);
+        allServo(0);
     }
 }

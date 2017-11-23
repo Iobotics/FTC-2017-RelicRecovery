@@ -39,6 +39,7 @@ public class WaffleToaster extends LinearOpMode {
     private double left = 0;
     private double right = 0;
 
+
     /**
      * Sets the two arm servos to a set position
      * @param position
@@ -67,6 +68,31 @@ public class WaffleToaster extends LinearOpMode {
             telemetry.addData("Robot is going backward.","BACKWARD");
         } else {
             telemetry.addData("Robot is operating abnormally or is turning.", "OTHER");
+        }
+        telemetry.update();
+    }
+
+    /**
+     * Turns the robot depending on the direction you set it to turn and the power you set it to go
+     * @param direction
+     * @param speed
+     */
+    public void turnDrive (String direction, double speed) {
+        direction = direction.toLowerCase();
+        if (direction == "left") {
+            leftFront.setPower(-speed);
+            leftBack.setPower(-speed);
+            rightFront.setPower(speed);
+            rightBack.setPower(speed);
+            telemetry.addData("Turning left by", speed + "power.");
+        } else if (direction == "right") {
+            leftFront.setPower(speed);
+            leftBack.setPower(speed);
+            rightFront.setPower(-speed);
+            rightBack.setPower(-speed);
+            telemetry.addData("Turning right by", speed + "power.");
+        } else {
+            telemetry.addData("Uh Oh", "Incorrect syntax");
         }
         telemetry.update();
     }
@@ -144,7 +170,8 @@ public class WaffleToaster extends LinearOpMode {
             } else if (gamepad1.x) {
                 arm.setPower(-0.5);
                 sleep(500);
-                arm.setPower(0);
+                arm.setPower(0.2);
+                sleep(200);
                 allServo(0);
                 telemetry.addData("Arm Down", "1/2 second.");
             } else if (gamepad1.y) {
