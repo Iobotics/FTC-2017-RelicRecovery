@@ -46,7 +46,6 @@ import ftc.vision.JewelColorResult;
 
 //wait before quitting (quitting clears telemetry)
         Thread.sleep(1000);
-
     }
 
 }

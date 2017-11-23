@@ -44,41 +44,42 @@ public class GoldDiggerBlueAuto extends LinearOpMode {
         telemetry.update();
 //wait before quitting (quitting clears telemetry)
         Thread.sleep(1000);
-
-        if (rightColor == JewelColorResult.JewelColor.BLUE){
+/*
+        if (rightColor == JewelColorResult.JewelColor.BLUE && leftColor == JewelColorResult.JewelColor.RED){
             robot.jewelServo.setPosition(robot.JEWEL_ARM_DOWN);
             robot.encoderDrive(1, 0.4);
             robot.jewelServo.setPosition(robot.JEWEL_ARM_UP);
             robot.encoderDrive(23, 0.4);
 
         }
-        else if (leftColor == JewelColorResult.JewelColor.BLUE){
+        else if (leftColor == JewelColorResult.JewelColor.BLUE && rightColor == JewelColorResult.JewelColor.RED){
             robot.jewelServo.setPosition(robot.JEWEL_ARM_DOWN);
-            robot.encoderDrive(-1, -0.4);
+            robot.encoderDrive(-1, 0.4);
             robot.jewelServo.setPosition(robot.JEWEL_ARM_UP);
             robot.encoderDrive(25, 0.4);
         } else {
-
+*/
             robot.encoderDrive(24, 0.4);
-       }
+       //}
 
         robot.gyroTurn(0.4, -45);
 
         robot.gyroHold(0.4, -45, 0.5);
 
-        robot.encoderDrive(17, 0.4);
+        robot.encoderDrive(9, 0.4);
 
-        robot.glyphPull(-0.5, -0.5);
+        robot.glyphPull(-1);
         Thread.sleep(1000);
 
-        robot.glyphPull(0, 0);
+        robot.glyphPull(0);
 
-        robot.encoderDrive(-10, -0.4);
+        robot.encoderDrive(-11, 0.4);
 
+        robot.gyroTurn(0.4, -90);
 
+        robot.gyroHold(0.4, -90, 0.5);
 
-
-
+        robot.encoderDrive(9, 0.4);
 
     }
 }
