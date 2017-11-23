@@ -83,32 +83,26 @@ public class Team8740_Teleop extends LinearOpMode {
 
             // Use gamepad A to toggle top outtake
             if (gamepad1.a) {
-                robot.pushGlyph();
                 robot.toggleIntakeClaws();
+                robot.pushGlyph();
                 sleep(1430);
                 robot.retractGlyph();
                 sleep(1430);
+                robot.toggleIntakeClaws();
                 robot.stopGlyph();
             }
 
-            // Use gamepad B to toggle all outtakes
-            if (gamepad1.b) {
+            // Use gamepad B or X to toggle all outtakes
+            if (gamepad1.b || gamepad1.x) {
+                robot.toggleIntakeClaws();
                 robot.reverseIntake();
                 robot.pushGlyph();
-                robot.toggleIntakeClaws();
                 sleep(1430);
                 robot.stopIntake();
                 robot.retractGlyph();
                 sleep(1430);
-                robot.stopGlyph();
-            }
-
-            // Use gamepad X to toggle bottom outtake
-            if (gamepad1.x) {
-                robot.reverseIntake();
                 robot.toggleIntakeClaws();
-                sleep(500);
-                robot.stopIntake();
+                robot.stopGlyph();
             }
 
             /* GAMEPAD 2 CONTROLS */
@@ -121,11 +115,7 @@ public class Team8740_Teleop extends LinearOpMode {
                 robot.setLiftPosition(Team8740_Base.LiftPosition.TOP);
             }
 
-            if (gamepad2.right_trigger > 0.2) {
-                robot.toggleRelicWrist();
-                sleep(100);
-            }
-
+            robot.setRelicWrist(robot.RELIC_WRIST_DOWN + gamepad2.left_stick_y * robot.RELIC_WRIST_DOWN);
             robot.setLiftPower(-gamepad2.right_stick_y);
 
             if (gamepad2.a) {

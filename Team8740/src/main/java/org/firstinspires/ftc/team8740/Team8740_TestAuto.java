@@ -122,7 +122,7 @@ public class Team8740_TestAuto extends LinearOpMode {
         // Put a hold after each turn
 
         //robot.toggleJewelArm();
-        robot.driveStraight(DRIVE_SPEED, -15.0, 0.0);
+        robot.driveStraight(DRIVE_SPEED, 18.0, 0.0);
         //robot.toggleJewelArm();
         //robot.gyroTurn(TURN_SPEED, 90.0);
         //robot.gyroHold(TURN_SPEED, 90.0, 0.5);
