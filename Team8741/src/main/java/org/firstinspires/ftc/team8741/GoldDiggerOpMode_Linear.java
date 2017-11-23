@@ -50,19 +50,19 @@ public class GoldDiggerOpMode_Linear extends LinearOpMode {
             // Setting the motors to different joysticks of controller
                 robot.drive(-gamepad1.left_stick_y, -gamepad1.right_stick_y);
             if (gamepad1.right_trigger > 0.5) {
-                robot.glyphPull(-1, -1);
+                robot.glyphPull(-1);
             }
 
             else {
-                robot.glyphPull(0, 0);
+                robot.glyphPull(0);
             }
 
             if (gamepad1.right_bumper) {
-                robot.glyphPull(1, 1);
+                robot.glyphPull(1);
             }
 
             else {
-                robot.glyphPull(0, 0);
+                robot.glyphPull(0);
             }
             if (gamepad1.left_trigger >= 0.5){
                 robot.conveyor.setPower(.7);

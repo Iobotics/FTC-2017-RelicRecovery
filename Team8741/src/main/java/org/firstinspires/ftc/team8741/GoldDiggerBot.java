@@ -72,7 +72,7 @@ public class GoldDiggerBot {
         jewelServo = hwMap.get(Servo.class, "jewelServo");
 
 
-        //setting direction of motors and how they will spin
+        //setting direction of motors and ther behaviour
 
         leftBackDrive.setDirection(DcMotor.Direction.REVERSE);
         leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
@@ -83,13 +83,16 @@ public class GoldDiggerBot {
         conveyor.setDirection(DcMotor.Direction.REVERSE);
         jewelServo.setDirection(Servo.Direction.FORWARD);
 
-        /* setting motor behaviour */
+
 
         if(isAuto) {
             leftBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             leftFrontDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             rightBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             rightFrontDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        }
+        else {
+
         }
 
         initGyro();
@@ -102,14 +105,16 @@ public class GoldDiggerBot {
         rightBackDrive.setMode(mode);
         //set run mode of the motors
     }
-
+    //returns the encoder value on the left side
     public double getLeftEncoder() {
         return leftFrontDrive.getCurrentPosition();
     }
 
+    //returns the encoder value on the right
     public double getRightEncoder() {
         return rightFrontDrive.getCurrentPosition();
     }
+
 
     public void setLeftEncoder(double position) {
         leftFrontDrive.setTargetPosition(Math.round((float) position));
@@ -124,30 +129,39 @@ public class GoldDiggerBot {
         leftFrontDrive.setPower(leftPower);
         rightBackDrive.setPower(rightPower);
         rightFrontDrive.setPower(rightPower);
-        //sets power motors
+        //gives specified power to each side
     }
     public void stopDrive(){
         drive(0,0);
-        //stops the robot
+        //stops all motors
     }
 
-    public void glyphPull(double leftGlyphPower, double rightGlyphPower) {
-        leftGlyphPull.setPower(leftGlyphPower);
-        rightGlyphPull.setPower(rightGlyphPower);
+    public void glyphPull(double glyphPower) {
+        leftGlyphPull.setPower(glyphPower);
+        rightGlyphPull.setPower(glyphPower);
         //sets power to the intake
     }
     /*
     *Autonomously moves the bot forward a set number of inches
-    *@param inches sets the amount of inches the robot goes forward
-    * @param speed sets the speed the robot moves at
+    *@param inches sets the amount of inches the robot goes forward(positive) or backwards(negative)
+    * @param speed sets the speed the robot moves at no matter the direction
      */
     public void encoderDrive(double inches, double speed) {
         int target = rightFrontDrive.getCurrentPosition() + (int) (inches*COUNTS_PER_INCH);
-        drive(speed, speed );
-        while(rightFrontDrive.getCurrentPosition() <= target){
+        if (inches > 0) {
+            drive(speed, speed);
+            while (rightFrontDrive.getCurrentPosition() <= target) {
 
+            }
+            stopDrive();
         }
-        stopDrive();
+        if (inches < 0){
+            drive(-speed, -speed);
+            while (rightFrontDrive.getCurrentPosition() >= target) {
+
+            }
+            stopDrive();
+        }
     }
     void initGyro() {
         // Set up the parameters with which we will use our IMU. Note that integration
@@ -232,7 +246,7 @@ public class GoldDiggerBot {
             setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
             // start motion.
-            speed = Range.clip(Math.abs(speed), 0.0, 1.0);
+            speed = Range.clip(Math.abs(speed), 0.3, 1.0);
             drive(speed, speed);
 
             // keep looping while we are still active, and BOTH motors are running.
@@ -358,9 +372,6 @@ public class GoldDiggerBot {
         opMode.telemetry.addData("Speed.", "%5.2f:%5.2f", leftSpeed, rightSpeed);
 
         return onTarget;
-    }
-    public void turnGyro(int degrees, double speed){
-
     }
 }
 

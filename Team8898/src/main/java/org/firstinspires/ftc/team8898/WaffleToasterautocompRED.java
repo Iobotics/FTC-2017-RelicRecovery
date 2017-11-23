@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.view.View;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
@@ -17,10 +18,10 @@ import ftc.vision.BeaconColorResult;
 import static java.lang.System.currentTimeMillis;
 
 /**
- * Created by Teacher on 10/28/2017.
+ * Created by Matt Hockenberger and Jack Gonser on 10/28/2017.
 */
-@Autonomous (name = "AUTO(RED)(if auto fails)",group = "RED")
-public class WaffleToasterautocompRED extends WaffleToaster {
+@Autonomous (name = "AUTO(RED)",group = "RED")
+public class WaffleToasterautocompRED extends LinearOpMode {
     private DcMotor leftFront = null;
     private DcMotor leftBack = null;
     private DcMotor rightFront = null;
@@ -35,6 +36,62 @@ public class WaffleToasterautocompRED extends WaffleToaster {
     NormalizedColorSensor colorSensor;
     View relativeLayout;
 
+    /**
+     * Sets the two arm servos to a set position
+     * @param position
+     */
+    public void allServo(double position) {
+        leftServo.setPosition(position);
+        rightServo.setPosition(position);
+    }
+
+    /**
+     * Sets power to the four motors by left or right values
+     * @param leftPower
+     * @param rightPower
+     */
+    public void allDrive (double leftPower, double rightPower) {
+        leftBack.setPower(leftPower);
+        leftFront.setPower(leftPower);
+        rightFront.setPower(rightPower);
+        rightBack.setPower(rightPower);
+
+        if (leftPower == 0 && rightPower == 0) {
+            telemetry.addData("Robot is stopped.", "STOP");
+        } else if (leftPower > 0 && rightPower > 0) {
+            telemetry.addData("Robot is going forward.", "FORWARD");
+        } else if (leftPower < 0 && rightPower < 0) {
+            telemetry.addData("Robot is going backward.","BACKWARD");
+        } else {
+            telemetry.addData("Robot is operating abnormally or is turning.", "OTHER");
+        }
+        telemetry.update();
+    }
+
+    /**
+     * Turns the robot depending on the direction you set it to turn and the power you set it to go
+     * @param direction
+     * @param speed
+     */
+    public void turnDrive (String direction, double speed) {
+        direction = direction.toLowerCase();
+        if (direction == "left") {
+            leftFront.setPower(-speed);
+            leftBack.setPower(-speed);
+            rightFront.setPower(speed);
+            rightBack.setPower(speed);
+            telemetry.addData("Turning left by", speed + "power.");
+        } else if (direction == "right") {
+            leftFront.setPower(speed);
+            leftBack.setPower(speed);
+            rightFront.setPower(-speed);
+            rightBack.setPower(-speed);
+            telemetry.addData("Turning right by", speed + "power.");
+        } else {
+            telemetry.addData("Uh Oh", "Incorrect syntax");
+        }
+        telemetry.update();
+    }
 
     public void runOpMode()  { //set up for the phone tp
         leftFront = hardwareMap.get(DcMotor.class, "leftFront");
@@ -75,7 +132,6 @@ public class WaffleToasterautocompRED extends WaffleToaster {
         }
 
         waitForStart();
-
         leftServo.setPosition(0.25);
         rightServo.setPosition(0.25);
         jewelServo.setPosition(.4);
@@ -87,15 +143,9 @@ public class WaffleToasterautocompRED extends WaffleToaster {
         while(Color.red(color) < 3 && currentTimeMillis()- startTime < 900) {
             colors = colorSensor.getNormalizedColors();
             color = colors.toColor();
-            leftFront.setPower(0);
-            leftBack.setPower(0);
-            rightFront.setPower(0);
-            rightBack.setPower(0);
+            allDrive(0, 0);
         }
-        leftFront.setPower(0);
-        leftBack.setPower(0);
-        rightFront.setPower(0);
-        rightBack.setPower(0);
+        allDrive(0, 0);
         sleep(100);
         telemetry.addData("Red", Color.red(color));
         int timeDiff;
@@ -114,7 +164,11 @@ public class WaffleToasterautocompRED extends WaffleToaster {
         sleep(200);
 
         allDrive(0.4, 0.4);
-        sleep(1750-timeDiff);
+        sleep(1850-timeDiff);
+        turnDrive("right", 0.4);
+        sleep(300);
         allDrive(0,0);
+        leftServo.setPosition(0);
+        rightServo.setPosition(0);
     }
 }
