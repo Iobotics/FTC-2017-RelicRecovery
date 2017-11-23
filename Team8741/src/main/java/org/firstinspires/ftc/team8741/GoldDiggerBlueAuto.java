@@ -17,7 +17,7 @@ import ftc.vision.JewelColorResult;
 /**
  * Created by Joshua Taufahema on 10/16/2017.
  */
-@Autonomous (name = "Gold Digger Blue Auto", group = "Linear Opmode")
+@Autonomous (name = "Gold Digger Blue Auto 1", group = "Linear Opmode")
 //@Disabled
 public class GoldDiggerBlueAuto extends LinearOpMode {
     GoldDiggerBot robot = new GoldDiggerBot(this);
@@ -58,8 +58,9 @@ public class GoldDiggerBlueAuto extends LinearOpMode {
             robot.jewelServo.setPosition(robot.JEWEL_ARM_UP);
             robot.encoderDrive(25, 0.4);
         } else {
+
             robot.encoderDrive(24, 0.4);
-        }
+       }
 
         robot.gyroTurn(0.4, -45);
 
@@ -72,7 +73,7 @@ public class GoldDiggerBlueAuto extends LinearOpMode {
 
         robot.glyphPull(0, 0);
 
-        robot.encoderDrive(-5, -0.4);
+        robot.encoderDrive(-10, -0.4);
 
 
 

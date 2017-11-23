@@ -27,13 +27,12 @@ public class EncoderTester extends LinearOpMode {
           if (gamepad1.x){
               pos += 0.01;
               robot.jewelServo.setPosition(pos);
-              telemetry.addData("Position", pos);
           }
             if (gamepad1.y){
                 pos -= 0.01;
                 robot.jewelServo.setPosition(pos);
-                telemetry.addData("Position", pos);
             }
+            telemetry.addData("Position", pos);
         }
     }
 }

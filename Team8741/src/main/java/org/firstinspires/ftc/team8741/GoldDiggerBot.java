@@ -45,7 +45,7 @@ public class GoldDiggerBot {
     private final static double HEADING_THRESHOLD = 1;      // As tight as we can make it with an integer gyro
     private final static double P_TURN_COEFF       = 0.1;     // Larger is more responsive, but also less stable
     private final static double P_DRIVE_COEFF      = 0.1;    // Larger is more responsive, but also less stable
-    public final double JEWEL_ARM_DOWN      = -1;
+    public final double JEWEL_ARM_DOWN      = 0.6;
     public final double JEWEL_ARM_UP    = 0;
 
     private HardwareMap hwMap = null;

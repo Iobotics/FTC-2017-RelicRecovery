@@ -16,9 +16,10 @@ import ftc.vision.JewelColorResult;
 /**
  * Created by Joshua Taufahema on 11/8/2017.
  */
-@Autonomous (name = "Gold Digger Auto 2jj", group = "Linear Opmode")
+
+@Autonomous (name = "Gold Digger Blue Auto 2", group = "Linear Opmode")
 //@Disabled
-        public class GoldDiggerBlue2 extends LinearOpMode {
+        public class GoldDiggerBlueAutoTwo extends LinearOpMode {
             GoldDiggerBot robot = new GoldDiggerBot(this);
 
     @Override
@@ -41,6 +42,8 @@ import ftc.vision.JewelColorResult;
 
         telemetry.addData("Result", result); //Display it on telemetry
         telemetry.update();
+
+
 //wait before quitting (quitting clears telemetry)
         Thread.sleep(1000);
 
