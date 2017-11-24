@@ -85,11 +85,7 @@ public class Team8740_Teleop extends LinearOpMode {
             if (gamepad1.a) {
                 robot.toggleIntakeClaws();
                 robot.pushGlyph();
-                sleep(1430);
-                robot.retractGlyph();
-                sleep(1430);
                 robot.toggleIntakeClaws();
-                robot.stopGlyph();
             }
 
             // Use gamepad B or X to toggle all outtakes
@@ -97,12 +93,8 @@ public class Team8740_Teleop extends LinearOpMode {
                 robot.toggleIntakeClaws();
                 robot.reverseIntake();
                 robot.pushGlyph();
-                sleep(1430);
                 robot.stopIntake();
-                robot.retractGlyph();
-                sleep(1430);
                 robot.toggleIntakeClaws();
-                robot.stopGlyph();
             }
 
             /* GAMEPAD 2 CONTROLS */
@@ -128,12 +120,10 @@ public class Team8740_Teleop extends LinearOpMode {
 
             if (gamepad2.x) {
                 robot.toggleRelicClaw();
-                sleep(75);
             }
 
             if (gamepad2.y) {
                 robot.toggleProgramAssist();
-                sleep(75);
             }
 
             // Pause for 10 mS each cycle = update 100 times a second.

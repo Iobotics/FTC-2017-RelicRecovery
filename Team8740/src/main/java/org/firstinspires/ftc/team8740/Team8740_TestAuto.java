@@ -77,7 +77,7 @@ public class Team8740_TestAuto extends LinearOpMode {
 
     // These constants define the desired driving/control characteristics
     // The can/should be tweaked to suite the specific robot drive train.
-    static final double DRIVE_SPEED = 0.5;     // Nominal speed for better accuracy.
+    static final double DRIVE_SPEED = 0.4;     // Nominal speed for better accuracy.
     static final double TURN_SPEED = 0.4;     // Nominal half speed for better accuracy.
 
     @Override
@@ -122,13 +122,16 @@ public class Team8740_TestAuto extends LinearOpMode {
         // Put a hold after each turn
 
         //robot.toggleJewelArm();
-        robot.driveStraight(DRIVE_SPEED, 18.0, 0.0);
+        robot.driveStraight(DRIVE_SPEED, 12.0, 0.0);
+        sleep(1000);
+        robot.driveStraight(DRIVE_SPEED, -12.0, 0.0);
+        sleep(1000);
         //robot.toggleJewelArm();
-        //robot.gyroTurn(TURN_SPEED, 90.0);
-        //robot.gyroHold(TURN_SPEED, 90.0, 0.5);
+        robot.gyroTurn(TURN_SPEED, -90.0);
+        robot.gyroHold(TURN_SPEED, -90.0, 0.5);
         //robot.driveStraight(DRIVE_SPEED, -12.0, 90.0);
-        //robot.gyroTurn(TURN_SPEED, 180.0);
-        //robot.gyroHold(TURN_SPEED, 180.0, 0.5);
+        robot.gyroTurn(TURN_SPEED, 180.0);
+        robot.gyroHold(TURN_SPEED, 180.0, 0.5);
         //robot.driveStraight(DRIVE_SPEED, 6.0, 180.0);
         //robot.jewelKnock();
     }
