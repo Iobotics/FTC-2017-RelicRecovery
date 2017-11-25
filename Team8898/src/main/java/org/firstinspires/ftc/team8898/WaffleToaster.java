@@ -10,6 +10,11 @@ import com.qualcomm.robotcore.hardware.Servo;
 /**
  * Created by Jack Gonser on 10/9/2017.
  * yay
+ * hi
+ * I SAID HE HE HE HE HE HEH AHA WHATS GOING ON? -heman
+ * tyler is a person :0
+ * FAT SANTA BOIIIISSSS
+ * #EatLessKatelyn
  */
 
 @TeleOp(name = "WaffleTeleOp", group = "TeleOp")
@@ -55,22 +60,31 @@ public class WaffleToaster extends LinearOpMode {
      * @param rightPower
      */
     public void allDrive (double leftPower, double rightPower) {
-        leftBack.setPower(leftPower);
-        leftFront.setPower(leftPower);
-        rightFront.setPower(rightPower);
-        rightBack.setPower(rightPower);
 
-        if (leftPower == 0 && rightPower == 0) {
-            telemetry.addData("Robot is stopped.", "STOP");
-        } else if (leftPower > 0 && rightPower > 0) {
-            telemetry.addData("Robot is going forward.", "FORWARD");
-        } else if (leftPower < 0 && rightPower < 0) {
-            telemetry.addData("Robot is going backward.","BACKWARD");
-        } else {
-            telemetry.addData("Robot is operating abnormally or is turning.", "OTHER");
+        if (leftPower == 0 && (rightPower < 0 || rightPower > 0)) {
+            rightPower = leftPower;
+            telemetry.addData("BURNOUTS","STOP NOW");
+        } else if (rightPower == 0 && (leftPower < 0 || rightPower > 0)) {
+            leftPower = rightPower;
+            telemetry.addData("BURNOUTS","STOP NOW");
+            telemetry.addData("Automatic Burnout Protection","");
         }
-        telemetry.update();
-    }
+            leftBack.setPower(leftPower);
+            leftFront.setPower(leftPower);
+            rightFront.setPower(rightPower);
+            rightBack.setPower(rightPower);
+
+            if (leftPower == 0 && rightPower == 0) {
+                telemetry.addData("Robot is stopped.", "STOP");
+            } else if (leftPower > 0 && rightPower > 0) {
+                telemetry.addData("Robot is going forward.", "FORWARD");
+            } else if (leftPower < 0 && rightPower < 0) {
+                telemetry.addData("Robot is going backward.", "BACKWARD");
+            } else {
+                telemetry.addData("Robot is operating abnormally or is turning.", "OTHER");
+            }
+            telemetry.update();
+        }
 
     /**
      * Turns the robot depending on the direction you set it to turn and the power you set it to go

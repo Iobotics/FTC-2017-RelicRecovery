@@ -1,63 +1,98 @@
 package org.firstinspires.ftc.team8898;
 
+import android.app.Activity;
+import android.graphics.Color;
+import android.view.View;
+
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.I2cDevice;
+import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
+import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.SwitchableLight;
 
-
-import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
-
-import ftc.vision.BeaconColorResult;
-import ftc.vision.FrameGrabber;
-import ftc.vision.ImageProcessorResult;
+import static java.lang.System.currentTimeMillis;
 
 /**
- * Created by Jack Gonser on 10/16/2017.
-*/
-@Autonomous(name = "WaffleToasterAutoRED", group = "Auto")
-//@Disabled
+ * Created by Matt Hockenberger and Jack Gonser on 10/28/2017.
+ */
+@Autonomous (name = "AUTO(RED)(Back Glyph Box)",group = "RED")
 public class WaffleToasterAuto extends LinearOpMode {
     private DcMotor leftFront = null;
     private DcMotor leftBack = null;
     private DcMotor rightFront = null;
     private DcMotor rightBack = null;
-
+    // creates arm variable
     private DcMotor arm = null;
-
+    // sets up variable for the arm servos
     private Servo leftServo = null;
     private Servo rightServo = null;
-
+    // sets up variable for the jewel servo
     private Servo jewelServo = null;
-    private ColorSensor colorSensor = null;
+    NormalizedColorSensor colorSensor;
+    View relativeLayout;
 
-    private BeaconColorResult.BeaconColor leftColorCheck = null;
-    private BeaconColorResult.BeaconColor rightColorCheck = null;
-    //sets basic variables to set servos and motors to
-    private float stop = 0;
-    private float forward = 1;
-    private float backward = -1;
-    private float halfBack = -0.5f;
-    private float halfForward = 0.5f;
-
-    long millis = System.currentTimeMillis() % 1000;
-    long millisReset;
-    boolean openRight = false;
-    boolean openLeft = false;
-    public int secondsToMillis(double seconds) {return (int) seconds * 1000;}
-
-    public void allDrive(float speed) {
-        leftFront.setPower(speed);
-        leftBack.setPower(speed);
-        rightFront.setPower(speed);
-        rightBack.setPower(speed);
+    /**
+     * Sets the two arm servos to a set position
+     * @param position
+     */
+    public void allServo(double position) {
+        leftServo.setPosition(position);
+        rightServo.setPosition(position);
     }
 
-    public void runOpMode() throws InterruptedException {
+    /**
+     * Sets power to the four motors by left or right values
+     * @param leftPower
+     * @param rightPower
+     */
+    public void allDrive (double leftPower, double rightPower) {
+        leftBack.setPower(leftPower);
+        leftFront.setPower(leftPower);
+        rightFront.setPower(rightPower);
+        rightBack.setPower(rightPower);
+
+        if (leftPower == 0 && rightPower == 0) {
+            telemetry.addData("Robot is stopped.", "STOP");
+        } else if (leftPower > 0 && rightPower > 0) {
+            telemetry.addData("Robot is going forward.", "FORWARD");
+        } else if (leftPower < 0 && rightPower < 0) {
+            telemetry.addData("Robot is going backward.","BACKWARD");
+        } else {
+            telemetry.addData("Robot is operating abnormally or is turning.", "OTHER");
+        }
+        telemetry.update();
+    }
+
+    /**
+     * Turns the robot depending on the direction you set it to turn and the power you set it to go
+     * @param direction
+     * @param speed
+     */
+    public void turnDrive (String direction, double speed) {
+        direction = direction.toLowerCase();
+        if (direction.equals("left")) {
+            leftFront.setPower(-speed);
+            leftBack.setPower(-speed);
+            rightFront.setPower(speed);
+            rightBack.setPower(speed);
+            telemetry.addData("Turning left by", speed + "power.");
+        } else if (direction.equals("right")) {
+            leftFront.setPower(speed);
+            leftBack.setPower(speed);
+            rightFront.setPower(-speed);
+            rightBack.setPower(-speed);
+            telemetry.addData("Turning right by", speed + "power.");
+        } else {
+            telemetry.addData("Uh Oh", "Incorrect syntax");
+        }
+        telemetry.update();
+    }
+
+    public void runOpMode()  { //set up for the phone tp
         leftFront = hardwareMap.get(DcMotor.class, "leftFront");
         leftBack = hardwareMap.get(DcMotor.class, "leftBack");
         rightFront = hardwareMap.get(DcMotor.class, "rightFront");
@@ -69,12 +104,16 @@ public class WaffleToasterAuto extends LinearOpMode {
         rightServo = hardwareMap.get(Servo.class, "rightServo");
 
         jewelServo = hardwareMap.get(Servo.class, "jewelServo");
-        colorSensor = hardwareMap.get(ColorSensor.class, "colorSensor");
 
-        leftFront.setDirection(DcMotorSimple.Direction.FORWARD);
-        leftBack.setDirection(DcMotorSimple.Direction.FORWARD);
-        rightBack.setDirection(DcMotorSimple.Direction.REVERSE);
-        rightFront.setDirection(DcMotorSimple.Direction.REVERSE);
+        int relativeLayoutId = hardwareMap.appContext.getResources().getIdentifier("RelativeLayout", "id", hardwareMap.appContext.getPackageName());
+        relativeLayout = ((Activity) hardwareMap.appContext).findViewById(relativeLayoutId);
+
+
+
+        leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
+        leftBack.setDirection(DcMotorSimple.Direction.REVERSE);
+        rightBack.setDirection(DcMotorSimple.Direction.FORWARD);
+        rightFront.setDirection(DcMotorSimple.Direction.FORWARD);
 
         arm.setDirection(DcMotorSimple.Direction.FORWARD);
 
@@ -83,43 +122,44 @@ public class WaffleToasterAuto extends LinearOpMode {
 
         jewelServo.setDirection(Servo.Direction.FORWARD);
 
+        colorSensor = hardwareMap.get(NormalizedColorSensor.class, "colorSensor");
+
+        // If possible, turn the light on in the beginning (it might already be on anyway,
+        // we just make sure it is if we can).
+        if (colorSensor instanceof SwitchableLight) {
+            ((SwitchableLight)colorSensor).enableLight(true);
+        }
 
         waitForStart();
-
-
-        colorSensor.enableLed(true); //activate Led on color sensor
-        jewelServo.setPosition(stop); //drop jewel arm
+        leftServo.setPosition(0.25);
+        rightServo.setPosition(0.25);
+        jewelServo.setPosition(.4);
+        arm.setPower(0.25);
         sleep(500);
-        if (colorSensor.blue() >= 128) { //Sense
-            telemetry.addData("Going for the jewel on the left.", "Blue Jewel is on the right");
-            telemetry.addData("Jewel Arm Down", "");
-            telemetry.update();
-            leftServo.setPosition(0.25);
-            rightServo.setPosition(0.25);
-            arm.setPower(0.25);
-            Thread.sleep(secondsToMillis(0.5));
-            arm.setPower(stop);
-            allDrive(halfBack);
-            Thread.sleep(secondsToMillis(0.25));
-            jewelServo.setPosition(stop);
-            Thread.sleep(secondsToMillis(0.25));
-            allDrive(halfForward);
-            Thread.sleep(secondsToMillis(2.5));
-            allDrive(stop);
-        } else if (colorSensor.blue() < 128) { //senses if the blue jewel is on the left
-            telemetry.addData("Going for the jewel on the left.", "Blue Jewel is on the left");//adds data to package to send towards the driver station
-            telemetry.update();//sends package to the driver station
-            leftServo.setPosition(0.25);
-            rightServo.setPosition(0.25);
-            arm.setPower(0.25);
-            Thread.sleep(secondsToMillis(0.5));
-            arm.setPower(stop);
-            allDrive(halfForward);
-            jewelServo.setPosition(stop);
-            Thread.sleep(secondsToMillis(2));
-            allDrive(stop);
+        NormalizedRGBA colors = colorSensor.getNormalizedColors();
+        int color = colors.toColor();
+        long startTime = currentTimeMillis();
+        while(Color.red(color) < 3 && currentTimeMillis()- startTime < 900) {
+            colors = colorSensor.getNormalizedColors();
+            color = colors.toColor();
+            allDrive(0, 0);
         }
-        telemetry.update();
-    }
+        allDrive(0, 0);
+        sleep(100);
+        telemetry.addData("Red", Color.red(color));
+        int timeDiff;
+        if(Color.red(color) < 3){
+            allDrive(-0.4,-0.4);
+            timeDiff = -350;
+        }
+        else{
+            allDrive(0.4,0.4);
+            timeDiff = 350;
+        }
+        sleep(500);
 
+        allDrive(0,0);
+        jewelServo.setPosition(1);
+        sleep(1000);
+    }
 }

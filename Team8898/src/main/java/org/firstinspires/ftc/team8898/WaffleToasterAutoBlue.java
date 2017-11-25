@@ -1,24 +1,26 @@
 package org.firstinspires.ftc.team8898;
 
+import android.app.Activity;
+import android.graphics.Color;
+import android.view.View;
+
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
+import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.SwitchableLight;
 
-import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
-
-import ftc.vision.BeaconColorResult;
-import ftc.vision.FrameGrabber;
-import ftc.vision.ImageProcessorResult;
+import static java.lang.System.currentTimeMillis;
 
 /**
- * Created by Jack Gonser on 10/16/2017.
-*/
-@Autonomous (name = "WaffleToasterAutoBlue", group = "WaffleAuto")
-@Disabled
-public class WaffleToasterAutoBlue extends WaffleToasterAuto
-{   // sets up the basic wheel variables
+ * Created by Matt Hockenberger and Jack Gonser on 10/28/2017.
+ */
+@Autonomous (name = "AUTO(BLUE)(Back Glyph Box)",group = "BLUE")
+public class WaffleToasterAutoBlue extends LinearOpMode {
     private DcMotor leftFront = null;
     private DcMotor leftBack = null;
     private DcMotor rightFront = null;
@@ -30,20 +32,66 @@ public class WaffleToasterAutoBlue extends WaffleToasterAuto
     private Servo rightServo = null;
     // sets up variable for the jewel servo
     private Servo jewelServo = null;
+    NormalizedColorSensor colorSensor;
+    View relativeLayout;
+    /**
+     * Sets the two arm servos to a set position
+     * @param position
+     */
+    public void allServo(double position) {
+        leftServo.setPosition(position);
+        rightServo.setPosition(position);
+    }
 
-    private BeaconColorResult.BeaconColor leftColorCheck = null;
-    private BeaconColorResult.BeaconColor rightColorCheck = null;
-    //sets basic variables to set servos and motors to
-    private float stop = 0;
-    private float forward = 1;
-    private float backward = -1;
-    private float halfBack = -0.5f;
-    private float halfForward = 0.5f;
+    /**
+     * Sets power to the four motors by left or right values
+     * @param leftPower
+     * @param rightPower
+     */
+    public void allDrive (double leftPower, double rightPower) {
+        leftBack.setPower(leftPower);
+        leftFront.setPower(leftPower);
+        rightFront.setPower(rightPower);
+        rightBack.setPower(rightPower);
 
-    private int halfSec = 500;
-    private int sec = 1000;
+        if (leftPower == 0 && rightPower == 0) {
+            telemetry.addData("Robot is stopped.", "STOP");
+        } else if (leftPower > 0 && rightPower > 0) {
+            telemetry.addData("Robot is going forward.", "FORWARD");
+        } else if (leftPower < 0 && rightPower < 0) {
+            telemetry.addData("Robot is going backward.","BACKWARD");
+        } else {
+            telemetry.addData("Robot is operating abnormally or is turning.", "OTHER");
+        }
+        telemetry.update();
+    }
 
-    public void runOpMode ()  throws InterruptedException{ //set up for the phone tp
+    /**
+     * Turns the robot depending on the direction you set it to turn and the power you set it to go
+     * @param direction
+     * @param speed
+     */
+    public void turnDrive (String direction, double speed) {
+        direction = direction.toLowerCase();
+        if (direction == "left") {
+            leftFront.setPower(-speed);
+            leftBack.setPower(-speed);
+            rightFront.setPower(speed);
+            rightBack.setPower(speed);
+            telemetry.addData("Turning left by", speed + "power.");
+        } else if (direction == "right") {
+            leftFront.setPower(speed);
+            leftBack.setPower(speed);
+            rightFront.setPower(-speed);
+            rightBack.setPower(-speed);
+            telemetry.addData("Turning right by", speed + "power.");
+        } else {
+            telemetry.addData("Uh Oh", "Incorrect syntax");
+        }
+        telemetry.update();
+    }
+
+    public void runOpMode() { //set up for the phone tp
         leftFront = hardwareMap.get(DcMotor.class, "leftFront");
         leftBack = hardwareMap.get(DcMotor.class, "leftBack");
         rightFront = hardwareMap.get(DcMotor.class, "rightFront");
@@ -55,6 +103,11 @@ public class WaffleToasterAutoBlue extends WaffleToasterAuto
         rightServo = hardwareMap.get(Servo.class, "rightServo");
 
         jewelServo = hardwareMap.get(Servo.class, "jewelServo");
+
+        int relativeLayoutId = hardwareMap.appContext.getResources().getIdentifier("RelativeLayout", "id", hardwareMap.appContext.getPackageName());
+        relativeLayout = ((Activity) hardwareMap.appContext).findViewById(relativeLayoutId);
+
+
 
         leftFront.setDirection(DcMotorSimple.Direction.FORWARD);
         leftBack.setDirection(DcMotorSimple.Direction.FORWARD);
@@ -68,57 +121,45 @@ public class WaffleToasterAutoBlue extends WaffleToasterAuto
 
         jewelServo.setDirection(Servo.Direction.FORWARD);
 
-        waitForStart();
-        while (opModeIsActive()) {
-            waitForStart();
+        colorSensor = hardwareMap.get(NormalizedColorSensor.class, "colorSensor");
 
-            FrameGrabber frameGrabber = FtcRobotControllerActivity.frameGrabber; //Get the
-
-            frameGrabber.grabSingleFrame(); //Tell it to grab a frame
-            while (!frameGrabber.isResultReady()) { //Wait for the result
-                Thread.sleep(5); //sleep for 5 milliseconds
-            }
-            //Get the result
-            ImageProcessorResult imageProcessorResult = frameGrabber.getResult();
-            BeaconColorResult result = (BeaconColorResult) imageProcessorResult.getResult();
-            BeaconColorResult.BeaconColor leftColor = result.getLeftColor();
-            BeaconColorResult.BeaconColor rightColor = result.getRightColor();
-            telemetry.addData("Result", leftColor); //Display it on telemetry
-            telemetry.update();
-
-            rightColorCheck = rightColor;
-            leftColorCheck = leftColor;
-
-            if (leftColorCheck == BeaconColorResult.BeaconColor.BLUE) { //senses if the red jewel is on the left
-                telemetry.addData("Going for the jewel on the left.","Blue Jewel is on the right");
-                telemetry.update();
-                leftServo.setPosition(0.25);
-                rightServo.setPosition(0.25);
-                jewelServo.setPosition(forward);
-                arm.setPower(0.25);
-                Thread.sleep(secondsToMillis(0.5));
-                arm.setPower(0);
-                allDrive(halfBack);
-                Thread.sleep(secondsToMillis(0));
-                jewelServo.setPosition(backward);
-                Thread.sleep(secondsToMillis(0.5));
-                allDrive(halfForward);
-                Thread.sleep(secondsToMillis(2.5));
-                allDrive(stop);
-            } else if (rightColorCheck == BeaconColorResult.BeaconColor.BLUE) { //senses if the blue jewel is on the left
-                telemetry.addData("Going for the jewel on the left.","Blue Jewel is on the left");//adds data to package to send towards the driver station
-                telemetry.update();//sends package to the driver station
-                leftServo.setPosition(0.25);
-                rightServo.setPosition(0.25);
-                jewelServo.setPosition(forward);
-                arm.setPower(0.25);
-                Thread.sleep(secondsToMillis(0.5));
-                arm.setPower(0);
-                allDrive(halfForward);
-                Thread.sleep(secondsToMillis(2));
-                jewelServo.setPosition(stop);
-                allDrive(stop);
-            }
+        // If possible, turn the light on in the beginning (it might already be on anyway,
+        // we just make sure it is if we can).
+        if (colorSensor instanceof SwitchableLight) {
+            ((SwitchableLight)colorSensor).enableLight(true);
         }
+
+        waitForStart();
+
+        leftServo.setPosition(0.25);
+        rightServo.setPosition(0.25);
+        jewelServo.setPosition(.4);
+        arm.setPower(0.25);
+        sleep(500);
+        NormalizedRGBA colors = colorSensor.getNormalizedColors();
+        int color = colors.toColor();
+        long startTime = currentTimeMillis();
+        while(Color.red(color) <= 3 && currentTimeMillis()- startTime < 500) {
+            colors = colorSensor.getNormalizedColors();
+            color = colors.toColor();
+            allDrive(0,0);
+        }
+        allDrive(0,0);
+        sleep(100);
+        int timeDiff;
+        telemetry.addData("Red", Color.red(color));
+        if(Color.red(color) > 3){
+            allDrive(.4, .4);
+            timeDiff = -300;
+        }
+        else{
+            allDrive(-.4,-.4);
+            timeDiff = 550;
+        }
+        sleep(400);
+
+        allDrive(0,0);
+        jewelServo.setPosition(1);
+        sleep(1000);
     }
 }

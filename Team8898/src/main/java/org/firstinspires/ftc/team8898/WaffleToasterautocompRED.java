@@ -13,14 +13,12 @@ import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.SwitchableLight;
 
-import ftc.vision.BeaconColorResult;
-
 import static java.lang.System.currentTimeMillis;
 
 /**
  * Created by Matt Hockenberger and Jack Gonser on 10/28/2017.
 */
-@Autonomous (name = "AUTO(RED)",group = "RED")
+@Autonomous (name = "AUTO(RED)(Audience side)",group = "RED")
 public class WaffleToasterautocompRED extends LinearOpMode {
     private DcMotor leftFront = null;
     private DcMotor leftBack = null;
