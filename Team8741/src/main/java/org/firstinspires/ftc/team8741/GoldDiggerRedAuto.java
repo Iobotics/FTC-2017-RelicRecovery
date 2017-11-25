@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.team8741;
 
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
@@ -11,7 +12,7 @@ import ftc.vision.JewelColorResult;
 /**
  * Created by student on 11/20/2017.
  */
-
+@Autonomous(name = "Gold Digger Red Auto 1", group = "Linear Opmode")
 public class GoldDiggerRedAuto extends LinearOpMode {
     GoldDiggerBot robot = new GoldDiggerBot(this);
 
@@ -55,9 +56,9 @@ public class GoldDiggerRedAuto extends LinearOpMode {
         robot.encoderDrive(24, 0.4);
         //}
 
-        robot.gyroTurn(0.5, 45);
+        //robot.gyroTurn(0.5, 45);
 
-        robot.gyroHold(0.5, 45, 0.5);
+        robot.gyroHold(0.5, 45, 2);
 
         robot.encoderDrive(9, 0.4);
 
@@ -68,9 +69,9 @@ public class GoldDiggerRedAuto extends LinearOpMode {
 
         robot.encoderDrive(-11, 0.4);
 
-        robot.gyroTurn(0.5, 90);
+        //robot.gyroTurn(0.5, 90);
 
-        robot.gyroHold(0.5, 90, 0.5);
+        robot.gyroHold(0.5, 90, 2);
 
         robot.encoderDrive(9, 0.4);
     }

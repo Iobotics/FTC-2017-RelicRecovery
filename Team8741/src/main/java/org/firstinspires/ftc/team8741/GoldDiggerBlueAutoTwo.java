@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.team8741;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -46,6 +47,15 @@ import ftc.vision.JewelColorResult;
 
 //wait before quitting (quitting clears telemetry)
         Thread.sleep(1000);
+
+        robot.encoderDrive(0.4, 24);
+        robot.gyroTurn(0.4, 90);
+        robot.gyroHold(0.4, 90, 0.5);
+        robot.encoderDrive(10, 0.4);
+        robot.glyphPull(-1);
+        Thread.sleep(1000);
+        robot.glyphPull(0);
+        robot.encoderDrive(-7, 0.4);
     }
 
 }

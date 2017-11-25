@@ -43,8 +43,8 @@ public class GoldDiggerBot {
     private final int WHEEL_DIAMETER = 4;
     private final double COUNTS_PER_INCH = TICKS_PER_REV / (Math.PI * WHEEL_DIAMETER);
     private final static double HEADING_THRESHOLD = 1;      // As tight as we can make it with an integer gyro
-    private final static double P_TURN_COEFF       = 0.1;     // Larger is more responsive, but also less stable
-    private final static double P_DRIVE_COEFF      = 0.1;    // Larger is more responsive, but also less stable
+    private final static double P_TURN_COEFF       = 0.07;     // Larger is more responsive, but also less stable
+    private final static double P_DRIVE_COEFF      = 0.07;    // Larger is more responsive, but also less stable
     public final double JEWEL_ARM_DOWN      = 0.6;
     public final double JEWEL_ARM_UP    = 0;
 
@@ -53,6 +53,7 @@ public class GoldDiggerBot {
     private BNO055IMU imu = null;
     private Orientation angles   = null;
     private Acceleration gravity = null;
+
 
     public GoldDiggerBot(LinearOpMode opMode){
         this.opMode = opMode;
@@ -83,13 +84,13 @@ public class GoldDiggerBot {
         conveyor.setDirection(DcMotor.Direction.REVERSE);
         jewelServo.setDirection(Servo.Direction.FORWARD);
 
-
-
+        /*sets Behaviour of the motors depending on the type of Opmode
+        if it is auto then brake
+        if it is TeleOp then use default
+        TODO: Determine which is prefered, default or float
+        */
         if(isAuto) {
-            leftBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            leftFrontDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            rightBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            rightFrontDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+           setZeroPower(DcMotor.ZeroPowerBehavior.BRAKE);
         }
         else {
 
@@ -97,13 +98,13 @@ public class GoldDiggerBot {
 
         initGyro();
     }
+    //set run mode of the motors
 
     public void setMode(DcMotor.RunMode mode){
         leftBackDrive.setMode(mode);
         leftFrontDrive.setMode(mode);
         rightFrontDrive.setMode(mode);
         rightBackDrive.setMode(mode);
-        //set run mode of the motors
     }
     //returns the encoder value on the left side
     public double getLeftEncoder() {
@@ -123,17 +124,23 @@ public class GoldDiggerBot {
     public void setRightEncoder(double position) {
         rightFrontDrive.setTargetPosition(Math.round((float) position));
     }
-
+    //set the behaviour for all drive motors
+    public void setZeroPower(DcMotor.ZeroPowerBehavior behavior){
+        leftBackDrive.setZeroPowerBehavior(behavior);
+        leftFrontDrive.setZeroPowerBehavior(behavior);
+        rightBackDrive.setZeroPowerBehavior(behavior);
+        rightFrontDrive.setZeroPowerBehavior(behavior);
+    }
+    //gives specified power to each side
     public void drive(double leftPower, double rightPower) {
         leftBackDrive.setPower(leftPower);
         leftFrontDrive.setPower(leftPower);
         rightBackDrive.setPower(rightPower);
         rightFrontDrive.setPower(rightPower);
-        //gives specified power to each side
     }
+    //stops all motors
     public void stopDrive(){
         drive(0,0);
-        //stops all motors
     }
 
     public void glyphPull(double glyphPower) {
@@ -147,18 +154,21 @@ public class GoldDiggerBot {
     * @param speed sets the speed the robot moves at no matter the direction
      */
     public void encoderDrive(double inches, double speed) {
+        //sets the target encoder value
         int target = rightFrontDrive.getCurrentPosition() + (int) (inches*COUNTS_PER_INCH);
+        //if positive move forward to meet the value
         if (inches > 0) {
             drive(speed, speed);
             while (rightFrontDrive.getCurrentPosition() <= target) {
-
+            //pauses the robot while moving forward
             }
             stopDrive();
         }
-        if (inches < 0){
+        //if negative move backwards
+        else if (inches < 0){
             drive(-speed, -speed);
             while (rightFrontDrive.getCurrentPosition() >= target) {
-
+            //pauses the robot while moving back
             }
             stopDrive();
         }

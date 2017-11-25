@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.team8741;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -9,17 +10,17 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
 
-import ftc.vision.BeaconColorResult;
 import ftc.vision.FrameGrabber;
 import ftc.vision.ImageProcessorResult;
 import ftc.vision.JewelColorResult;
 
 /**
- * Created by Joshua Taufahema on 10/16/2017.
+ * Created by Joshua Taufahema on 11/8/2017.
  */
-@Autonomous (name = "Gold Digger Blue Auto 1", group = "Linear Opmode")
-//@Disabled
-public class GoldDiggerBlueAuto extends LinearOpMode {
+
+@Autonomous (name = "Gold Digger Red Auto 2", group = "Linear Opmode")
+//Disabled
+public class GoldDiggerRedAutoTwo extends LinearOpMode {
     GoldDiggerBot robot = new GoldDiggerBot(this);
 
     @Override
@@ -42,46 +43,19 @@ public class GoldDiggerBlueAuto extends LinearOpMode {
 
         telemetry.addData("Result", result); //Display it on telemetry
         telemetry.update();
+
+
 //wait before quitting (quitting clears telemetry)
         Thread.sleep(1000);
-    /*
-            if (rightColor == JewelColorResult.JewelColor.BLUE && leftColor == JewelColorResult.JewelColor.RED){
-                robot.jewelServo.setPosition(robot.JEWEL_ARM_DOWN);
-                robot.encoderDrive(1, 0.4);
-                robot.jewelServo.setPosition(robot.JEWEL_ARM_UP);
-                robot.encoderDrive(23, 0.4);
 
-            }
-            else if (leftColor == JewelColorResult.JewelColor.BLUE && rightColor == JewelColorResult.JewelColor.RED){
-                robot.jewelServo.setPosition(robot.JEWEL_ARM_DOWN);
-                robot.encoderDrive(-1, 0.4);
-                robot.jewelServo.setPosition(robot.JEWEL_ARM_UP);
-                robot.encoderDrive(25, 0.4);
-            } else {
-    */      //drives forward 24 inches no jewels are found
-            robot.encoderDrive(24, 0.4);
-       //}
-        //turns 45 degrees clockwise to line up with cryptobox
-        //robot.gyroTurn(0.4, -45);
-        robot.gyroHold(0.4, -45, 2);
-
-        //drives forward to meet box
-        robot.encoderDrive(9, 0.4);
-
-        //outtakes Glyph
+        robot.encoderDrive(0.4, 24);
+        robot.gyroTurn(0.4, -90);
+        robot.gyroHold(0.4, -90, 0.5);
+        robot.encoderDrive(10, 0.4);
         robot.glyphPull(-1);
         Thread.sleep(1000);
         robot.glyphPull(0);
-
-        //drives back out of zone
-        robot.encoderDrive(-11, 0.4);
-
-        //Turns another 45 degrees to line up with the safe zone
-        //robot.gyroTurn(0.4, -90);
-        robot.gyroHold(0.4, -90, 2);
-
-        //drives back into zone
-        robot.encoderDrive(9, 0.4);
-
+        robot.encoderDrive(-7, 0.4);
     }
+
 }
