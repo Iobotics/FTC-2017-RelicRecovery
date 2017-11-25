@@ -77,21 +77,20 @@ public class Team8740_Base {
     public final static double JEWEL_SERVO_HOME = 0.45;
     public final static double JEWEL_SERVO_DOWN = 0.85;
 
-    // TODO - Find relic servo positions
     public final static double RELIC_WRIST_DOWN = 0.77;
     public final static double RELIC_WRIST_UP = 0.0;
 
     private final static double RELIC_CLAW_CLOSED = 0.0;
     private final static double RELIC_CLAW_OPEN = 1.0;
 
-    private final static double LOW_SPEED = 0.5;
-    private final static double HIGH_SPEED = 0.8;
+    private final static double LOW_SPEED = 0.4;
+    private final static double HIGH_SPEED = 0.7;
 
     private final static double INTAKE_POWER = 1.0;
 
     private final static double GLYPH_POWER = 1.0;
 
-    private final static double LIFT_POWER = 0.6;
+    private final static double LIFT_POWER = 0.5;
 
     private final static double RELIC_ARM_SPEED = 0.5;
 
@@ -100,18 +99,21 @@ public class Team8740_Base {
     private final static double LIFT_GEAR_DIAMETER = 1.504;  // Inches
     private final static double LIFT_TICKS_PER_INCH = (LIFT_TICKS_PER_REV * LIFT_GEAR_REDUCTION) / (LIFT_GEAR_DIAMETER * 3.1415);
 
-    private final static double LIFT_POS_MIDDLE = 2; // 6.5 Inches
+    private final static double LIFT_POS_MIDDLE = 1.18;
 
     private final static double DRIVE_TICKS_PER_REV = 1024;  // Ticks per revolution
     private final static double DRIVE_GEAR_REDUCTION = 1.0; // This is < 1.0 if geared UP
     private final static double DRIVE_WHEEL_DIAMETER = 1.5; // Inches
     private final static double DRIVE_TICKS_PER_INCH = (DRIVE_TICKS_PER_REV * DRIVE_GEAR_REDUCTION) / (DRIVE_WHEEL_DIAMETER * 3.1415);
 
-    private final static double ERROR_OFFSET = -5.0; // Inches
+    private final static double ERROR_OFFSET = -4.0; // Inches
 
     private final static double HEADING_THRESHOLD = 1; // As tight as we can make it with an integer gyro
     private final static double P_TURN_COEFF = 0.115;   // Larger is more responsive, but also less stable
     private final static double P_DRIVE_COEFF = 0.05;  // Larger is more responsive, but also less stable
+
+    private final static double AUTO_DRIVE_SPEED = 0.4;
+    private final static double AUTO_TURN_SPEED = 0.4;
 
     private final static String VUFORIA_LICENSE = "AY0QHQL/////AAAAGddY2lrlhEkenq0T04cRoVVmq/FAquH7DThEnayFrV+ojyjel8qTCn03vKe+FaZt0FwnE4tKdbimF0i47pzVuCQm2lRVdy5m1W03vvMN+8SA0RoXquxc1ddQLNyw297Ei3yWCJLV74UsEtfBwYKqr4ys3d2b2vPgaWnaZX6SNzD+x7AfKsaTSEIFqWfH8GOBoyw0kJ6qSCL384ylCcId6fVJbO8s9WccvuQYsCgCizdr0N/wOdEn76wY7fiNuR+5oReDCaIgfw5L35mD8EtQ0UHmNZGeDndtPDd6ZfNVlU3gyzch7nj5cmPBTleaoiCjyR9AputQHRH3qXnf3k76MvozmMGTE/j5o1HBA6BMSPwH";
 
@@ -182,14 +184,13 @@ public class Team8740_Base {
     private boolean teleop = false;
 
     private double speedMultiplier = HIGH_SPEED;
-
-    private double xPosition = 0.0;
-    private double yPosition = 0.0;
+    private JewelColorResult.JewelColor teamColor = null;
 
 
     /* Initialize standard Hardware interfaces */
-    public void initRobot(HardwareMap hwMap, LinearOpMode opmode) {
+    public void initRobot(HardwareMap hwMap, LinearOpMode opmode, JewelColorResult.JewelColor color) {
         this.initRobot(hwMap, opmode, false);
+        setTeamColor(color);
     }
 
     /* Initialize standard Hardware interfaces */
@@ -210,7 +211,7 @@ public class Team8740_Base {
         }
     }
 
-    private void initDrive() {
+    public void initDrive() {
         // Define and initialize motors
         frontLeftDrive = hwMap.dcMotor.get("frontLeft");
         frontRightDrive = hwMap.dcMotor.get("frontRight");
@@ -235,7 +236,7 @@ public class Team8740_Base {
         setPower(0, 0, 0, 0);
     }
 
-    private void initIntake() {
+    public void initIntake() {
         // Define the intake motors
         intakeLeft = hwMap.dcMotor.get("intakeLeft");
         intakeRight = hwMap.dcMotor.get("intakeRight");
@@ -244,7 +245,7 @@ public class Team8740_Base {
         intakeRight.setDirection(DcMotor.Direction.REVERSE);
     }
 
-    private void initLift() {
+    public void initLift() {
         // Define the lift motor
         lift = hwMap.dcMotor.get("lift");
 
@@ -264,7 +265,7 @@ public class Team8740_Base {
         upperLimit.setMode(DigitalChannel.Mode.INPUT);
     }
 
-    private void initServos() {
+    public void initServos() {
         // Define and initialize ALL installed servos
         leftServo = hwMap.servo.get("grabLeft");
         rightServo = hwMap.servo.get("grabRight");
@@ -282,7 +283,7 @@ public class Team8740_Base {
         jewelServo.setPosition(JEWEL_SERVO_HOME);
     }
 
-    private void initRelic() {
+    public void initRelic() {
         relicWrist = hwMap.servo.get("relicWrist");
         relicClaw = hwMap.servo.get("relicClaw");
         relicArm = hwMap.dcMotor.get("relicArm");
@@ -295,11 +296,11 @@ public class Team8740_Base {
         relicArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
-    private void initProx() {
+    public void initProx() {
         proxSensor = hwMap.get(DistanceSensor.class, "prox");
     }
 
-    private void initVuforia() {
+    public void initVuforia() {
         //int cameraMonitorViewId = hwMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hwMap.appContext.getPackageName());
         //VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
@@ -314,7 +315,7 @@ public class Team8740_Base {
         relicTemplate.setName("relicVuMarkTemplate");
     }
 
-    private void initGyro() {
+    public void initGyro() {
         // Set up the parameters with which we will use our IMU. Note that integration
         // algorithm here just reports accelerations to the logcat log; it doesn't actually
         // provide positional information.
@@ -332,6 +333,16 @@ public class Team8740_Base {
         imu = hwMap.get(BNO055IMU.class, "imu");
         imu.initialize(parameters);
     }
+
+    public void setHardwareMap(HardwareMap hwMap) {
+        this.hwMap = hwMap;
+    }
+
+    public void setOpmode(LinearOpMode opmode) {
+        this.opmode = opmode;
+    }
+
+    public void setTeamColor(JewelColorResult.JewelColor color) { this.teamColor = color; }
 
     public boolean isStopRequested() {
         boolean stopRequested = opmode.isStopRequested();
@@ -514,6 +525,7 @@ public class Team8740_Base {
                 lift.setPower(0);
                 break;
         }
+        opmode.sleep(500);
     }
 
     public LiftPosition getLiftPosition() {
@@ -565,6 +577,12 @@ public class Team8740_Base {
 
     public void setGlyphPower(double power) {
         pushServo.setPower(power);
+    }
+
+    public void releaseGlyph() {
+        toggleIntakeClaws();
+        pushGlyph();
+        toggleIntakeClaws();
     }
 
     /**
@@ -627,22 +645,12 @@ public class Team8740_Base {
     public JewelColorResult.JewelColor getColor() {
         FrameGrabber frameGrabber = FtcRobotControllerActivity.frameGrabber; //Get the frameGrabber
 
-        opmode.telemetry.addData("Checkpoint", "4");
-        opmode.telemetry.update();
-
         frameGrabber.grabSingleFrame(); //Tell it to grab a frame
-
-        opmode.telemetry.addData("Checkpoint", "5");
-        opmode.telemetry.addData("FrameGrabber", !frameGrabber.isResultReady());
-        opmode.telemetry.update();
 
         while (!frameGrabber.isResultReady()) { //Wait for the result
             if (isStopRequested()) return JewelColorResult.JewelColor.UNKNOWN;
             opmode.sleep(5); //sleep for 5 milliseconds
         }
-
-        opmode.telemetry.addData("Checkpoint", "6");
-        opmode.telemetry.update();
 
         //Get the result
         ImageProcessorResult imageProcessorResult = frameGrabber.getResult();
@@ -664,28 +672,28 @@ public class Team8740_Base {
     }
 
     /**
-     * FIXME - The negative angles will make the robot go in a straight line or curve
-     * This method will knock the opposite jewel to the team color
+     * A method to knock off the opposing team's jewel
+     *
+     * @param color
      */
-    public void jewelKnock() {
+    public void hitJewel(JewelColorResult.JewelColor color) {
         toggleJewelArm();
-        if (1 == 1) {
-            if (1 == 1) {
-                gyroTurn(.6, 10);
-                gyroTurn(.6, 0);
-            } else {
-                gyroTurn(.6, -10);
-                gyroTurn(.6, 0);
-            }
-        } else if (1 == 2) {
-            if (getColor().equals(JewelColorResult.JewelColor.RED)) {
-                gyroTurn(.6, 10);
-                gyroTurn(.6, -10);
-            } else {
-                gyroTurn(.6, 10);
-                gyroTurn(.6, -10);
-            }
+        if(teamColor == JewelColorResult.JewelColor.RED && color == JewelColorResult.JewelColor.RED) {
+            gyroTurn(45.0);
+            gyroHold(45.0, 0.5);
+        } else if(teamColor == JewelColorResult.JewelColor.RED && color == JewelColorResult.JewelColor.BLUE) {
+            gyroTurn(-45.0);
+            gyroHold(-45.0, 0.5);
+        } else if(teamColor == JewelColorResult.JewelColor.BLUE && color == JewelColorResult.JewelColor.BLUE) {
+            gyroTurn(45.0);
+            gyroHold(45.0, 0.5);
+        } else if(teamColor == JewelColorResult.JewelColor.BLUE && color == JewelColorResult.JewelColor.RED) {
+            gyroTurn(-45.0);
+            gyroHold(-45.0, 0.5);
         }
+
+        gyroTurn(0.0);
+        gyroHold(0.0, 0.5);
         toggleJewelArm();
     }
 
@@ -728,6 +736,10 @@ public class Team8740_Base {
         return heading;
     }
 
+    public void driveStraight(double distance, double angle) {
+        driveStraight(AUTO_DRIVE_SPEED, distance, angle);
+    }
+
     /**
      * Method to drive on a fixed compass bearing (angle), based on encoder counts.
      * Move will stop if either of these conditions occur:
@@ -761,7 +773,7 @@ public class Team8740_Base {
                 //newTarget = newTarget - Math.round((float) (ERROR_OFFSET * DRIVE_TICKS_PER_INCH));
             } else {
                 direction = 1;
-                //newTarget = newTarget + Math.round((float) (ERROR_OFFSET * DRIVE_TICKS_PER_INCH));
+                newTarget = newTarget + Math.round((float) (ERROR_OFFSET * DRIVE_TICKS_PER_INCH));
             }
 
             // Set target position
@@ -803,6 +815,7 @@ public class Team8740_Base {
 
             // Stop all motion
             setTank(0, 0);
+            opmode.sleep(1000);
         }
     }
 
@@ -818,6 +831,7 @@ public class Team8740_Base {
      *                 0 = fwd. +ve is CCW from fwd. -ve is CW from forward.
      *                 If a relative angle is required, add/subtract from current heading.
      */
+    // TODO - Finish writing this method
     public void driveStrafe(double speed, double distance, double angle) {
         int newXTarget;
         int newYTarget;
@@ -880,6 +894,10 @@ public class Team8740_Base {
         }
     }
 
+    public void gyroTurn(double angle) {
+        gyroTurn(AUTO_TURN_SPEED, angle);
+    }
+
     /**
      * Method to spin on central axis to point in a new direction.
      * Move will stop if either of these conditions occur:
@@ -898,6 +916,10 @@ public class Team8740_Base {
             // Update telemetry & Allow time for other processes to run.
             opmode.telemetry.update();
         }
+    }
+
+    public void gyroHold(double angle, double holdTime) {
+        gyroHold(AUTO_TURN_SPEED, angle, holdTime);
     }
 
     /**
@@ -924,6 +946,7 @@ public class Team8740_Base {
 
         // Stop all motion;
         setTank(0, 0);
+        opmode.sleep(1000);
     }
 
     /**

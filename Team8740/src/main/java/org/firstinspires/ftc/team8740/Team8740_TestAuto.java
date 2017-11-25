@@ -86,7 +86,7 @@ public class Team8740_TestAuto extends LinearOpMode {
          * Initialize the standard drive system variables.
          * The initRobot() method of the hardware class does most of the work here
          */
-        robot.initRobot(hardwareMap, this);
+        robot.initRobot(hardwareMap, this, JewelColorResult.JewelColor.UNKNOWN);
 
         robot.activateVuforia();
 
@@ -123,9 +123,7 @@ public class Team8740_TestAuto extends LinearOpMode {
 
         //robot.toggleJewelArm();
         robot.driveStraight(DRIVE_SPEED, 12.0, 0.0);
-        sleep(1000);
         robot.driveStraight(DRIVE_SPEED, -12.0, 0.0);
-        sleep(1000);
         //robot.toggleJewelArm();
         robot.gyroTurn(TURN_SPEED, -90.0);
         robot.gyroHold(TURN_SPEED, -90.0, 0.5);
@@ -133,6 +131,5 @@ public class Team8740_TestAuto extends LinearOpMode {
         robot.gyroTurn(TURN_SPEED, 180.0);
         robot.gyroHold(TURN_SPEED, 180.0, 0.5);
         //robot.driveStraight(DRIVE_SPEED, 6.0, 180.0);
-        //robot.jewelKnock();
     }
 }

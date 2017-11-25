@@ -81,14 +81,12 @@ public class Team8740_Teleop extends LinearOpMode {
                 robot.stopIntake();
             }
 
-            // Use gamepad A to toggle top outtake
+            // Use gamepad A to toggle outtake
             if (gamepad1.a) {
-                robot.toggleIntakeClaws();
-                robot.pushGlyph();
-                robot.toggleIntakeClaws();
+                robot.releaseGlyph();
             }
 
-            // Use gamepad B or X to toggle all outtakes
+            // Use gamepad B or X to toggle outtake and reverse intake
             if (gamepad1.b || gamepad1.x) {
                 robot.toggleIntakeClaws();
                 robot.reverseIntake();

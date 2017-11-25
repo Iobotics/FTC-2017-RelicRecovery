@@ -32,6 +32,8 @@ package org.firstinspires.ftc.team8740;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
+import ftc.vision.JewelColorResult;
+
 /**
  * This file illustrates the concept of driving a path based on Gyro heading and encoder counts.
  * It uses the common Pushbot hardware class to define the drive on the robot.
@@ -70,11 +72,12 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 public class Team8740_LeftRedAuto extends LinearOpMode {
 
     /* Declare OpMode members */
-    Team8740_Base         robot   = new Team8740_Base();
+    Team8740_Base robot = new Team8740_Base();
+    JewelColorResult.JewelColor color = null;
 
     // These constants define the desired driving/control characteristics
     // The can/should be tweaked to suite the specific robot drive train.
-    static final double     DRIVE_SPEED             = 0.5;     // Nominal speed for better accuracy.
+    static final double     DRIVE_SPEED             = 0.4;     // Nominal speed for better accuracy.
     static final double     TURN_SPEED              = 0.4;     // Nominal half speed for better accuracy.
 
     @Override
@@ -83,7 +86,9 @@ public class Team8740_LeftRedAuto extends LinearOpMode {
          * Initialize the standard drive system variables.
          * The initRobot() method of the hardware class does most of the work here
          */
-        robot.initRobot(hardwareMap, this);
+        robot.initRobot(hardwareMap, this, JewelColorResult.JewelColor.RED);
+
+        robot.activateVuforia();
 
         // Send telemetry message to alert driver that we are calibrating
         telemetry.addData("X", "Calibrating Gyro");
@@ -91,33 +96,38 @@ public class Team8740_LeftRedAuto extends LinearOpMode {
         telemetry.update();
 
         // make sure the gyro is calibrated before continuing
-        while (!isStopRequested() && robot.isGyroCalibrating())  {
+        while (robot.isGyroCalibrating()) {
+            if (robot.isStopRequested()) return;
+
             sleep(50);
             idle();
         }
 
+        //color = robot.getColor();
+
         // Wait for the game to start (Display Gyro value), and reset gyro before we move
         while (!isStarted()) {
+            if (robot.isStopRequested()) return;
+
             telemetry.addData("O", "Robot Ready");
             telemetry.addLine("encoders").addData("X", robot.getXPosition()).addData("Y", robot.getYPosition());
             telemetry.addData(">", "Robot Heading = %.2f", robot.getGyroHeading());
+            //telemetry.addData("Color", color);
+            telemetry.addData("VuMark", robot.getVuMark());
             telemetry.update();
         }
-
-        //robot.activateVuforia();
 
         // Step through each leg of the path,
         // Note: Reverse movement is obtained by setting a negative distance (not speed)
         // Put a hold after each turn
 
-        //robot.toggleJewelArm();
-        robot.driveStraight(DRIVE_SPEED, 24.0, 0.0);
-        //robot.toggleJewelArm();
-        robot.gyroTurn(TURN_SPEED, -90.0);
-        robot.gyroHold(TURN_SPEED, -90.0, 0.5);
-        robot.driveStraight(DRIVE_SPEED, 12.0, -90.0);
-
-        requestOpModeStop();
+        //robot.hitJewel(color);
+        robot.driveStraight(17.0, 0.0);
+        robot.gyroTurn(-90.0);
+        robot.gyroHold(-90.0, 0.5);
+        robot.driveStraight(11.0, -90.0);
+        robot.releaseGlyph();
+        robot.driveStraight(-2.0, -90.0);
     }
 
 }
