@@ -32,6 +32,8 @@ package org.firstinspires.ftc.team8740;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
+import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
+
 import ftc.vision.JewelColorResult;
 
 /**
@@ -74,6 +76,7 @@ public class Team8740_LeftBlueAuto extends LinearOpMode {
     /* Declare OpMode members */
     Team8740_Base robot = new Team8740_Base();
     JewelColorResult.JewelColor color = null;
+    RelicRecoveryVuMark vuMark = null;
 
     // These constants define the desired driving/control characteristics
     // The can/should be tweaked to suite the specific robot drive train.
@@ -104,6 +107,7 @@ public class Team8740_LeftBlueAuto extends LinearOpMode {
         }
 
         //color = robot.getColor();
+        vuMark = robot.getVuMark();
 
         // Wait for the game to start (Display Gyro value), and reset gyro before we move
         while (!isStarted()) {
@@ -113,7 +117,7 @@ public class Team8740_LeftBlueAuto extends LinearOpMode {
             telemetry.addLine("encoders").addData("X", robot.getXPosition()).addData("Y", robot.getYPosition());
             telemetry.addData(">", "Robot Heading = %.2f", robot.getGyroHeading());
             //telemetry.addData("Color", color);
-            telemetry.addData("VuMark", robot.getVuMark());
+            telemetry.addData("VuMark", vuMark);
             telemetry.update();
         }
 

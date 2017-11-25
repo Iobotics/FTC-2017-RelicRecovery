@@ -586,6 +586,37 @@ public class Team8740_Base {
     }
 
     /**
+     * Method to place the cryptobox glyph
+     *
+     * @param vuMark
+     * @param angle
+     */
+    // TODO - Finish this method
+    public void cryptoboxGlyph(RelicRecoveryVuMark vuMark, double angle) {
+        switch(vuMark) {
+            case LEFT:
+                gyroTurn(90.0);
+                gyroHold(90.0, 0.5);
+                driveStraight(3.0, angle);
+                releaseGlyph();
+                driveStraight(-3.0, angle);
+                break;
+            case CENTER:
+                driveStraight(3.0, angle);
+                releaseGlyph();
+                driveStraight(-3.0, angle);
+                break;
+            case RIGHT:
+                gyroTurn(-90.0);
+                gyroHold(-90.0, 0.5);
+                driveStraight(3.0, angle);
+                releaseGlyph();
+                driveStraight(-3.0, angle);
+                break;
+        }
+    }
+
+    /**
      * Checks if the jewel arm is up
      *
      * @return jewelArmUp
