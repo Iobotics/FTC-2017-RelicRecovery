@@ -112,6 +112,7 @@ import org.firstinspires.ftc.robotcore.internal.webserver.WebServer;
 import org.firstinspires.inspection.RcInspectionActivity;
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
+import org.opencv.android.JavaCameraView;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 
@@ -121,7 +122,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 //import ftc.vision.BeaconProcessor;
 import ftc.vision.FrameGrabber;
 import ftc.vision.JewelProcessor;
-import ftc.vision.MyCameraView;
 
 @SuppressWarnings("WeakerAccess")
 public class FtcRobotControllerActivity extends Activity {
@@ -140,7 +140,7 @@ public class FtcRobotControllerActivity extends Activity {
     void myOnCreate() {
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-        cameraBridgeViewBase = (MyCameraView) findViewById(R.id.show_camera_activity_java_surface_view);
+        cameraBridgeViewBase = (JavaCameraView) findViewById(R.id.show_camera_activity_java_surface_view);
         frameGrabber = new FrameGrabber(cameraBridgeViewBase, FRAME_WIDTH_REQUEST, FRAME_HEIGHT_REQUEST);
         frameGrabber.setImageProcessor(new JewelProcessor());
         frameGrabber.setSaveImages(false);
