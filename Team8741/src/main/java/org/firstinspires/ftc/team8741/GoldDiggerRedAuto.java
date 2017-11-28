@@ -20,41 +20,24 @@ public class GoldDiggerRedAuto extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         robot.init(hardwareMap, true);
         waitForStart();
-        FrameGrabber frameGrabber = FtcRobotControllerActivity.frameGrabber; //Get the frameGrabber
 
-        frameGrabber.grabSingleFrame(); //Tell it to grab a frame
-        while (!frameGrabber.isResultReady()) { //Wait for the result
-            Thread.sleep(5); //sleep for 5 milliseconds
-        }
 
-//Get the result
-        ImageProcessorResult imageProcessorResult = frameGrabber.getResult();
-        JewelColorResult result = (JewelColorResult) imageProcessorResult.getResult();
-
-        JewelColorResult.JewelColor leftColor = result.getLeftColor();
-        JewelColorResult.JewelColor rightColor = result.getRightColor();
-
-        telemetry.addData("Result", result); //Display it on telemetry
-        telemetry.update();
-//wait before quitting (quitting clears telemetry)
-        Thread.sleep(1000);
-        /*
-        if (rightColor == JewelColorResult.JewelColor.RED && leftColor == JewelColorResult.JewelColor.BLUE){
+        if (!robot.checkBlue()){
             robot.jewelServo.setPosition(robot.JEWEL_ARM_DOWN);
             robot.encoderDrive(1, 0.4);
             robot.jewelServo.setPosition(robot.JEWEL_ARM_UP);
             robot.encoderDrive(23, 0.4);
 
         }
-        else if (leftColor == JewelColorResult.JewelColor.RED && rightColor == JewelColorResult.JewelColor.BLUE){
+        else if (robot.checkBlue()){
             robot.jewelServo.setPosition(robot.JEWEL_ARM_DOWN);
             robot.encoderDrive(-1, 0.4);
             robot.jewelServo.setPosition(robot.JEWEL_ARM_UP);
             robot.encoderDrive(25, 0.4);
         } else {
-*/
+
         robot.encoderDrive(24, 0.4);
-        //}
+        }
 
         //robot.gyroTurn(0.5, 45);
 

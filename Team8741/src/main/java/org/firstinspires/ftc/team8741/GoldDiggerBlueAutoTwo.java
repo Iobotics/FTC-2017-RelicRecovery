@@ -27,26 +27,7 @@ import ftc.vision.JewelColorResult;
     public void runOpMode() throws InterruptedException {
         robot.init(hardwareMap, true);
         waitForStart();
-        FrameGrabber frameGrabber = FtcRobotControllerActivity.frameGrabber; //Get the frameGrabber
-
-        frameGrabber.grabSingleFrame(); //Tell it to grab a frame
-        while (!frameGrabber.isResultReady()) { //Wait for the result
-            Thread.sleep(5); //sleep for 5 milliseconds
-        }
-
-//Get the result
-        ImageProcessorResult imageProcessorResult = frameGrabber.getResult();
-        JewelColorResult result = (JewelColorResult) imageProcessorResult.getResult();
-
-        JewelColorResult.JewelColor leftColor = result.getLeftColor();
-        JewelColorResult.JewelColor rightColor = result.getRightColor();
-
-        telemetry.addData("Result", result); //Display it on telemetry
-        telemetry.update();
-
-
-//wait before quitting (quitting clears telemetry)
-        Thread.sleep(1000);
+        
 
         robot.encoderDrive(0.4, 30);
         robot.gyroTurn(0.4, 90);
