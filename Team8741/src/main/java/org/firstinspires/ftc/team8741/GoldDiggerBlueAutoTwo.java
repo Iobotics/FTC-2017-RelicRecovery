@@ -48,7 +48,7 @@ import ftc.vision.JewelColorResult;
 //wait before quitting (quitting clears telemetry)
         Thread.sleep(1000);
 
-        robot.encoderDrive(0.4, 24);
+        robot.encoderDrive(0.4, 30);
         robot.gyroTurn(0.4, 90);
         robot.gyroHold(0.4, 90, 0.5);
         robot.encoderDrive(10, 0.4);
