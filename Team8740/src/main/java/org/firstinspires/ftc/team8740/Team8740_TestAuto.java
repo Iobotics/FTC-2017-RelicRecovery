@@ -130,7 +130,7 @@ public class Team8740_TestAuto extends LinearOpMode {
         robot.driveStraight(DRIVE_SPEED, 12.0, 0.0);
         //robot.driveStraight(DRIVE_SPEED, -12.0, 0.0);
         //robot.toggleJewelArm();
-        //robot.gyroTurn(TURN_SPEED, -90.0);
+        robot.gyroTurn(TURN_SPEED, -90.0);
         //robot.gyroHold(TURN_SPEED, -90.0, 0.5);
         //robot.driveStraight(DRIVE_SPEED, -12.0, 90.0);
         //robot.gyroTurn(TURN_SPEED, 180.0);

@@ -70,9 +70,6 @@ public class Team8740_Base {
     public final static double LEFT_SERVO_HOME = 0.35;
     public final static double RIGHT_SERVO_HOME = 0.65;
 
-    //public final static double LEFT_SERVO_CLOSED = 0.33;
-    //public final static double RIGHT_SERVO_CLOSED = 0.63;
-
     public final static double LEFT_SERVO_OPEN = 0.72;
     public final static double RIGHT_SERVO_OPEN = 1.25;
 
@@ -96,11 +93,6 @@ public class Team8740_Base {
 
     private final static double RELIC_ARM_SPEED = 0.5;
 
-    private final static double LIFT_TICKS_PER_REV = 28;     // Ticks per revolution
-    private final static double LIFT_GEAR_REDUCTION = 100.0; // This is < 1.0 if geared UP
-    private final static double LIFT_GEAR_DIAMETER = 1.504;  // Inches
-    private final static double LIFT_TICKS_PER_INCH = (LIFT_TICKS_PER_REV * LIFT_GEAR_REDUCTION) / (LIFT_GEAR_DIAMETER * 3.1415);
-
     private final static double LIFT_POS_MIDDLE = 896.0;
 
     private final static double DRIVE_TICKS_PER_REV = 1024;  // Ticks per revolution
@@ -112,9 +104,9 @@ public class Team8740_Base {
 
     private final static double HEADING_THRESHOLD = 1; // As tight as we can make it with an integer gyro
     private final static double P_TURN_COEFF = 0.143;   // Larger is more responsive, but also less stable
-    private final static double P_DRIVE_COEFF = 0.08;  // Larger is more responsive, but also less stable
+    private final static double P_DRIVE_COEFF = 0.16;  // Larger is more responsive, but also less stable
 
-    private final static double AUTO_DRIVE_SPEED = 0.5;
+    private final static double AUTO_DRIVE_SPEED = 0.6;
     private final static double AUTO_TURN_SPEED = 0.6;
 
     private final static String VUFORIA_LICENSE = "AY0QHQL/////AAAAGddY2lrlhEkenq0T04cRoVVmq/FAquH7DThEnayFrV+ojyjel8qTCn03vKe+FaZt0FwnE4tKdbimF0i47pzVuCQm2lRVdy5m1W03vvMN+8SA0RoXquxc1ddQLNyw297Ei3yWCJLV74UsEtfBwYKqr4ys3d2b2vPgaWnaZX6SNzD+x7AfKsaTSEIFqWfH8GOBoyw0kJ6qSCL384ylCcId6fVJbO8s9WccvuQYsCgCizdr0N/wOdEn76wY7fiNuR+5oReDCaIgfw5L35mD8EtQ0UHmNZGeDndtPDd6ZfNVlU3gyzch7nj5cmPBTleaoiCjyR9AputQHRH3qXnf3k76MvozmMGTE/j5o1HBA6BMSPwH";
@@ -181,6 +173,7 @@ public class Team8740_Base {
     private boolean isLowSpeed = false;
     private boolean jewelArmUp = true;
     private boolean relicClawOpen = false;
+    private boolean relicWristUp = false;
     private boolean intakeClawOpen = false;
     private boolean programAssist = false;
     private boolean teleop = false;
@@ -244,7 +237,7 @@ public class Team8740_Base {
         intakeRight = hwMap.dcMotor.get("intakeRight");
 
         // Reverse the right intake motor
-        intakeRight.setDirection(DcMotor.Direction.REVERSE);
+        intakeLeft.setDirection(DcMotor.Direction.REVERSE);
     }
 
     public void initLift() {
@@ -293,7 +286,7 @@ public class Team8740_Base {
         relicClaw.setDirection(Servo.Direction.REVERSE);
 
         relicWrist.setPosition(RELIC_WRIST_DOWN);
-        relicClaw.setPosition(0);
+        relicClaw.setPosition(RELIC_CLAW_CLOSED);
 
         relicArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
@@ -391,10 +384,10 @@ public class Team8740_Base {
         double backLeftPower;
         double backRightPower;
 
-        frontLeftPower = Range.clip(x + y - rotation, -1.0, 1.0);
-        frontRightPower = Range.clip(-x + y + rotation, -1.0, 1.0);
-        backLeftPower = Range.clip(-x + y - rotation, -1.0, 1.0);
-        backRightPower = Range.clip(x + y + rotation, -1.0, 1.0);
+        frontLeftPower = Range.clip(x - y - rotation, -1.0, 1.0);
+        frontRightPower = Range.clip(x - y + rotation, -1.0, 1.0);
+        backLeftPower = Range.clip(-x - y - rotation, -1.0, 1.0);
+        backRightPower = Range.clip(-x - y + rotation, -1.0, 1.0);
 
         // Send calculated power to wheels
         setPower(frontLeftPower, frontRightPower, backLeftPower, backRightPower);
@@ -416,11 +409,11 @@ public class Team8740_Base {
     }
 
     public double getXPosition() {
-        return frontRightDrive.getCurrentPosition();
+        return frontLeftDrive.getCurrentPosition();
     }
 
     public double getYPosition() {
-        return -(frontLeftDrive.getCurrentPosition());
+        return frontRightDrive.getCurrentPosition();
     }
 
     public boolean xTargetReached(double position) {
@@ -659,6 +652,12 @@ public class Team8740_Base {
         relicWrist.setPosition(position);
     }
 
+    public void toggleRelicWrist() {
+        relicWrist.setPosition(relicWristUp ? RELIC_WRIST_DOWN : RELIC_WRIST_UP);
+        relicWristUp = !relicWristUp;
+        opmode.sleep(75);
+    }
+
     /**
      * Gets the distance from the prox sensor in inches
      *
@@ -788,7 +787,7 @@ public class Team8740_Base {
      *                 If a relative angle is required, add/subtract from current heading.
      */
     public void driveStraight(double speed, double distance, double angle) {
-        int newTarget;
+        double newTarget;
         double moveCounts;
         double max;
         double error;
@@ -800,26 +799,26 @@ public class Team8740_Base {
         if (opmode.opModeIsActive()) {
             // Determine new target position, and pass to motor controller
             moveCounts = distance * DRIVE_TICKS_PER_INCH;
-            newTarget = Math.round((float) (getYPosition() + moveCounts));
+            newTarget = getYPosition() + moveCounts;
 
             // If target is negative relative to current position
             if (getYPosition() > newTarget) {
-                direction = -1;
+                direction = 1;
                 //newTarget = newTarget - Math.round((float) (ERROR_OFFSET * DRIVE_TICKS_PER_INCH));
             } else {
-                direction = 1;
+                direction = -1;
                 //newTarget = newTarget + Math.round((float) (ERROR_OFFSET * DRIVE_TICKS_PER_INCH));
             }
 
             // Set target position
-            frontLeftDrive.setTargetPosition(newTarget);
+            setYPosition(newTarget);
 
             // Start motion
             speed = Range.clip(Math.abs(speed), 0.0, 1.0);
             setTank(speed * direction, speed * direction);
 
             // Keep looping while we are still active, and the front right motor is running.
-            while (opmode.opModeIsActive() && !((direction < 0 && getYPosition() < frontLeftDrive.getTargetPosition()) || (direction > 0 && getYPosition() > frontLeftDrive.getTargetPosition()))) {
+            while (opmode.opModeIsActive() && !((direction > 0 && getYPosition() < frontRightDrive.getTargetPosition()) || (direction < 0 && getYPosition() > frontRightDrive.getTargetPosition()))) {
                 // Adjust relative speed based on heading error
                 error = getError(angle);
                 steer = getSteer(error, P_DRIVE_COEFF);
@@ -842,7 +841,7 @@ public class Team8740_Base {
 
                 // Display drive status for the driver.
                 opmode.telemetry.addData("Err/St", "%5.1f/%5.1f", error, steer);
-                opmode.telemetry.addData("Target", "%d", newTarget);
+                opmode.telemetry.addData("Target", "%.2f", newTarget);
                 opmode.telemetry.addData("Actual", "%.2f:%.2f", getXPosition(), getYPosition());
                 opmode.telemetry.addData("Speed", "%5.2f:%5.2f", leftSpeed * direction, rightSpeed * direction);
                 opmode.telemetry.update();
