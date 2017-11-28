@@ -107,17 +107,18 @@ public class Team8740_RightRedAuto extends LinearOpMode {
         }
 
         //color = robot.getColor();
-        vuMark = robot.getVuMark();
 
         // Wait for the game to start (Display Gyro value), and reset gyro before we move
         while (!isStarted()) {
             if (robot.isStopRequested()) return;
 
+            //vuMark = robot.getVuMark();
+
             telemetry.addData("O", "Robot Ready");
             telemetry.addLine("encoders").addData("X", robot.getXPosition()).addData("Y", robot.getYPosition());
             telemetry.addData(">", "Robot Heading = %.2f", robot.getGyroHeading());
             //telemetry.addData("Color", color);
-            telemetry.addData("VuMark", vuMark);
+            //telemetry.addData("VuMark", vuMark);
             telemetry.update();
         }
 
@@ -126,10 +127,10 @@ public class Team8740_RightRedAuto extends LinearOpMode {
         // Put a hold after each turn
 
         //robot.hitJewel(color);
-        robot.driveStraight(0.0, 14.0);
+        robot.driveStraight(15.0, 0.0);
         robot.gyroTurn(90.0);
         robot.gyroHold(90.0, 0.5);
-        robot.driveStraight(3.0, 90.0);
+        robot.driveStraight(9.0, 90.0);
         robot.gyroTurn(0.0);
         robot.gyroHold(0.0, 0.5);
         robot.driveStraight(11.0, 0.0);

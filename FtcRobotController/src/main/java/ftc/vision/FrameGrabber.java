@@ -24,6 +24,7 @@ public class FrameGrabber implements CameraBridgeViewBase.CvCameraViewListener2 
     }
 
     private FrameGrabberMode mode = FrameGrabberMode.STOPPED;
+    private MyCameraView cameraView = null;
 
     private boolean saveImages;
 
@@ -63,12 +64,14 @@ public class FrameGrabber implements CameraBridgeViewBase.CvCameraViewListener2 
     }
 
     public FrameGrabber(CameraBridgeViewBase cameraBridgeViewBase, int frameWidthRequest, int frameHeightRequest) {
-        cameraBridgeViewBase.setVisibility(SurfaceView.VISIBLE);
+        cameraView = (MyCameraView) cameraBridgeViewBase;
 
-        cameraBridgeViewBase.setMinimumWidth(frameWidthRequest);
-        cameraBridgeViewBase.setMinimumHeight(frameHeightRequest);
-        cameraBridgeViewBase.setMaxFrameSize(frameWidthRequest, frameHeightRequest);
-        cameraBridgeViewBase.setCvCameraViewListener(this);
+        cameraView.setVisibility(SurfaceView.VISIBLE);
+
+        cameraView.setMinimumWidth(frameWidthRequest);
+        cameraView.setMinimumHeight(frameHeightRequest);
+        cameraView.setMaxFrameSize(frameWidthRequest, frameHeightRequest);
+        cameraView.setCvCameraViewListener(this);
     }
 
     private boolean isImageProcessorNull() {
@@ -96,6 +99,10 @@ public class FrameGrabber implements CameraBridgeViewBase.CvCameraViewListener2 
         totalTime = 0;
         loopCount = 0;
         loopTimer = 0;
+    }
+
+    public void enableFlash(boolean flash) {
+        cameraView.enableFlash(flash);
     }
 
     //getter for the result
