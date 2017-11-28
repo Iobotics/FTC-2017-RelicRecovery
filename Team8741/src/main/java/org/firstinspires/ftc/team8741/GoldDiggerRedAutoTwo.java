@@ -18,7 +18,7 @@ import ftc.vision.JewelColorResult;
  * Created by Joshua Taufahema on 11/8/2017.
  */
 
-@Autonomous (name = "Gold Digger Red Auto 2", group = "Linear Opmode")
+@Autonomous (name = "Gold Digger Red Auto 2", group = "Linear OpMode")
 //Disabled
 public class GoldDiggerRedAutoTwo extends LinearOpMode {
     GoldDiggerBot robot = new GoldDiggerBot(this);
@@ -48,7 +48,7 @@ public class GoldDiggerRedAutoTwo extends LinearOpMode {
 //wait before quitting (quitting clears telemetry)
         Thread.sleep(1000);
 
-        robot.encoderDrive(0.4, 24);
+        robot.encoderDrive(30, 0.4);
         robot.gyroTurn(0.4, -90);
         robot.gyroHold(0.4, -90, 0.5);
         robot.encoderDrive(10, 0.4);

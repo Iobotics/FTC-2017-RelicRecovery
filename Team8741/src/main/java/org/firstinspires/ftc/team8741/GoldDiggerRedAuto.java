@@ -74,5 +74,6 @@ public class GoldDiggerRedAuto extends LinearOpMode {
         robot.gyroHold(0.5, 90, 2);
 
         robot.encoderDrive(9, 0.4);
+
     }
 }
