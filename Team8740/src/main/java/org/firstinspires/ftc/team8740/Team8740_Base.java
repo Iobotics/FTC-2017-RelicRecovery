@@ -40,6 +40,8 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
+import com.vuforia.PIXEL_FORMAT;
+import com.vuforia.Vuforia;
 
 import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
@@ -65,8 +67,8 @@ import ftc.vision.JewelColorResult;
  */
 public class Team8740_Base {
     /* Constants */
-    public final static double LEFT_SERVO_HOME = 0.3;
-    public final static double RIGHT_SERVO_HOME = 0.6;
+    public final static double LEFT_SERVO_HOME = 0.35;
+    public final static double RIGHT_SERVO_HOME = 0.65;
 
     //public final static double LEFT_SERVO_CLOSED = 0.33;
     //public final static double RIGHT_SERVO_CLOSED = 0.63;
@@ -99,7 +101,7 @@ public class Team8740_Base {
     private final static double LIFT_GEAR_DIAMETER = 1.504;  // Inches
     private final static double LIFT_TICKS_PER_INCH = (LIFT_TICKS_PER_REV * LIFT_GEAR_REDUCTION) / (LIFT_GEAR_DIAMETER * 3.1415);
 
-    private final static double LIFT_POS_MIDDLE = 1.18;
+    private final static double LIFT_POS_MIDDLE = 896.0;
 
     private final static double DRIVE_TICKS_PER_REV = 1024;  // Ticks per revolution
     private final static double DRIVE_GEAR_REDUCTION = 1.0; // This is < 1.0 if geared UP
@@ -109,11 +111,11 @@ public class Team8740_Base {
     private final static double ERROR_OFFSET = -4.0; // Inches
 
     private final static double HEADING_THRESHOLD = 1; // As tight as we can make it with an integer gyro
-    private final static double P_TURN_COEFF = 0.115;   // Larger is more responsive, but also less stable
-    private final static double P_DRIVE_COEFF = 0.05;  // Larger is more responsive, but also less stable
+    private final static double P_TURN_COEFF = 0.143;   // Larger is more responsive, but also less stable
+    private final static double P_DRIVE_COEFF = 0.08;  // Larger is more responsive, but also less stable
 
-    private final static double AUTO_DRIVE_SPEED = 0.4;
-    private final static double AUTO_TURN_SPEED = 0.4;
+    private final static double AUTO_DRIVE_SPEED = 0.5;
+    private final static double AUTO_TURN_SPEED = 0.6;
 
     private final static String VUFORIA_LICENSE = "AY0QHQL/////AAAAGddY2lrlhEkenq0T04cRoVVmq/FAquH7DThEnayFrV+ojyjel8qTCn03vKe+FaZt0FwnE4tKdbimF0i47pzVuCQm2lRVdy5m1W03vvMN+8SA0RoXquxc1ddQLNyw297Ei3yWCJLV74UsEtfBwYKqr4ys3d2b2vPgaWnaZX6SNzD+x7AfKsaTSEIFqWfH8GOBoyw0kJ6qSCL384ylCcId6fVJbO8s9WccvuQYsCgCizdr0N/wOdEn76wY7fiNuR+5oReDCaIgfw5L35mD8EtQ0UHmNZGeDndtPDd6ZfNVlU3gyzch7nj5cmPBTleaoiCjyR9AputQHRH3qXnf3k76MvozmMGTE/j5o1HBA6BMSPwH";
 
@@ -203,11 +205,11 @@ public class Team8740_Base {
         initIntake();
         initLift();
         initServos();
-        initGyro();
         initRelic();
-        initProx();
         if (!teleop) {
+            initGyro();
             initVuforia();
+            initProx();
         }
     }
 
@@ -301,14 +303,15 @@ public class Team8740_Base {
     }
 
     public void initVuforia() {
-        //int cameraMonitorViewId = hwMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hwMap.appContext.getPackageName());
-        //VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
-        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
+        int cameraMonitorViewId = hwMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hwMap.appContext.getPackageName());
+        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
+        //VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
 
         parameters.vuforiaLicenseKey = VUFORIA_LICENSE;
         parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
 
         vuforia = ClassFactory.createVuforiaLocalizer(parameters);
+        Vuforia.setFrameFormat(PIXEL_FORMAT.RGB565, true);
 
         relicTrackables = vuforia.loadTrackablesFromAsset("RelicVuMark");
         relicTemplate = relicTrackables.get(0);
@@ -502,8 +505,7 @@ public class Team8740_Base {
                 lift.setPower(0);
                 break;
             case MIDDLE:
-                int ticks = Math.round((float) (LIFT_TICKS_PER_INCH * LIFT_POS_MIDDLE));
-                lift.setTargetPosition(ticks);
+                lift.setTargetPosition((int) LIFT_POS_MIDDLE);
 
                 lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
@@ -525,7 +527,7 @@ public class Team8740_Base {
                 lift.setPower(0);
                 break;
         }
-        opmode.sleep(500);
+        opmode.sleep(250);
     }
 
     public LiftPosition getLiftPosition() {
@@ -699,6 +701,8 @@ public class Team8740_Base {
             color = JewelColorResult.JewelColor.UNKNOWN;
         }
 
+        opmode.sleep(1000);
+
         return color;
     }
 
@@ -795,7 +799,7 @@ public class Team8740_Base {
         // Ensure that the opmode is still active
         if (opmode.opModeIsActive()) {
             // Determine new target position, and pass to motor controller
-            moveCounts = (distance + ERROR_OFFSET) * DRIVE_TICKS_PER_INCH;
+            moveCounts = distance * DRIVE_TICKS_PER_INCH;
             newTarget = Math.round((float) (getYPosition() + moveCounts));
 
             // If target is negative relative to current position
@@ -804,7 +808,7 @@ public class Team8740_Base {
                 //newTarget = newTarget - Math.round((float) (ERROR_OFFSET * DRIVE_TICKS_PER_INCH));
             } else {
                 direction = 1;
-                newTarget = newTarget + Math.round((float) (ERROR_OFFSET * DRIVE_TICKS_PER_INCH));
+                //newTarget = newTarget + Math.round((float) (ERROR_OFFSET * DRIVE_TICKS_PER_INCH));
             }
 
             // Set target position
@@ -846,7 +850,7 @@ public class Team8740_Base {
 
             // Stop all motion
             setTank(0, 0);
-            opmode.sleep(1000);
+            opmode.sleep(500);
         }
     }
 
@@ -977,7 +981,6 @@ public class Team8740_Base {
 
         // Stop all motion;
         setTank(0, 0);
-        opmode.sleep(1000);
     }
 
     /**

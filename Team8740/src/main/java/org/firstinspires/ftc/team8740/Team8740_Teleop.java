@@ -121,7 +121,8 @@ public class Team8740_Teleop extends LinearOpMode {
             }
 
             if (gamepad2.y) {
-                robot.toggleProgramAssist();
+                robot.releaseGlyph();
+                //robot.toggleProgramAssist();
             }
 
             // Pause for 10 mS each cycle = update 100 times a second.
@@ -129,8 +130,6 @@ public class Team8740_Teleop extends LinearOpMode {
 
             telemetry.addData("Lift encoder", robot.getLiftEncoder());
             telemetry.addData("Lift position", robot.getLiftPosition());
-            telemetry.addData("Gyro position", robot.getGyroHeading());
-            telemetry.addData("Distance", robot.getDistance());
             telemetry.addData("Program assist", robot.assistEnabled());
             telemetry.addLine("Encoders").addData("X", robot.getXPosition()).addData("Y", robot.getYPosition());
             telemetry.update();

@@ -32,6 +32,8 @@ package org.firstinspires.ftc.team8740;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
+import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
+
 import ftc.vision.JewelColorResult;
 
 @Autonomous(name = "Team 8740: Test Color", group = "Team 8740")
@@ -41,30 +43,27 @@ public class Team8740_TestColor extends LinearOpMode {
     /* Declare OpMode members */
     Team8740_Base robot = new Team8740_Base();
     JewelColorResult.JewelColor color = null;
+    RelicRecoveryVuMark vuMark = null;
 
     @Override
     public void runOpMode() {
         robot.setHardwareMap(hardwareMap);
         robot.setOpmode(this);
 
+        robot.initVuforia();
+
         telemetry.addData("X", "Initializing...");
         telemetry.update();
 
-        robot.initVuforia();
-
-        robot.activateVuforia();
-
-        telemetry.addData("X", "Test");
-        telemetry.update();
-
         color = robot.getColor();
+        vuMark = robot.getVuMark();
 
         while (!isStarted()) {
             if (isStopRequested()) return;
 
             telemetry.addData("O", "Robot Ready");
             telemetry.addData("Color", color);
-            telemetry.addData("VuMark", robot.getVuMark());
+            telemetry.addData("VuMark", vuMark);
             telemetry.update();
         }
     }

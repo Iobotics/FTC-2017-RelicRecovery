@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.team8740;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -15,7 +16,8 @@ import ftc.vision.JewelColorResult;
  * FTC Team EV 7393
  */
 @TeleOp(name="Team 8740: Test OpenCV", group="Team 8740")
-public class BeaconDetectionOp extends LinearOpMode {
+//@Disabled
+public class JewelDetectionOp extends LinearOpMode {
 
   @Override
   public void runOpMode() throws InterruptedException {
@@ -23,7 +25,7 @@ public class BeaconDetectionOp extends LinearOpMode {
 
     frameGrabber.grabSingleFrame(); //Tell it to grab a frame
     while (!frameGrabber.isResultReady()) { //Wait for the result
-      Thread.sleep(5); //sleep for 5 milliseconds
+      sleep(5); //sleep for 5 milliseconds
     }
 
     //Get the result
@@ -36,6 +38,6 @@ public class BeaconDetectionOp extends LinearOpMode {
     telemetry.addData("Result", result); //Display it on telemetry
     telemetry.update();
     //wait before quitting (quitting clears telemetry)
-    Thread.sleep(1000);
+    sleep(1000);
   }
 }
