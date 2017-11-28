@@ -11,7 +11,7 @@ public class GoldDiggerEncoderTester extends LinearOpMode {
     GoldDiggerBot robot = new GoldDiggerBot(this);
     float pos = 0;
     // TANK DRIVE NOT ARCADE
-    // Have an else for every if especially for
+    // Have an else for every if especially
     @Override
     public void runOpMode() throws InterruptedException {
         robot.init(hardwareMap, true);
