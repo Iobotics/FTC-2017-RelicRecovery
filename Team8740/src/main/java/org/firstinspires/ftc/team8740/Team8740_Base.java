@@ -63,22 +63,20 @@ import ftc.vision.JewelColorResult;
 /**
  * Team 8740 base class
  *
- * @author Darren Kam
+ * @author darrenk1801
  */
 public class Team8740_Base {
     /* Constants */
-    public final static double LEFT_SERVO_HOME = 0.35;
-    public final static double RIGHT_SERVO_HOME = 0.65;
+    private final static double LEFT_SERVO_HOME = 0.35;
+    private final static double RIGHT_SERVO_HOME = 0.65;
 
-    //public final static double LEFT_SERVO_CLOSED = 0.33;
-    //public final static double RIGHT_SERVO_CLOSED = 0.63;
+    private final static double LEFT_SERVO_OPEN = 0.72;
+    private final static double RIGHT_SERVO_OPEN = 1.25;
 
-    public final static double LEFT_SERVO_OPEN = 0.72;
-    public final static double RIGHT_SERVO_OPEN = 1.25;
+    private final static double JEWEL_SERVO_HOME = 0.45;
+    private final static double JEWEL_SERVO_DOWN = 0.85;
 
-    public final static double JEWEL_SERVO_HOME = 0.45;
-    public final static double JEWEL_SERVO_DOWN = 0.85;
-
+    // TODO - Make constants private
     public final static double RELIC_WRIST_DOWN = 0.77;
     public final static double RELIC_WRIST_UP = 0.0;
 
@@ -96,11 +94,6 @@ public class Team8740_Base {
 
     private final static double RELIC_ARM_SPEED = 0.5;
 
-    private final static double LIFT_TICKS_PER_REV = 28;     // Ticks per revolution
-    private final static double LIFT_GEAR_REDUCTION = 100.0; // This is < 1.0 if geared UP
-    private final static double LIFT_GEAR_DIAMETER = 1.504;  // Inches
-    private final static double LIFT_TICKS_PER_INCH = (LIFT_TICKS_PER_REV * LIFT_GEAR_REDUCTION) / (LIFT_GEAR_DIAMETER * 3.1415);
-
     private final static double LIFT_POS_MIDDLE = 896.0;
 
     private final static double DRIVE_TICKS_PER_REV = 1024;  // Ticks per revolution
@@ -108,8 +101,10 @@ public class Team8740_Base {
     private final static double DRIVE_WHEEL_DIAMETER = 1.5; // Inches
     private final static double DRIVE_TICKS_PER_INCH = (DRIVE_TICKS_PER_REV * DRIVE_GEAR_REDUCTION) / (DRIVE_WHEEL_DIAMETER * 3.1415);
 
-    private final static double ERROR_OFFSET = -4.0; // Inches
+    // TODO - Find drive encoder offset
+    private final static double DRIVE_ENCODER_OFFSET = -4.0; // Inches
 
+    // TODO - Tweak the P-gains
     private final static double HEADING_THRESHOLD = 1; // As tight as we can make it with an integer gyro
     private final static double P_TURN_COEFF = 0.143;   // Larger is more responsive, but also less stable
     private final static double P_DRIVE_COEFF = 0.08;  // Larger is more responsive, but also less stable
@@ -123,11 +118,6 @@ public class Team8740_Base {
         TOP,
         MIDDLE,
         BOTTOM
-    }
-
-    public enum Team {
-        RED_TEAM,
-        BLUE_TEAM
     }
 
     /* OpMode members */
@@ -171,48 +161,80 @@ public class Team8740_Base {
 
     /* Local OpMode members. */
     private HardwareMap hwMap = null;
-
     private LinearOpMode opmode = null;
 
-    public ElapsedTime time = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
+    private ElapsedTime time = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
+
+    private JewelColorResult.JewelColor teamColor = null;
 
     private LiftPosition liftPosition = LiftPosition.BOTTOM;
 
     private boolean isLowSpeed = false;
     private boolean jewelArmUp = true;
     private boolean relicClawOpen = false;
+    private boolean relicWristUp = false;
     private boolean intakeClawOpen = false;
     private boolean programAssist = false;
-    private boolean teleop = false;
 
     private double speedMultiplier = HIGH_SPEED;
-    private JewelColorResult.JewelColor teamColor = null;
 
 
-    /* Initialize standard Hardware interfaces */
-    public void initRobot(HardwareMap hwMap, LinearOpMode opmode, JewelColorResult.JewelColor color) {
-        this.initRobot(hwMap, opmode, false);
-        setTeamColor(color);
+    /**
+     * Method for manual initialization
+     *
+     * @param hwMap
+     * @param opmode
+     */
+    public void init(HardwareMap hwMap, LinearOpMode opmode) {
+        setHardwareMap(hwMap);
+        setOpmode(opmode);
+
+        opmode.telemetry.addData("X", "Initializing...");
+        opmode.telemetry.update();
     }
 
-    /* Initialize standard Hardware interfaces */
-    public void initRobot(HardwareMap hwMap, LinearOpMode opmode, boolean teleop) {
-        this.hwMap = hwMap;
-        this.opmode = opmode;
-        this.teleop = teleop;
+    /**
+     * Method for teleop initialization
+     *
+     * @param hwMap
+     * @param opmode
+     */
+    public void initRobot(HardwareMap hwMap, LinearOpMode opmode) {
+        this.initRobot(hwMap, opmode, null);
+    }
+
+    /**
+     * Method for autonomous initialization
+     *
+     * @param hwMap
+     * @param opmode
+     * @param color
+     */
+    public void initRobot(HardwareMap hwMap, LinearOpMode opmode, JewelColorResult.JewelColor color) {
+        setHardwareMap(hwMap);
+        setOpmode(opmode);
+
+        opmode.telemetry.addData("X", "Initializing...");
+        opmode.telemetry.update();
 
         initDrive();
         initIntake();
         initLift();
         initServos();
         initRelic();
-        if (!teleop) {
+        initProx();
+
+        // If not teleop:
+        if (color != null) {
+            resetEncoders();
             initGyro();
             initVuforia();
-            initProx();
         }
     }
 
+    /**
+     * Initialize the drive motors
+     */
     public void initDrive() {
         // Define and initialize motors
         frontLeftDrive = hwMap.dcMotor.get("frontLeft");
@@ -231,13 +253,15 @@ public class Team8740_Base {
         backRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // Set all motors to run without encoders
-        setDriveMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         setDriveMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         // Set all motors to zero power
         setPower(0, 0, 0, 0);
     }
 
+    /**
+     * Initialize the intake motors
+     */
     public void initIntake() {
         // Define the intake motors
         intakeLeft = hwMap.dcMotor.get("intakeLeft");
@@ -247,12 +271,17 @@ public class Team8740_Base {
         intakeRight.setDirection(DcMotor.Direction.REVERSE);
     }
 
+    /**
+     * Initialize the lift motor and limit switches
+     */
     public void initLift() {
         // Define the lift motor
         lift = hwMap.dcMotor.get("lift");
 
+        // Set the lift motor to brake mode
         lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
+        // Reset and set the lift to run using the encoder
         lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
@@ -267,6 +296,9 @@ public class Team8740_Base {
         upperLimit.setMode(DigitalChannel.Mode.INPUT);
     }
 
+    /**
+     * Initialize the servos
+     */
     public void initServos() {
         // Define and initialize ALL installed servos
         leftServo = hwMap.servo.get("grabLeft");
@@ -285,6 +317,9 @@ public class Team8740_Base {
         jewelServo.setPosition(JEWEL_SERVO_HOME);
     }
 
+    /**
+     * Initialize the relic grabber
+     */
     public void initRelic() {
         relicWrist = hwMap.servo.get("relicWrist");
         relicClaw = hwMap.servo.get("relicClaw");
@@ -298,10 +333,16 @@ public class Team8740_Base {
         relicArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
+    /**
+     * Initialize the proximity sensor
+     */
     public void initProx() {
         proxSensor = hwMap.get(DistanceSensor.class, "prox");
     }
 
+    /**
+     * Initialize Vuforia
+     */
     public void initVuforia() {
         int cameraMonitorViewId = hwMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hwMap.appContext.getPackageName());
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
@@ -318,6 +359,9 @@ public class Team8740_Base {
         relicTemplate.setName("relicVuMarkTemplate");
     }
 
+    /**
+     * Initialize the BNO055 gyro
+     */
     public void initGyro() {
         // Set up the parameters with which we will use our IMU. Note that integration
         // algorithm here just reports accelerations to the logcat log; it doesn't actually
@@ -329,6 +373,9 @@ public class Team8740_Base {
         parameters.loggingEnabled = false;
         parameters.loggingTag = "IMU";
         parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
+
+        opmode.telemetry.addData("X", "Calibrating gyro...");
+        opmode.telemetry.update();
 
         // Retrieve and initialize the IMU. We expect the IMU to be attached to an I2C port
         // on a Core Device Interface Module, configured to be a sensor of type "AdaFruit IMU",
@@ -345,12 +392,10 @@ public class Team8740_Base {
         this.opmode = opmode;
     }
 
-    public void setTeamColor(JewelColorResult.JewelColor color) { this.teamColor = color; }
-
     public boolean isStopRequested() {
         boolean stopRequested = opmode.isStopRequested();
 
-        if (stopRequested) {
+        if (stopRequested && vuforia != null) {
             deactivateVuforia();
         }
 
@@ -370,8 +415,8 @@ public class Team8740_Base {
     /**
      * Set tank drive
      *
-     * @param left
-     * @param right
+     * @param left Left motor power
+     * @param right Right motor power
      */
     public void setTank(double left, double right) {
         this.setPower(left, right, left, right);
@@ -380,9 +425,9 @@ public class Team8740_Base {
     /**
      * Set mecanum drive
      *
-     * @param x
-     * @param y
-     * @param rotation
+     * @param x X component
+     * @param y Y component
+     * @param rotation Rotation
      */
     public void setMecanum(double x, double y, double rotation) {
         // Setup a variable for each drive wheel to save power level for telemetry
@@ -413,6 +458,11 @@ public class Team8740_Base {
     public void toggleSpeed() {
         speedMultiplier = isLowSpeed ? HIGH_SPEED : LOW_SPEED;
         isLowSpeed = !isLowSpeed;
+    }
+
+    public void resetEncoders() {
+        setDriveMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        setDriveMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
     public double getXPosition() {
@@ -590,12 +640,12 @@ public class Team8740_Base {
     /**
      * Method to place the cryptobox glyph
      *
-     * @param vuMark
-     * @param angle
+     * @param vuMark  The VuMark detected
+     * @param angle The angle of approach
      */
     // TODO - Finish this method
     public void cryptoboxGlyph(RelicRecoveryVuMark vuMark, double angle) {
-        switch(vuMark) {
+        switch (vuMark) {
             case LEFT:
                 gyroTurn(90.0);
                 gyroHold(90.0, 0.5);
@@ -709,20 +759,20 @@ public class Team8740_Base {
     /**
      * A method to knock off the opposing team's jewel
      *
-     * @param color
+     * @param color The team color
      */
     public void hitJewel(JewelColorResult.JewelColor color) {
         toggleJewelArm();
-        if(teamColor == JewelColorResult.JewelColor.RED && color == JewelColorResult.JewelColor.RED) {
+        if (teamColor == JewelColorResult.JewelColor.RED && color == JewelColorResult.JewelColor.RED) {
             gyroTurn(45.0);
             gyroHold(45.0, 0.5);
-        } else if(teamColor == JewelColorResult.JewelColor.RED && color == JewelColorResult.JewelColor.BLUE) {
+        } else if (teamColor == JewelColorResult.JewelColor.RED && color == JewelColorResult.JewelColor.BLUE) {
             gyroTurn(-45.0);
             gyroHold(-45.0, 0.5);
-        } else if(teamColor == JewelColorResult.JewelColor.BLUE && color == JewelColorResult.JewelColor.BLUE) {
+        } else if (teamColor == JewelColorResult.JewelColor.BLUE && color == JewelColorResult.JewelColor.BLUE) {
             gyroTurn(45.0);
             gyroHold(45.0, 0.5);
-        } else if(teamColor == JewelColorResult.JewelColor.BLUE && color == JewelColorResult.JewelColor.RED) {
+        } else if (teamColor == JewelColorResult.JewelColor.BLUE && color == JewelColorResult.JewelColor.RED) {
             gyroTurn(-45.0);
             gyroHold(-45.0, 0.5);
         }
@@ -805,10 +855,10 @@ public class Team8740_Base {
             // If target is negative relative to current position
             if (getYPosition() > newTarget) {
                 direction = -1;
-                //newTarget = newTarget - Math.round((float) (ERROR_OFFSET * DRIVE_TICKS_PER_INCH));
+                //newTarget = newTarget - Math.round((float) (DRIVE_ENCODER_OFFSET * DRIVE_TICKS_PER_INCH));
             } else {
                 direction = 1;
-                //newTarget = newTarget + Math.round((float) (ERROR_OFFSET * DRIVE_TICKS_PER_INCH));
+                //newTarget = newTarget + Math.round((float) (DRIVE_ENCODER_OFFSET * DRIVE_TICKS_PER_INCH));
             }
 
             // Set target position
@@ -991,7 +1041,7 @@ public class Team8740_Base {
      *               0 = fwd. +ve is CCW from fwd. -ve is CW from forward.
      *               If a relative angle is required, add/subtract from current heading.
      * @param PCoeff Proportional Gain coefficient
-     * @return
+     * @return onTarget
      */
     boolean onHeading(double speed, double angle, double PCoeff) {
         double error;
@@ -1048,7 +1098,7 @@ public class Team8740_Base {
      *
      * @param error  Error angle in robot relative degrees
      * @param PCoeff Proportional Gain Coefficient
-     * @return
+     * @return steer
      */
     public double getSteer(double error, double PCoeff) {
         return Range.clip(error * PCoeff, -1, 1);
@@ -1058,7 +1108,7 @@ public class Team8740_Base {
         time.reset();
     }
 
-    public double getElapsedTime() {
-        return time.milliseconds();
+    public ElapsedTime getTime() {
+        return time;
     }
 }

@@ -42,7 +42,7 @@ public class Team8740_Teleop extends LinearOpMode {
     public void runOpMode() {
 
         //Initialize the hardware variables.
-        robot.initRobot(hardwareMap, this, true);
+        robot.initRobot(hardwareMap, this);
 
         // Send telemetry message to signify robot waiting
         telemetry.addData("O", "Waiting for start");
@@ -105,7 +105,8 @@ public class Team8740_Teleop extends LinearOpMode {
                 robot.setLiftPosition(Team8740_Base.LiftPosition.TOP);
             }
 
-            robot.setRelicWrist(robot.RELIC_WRIST_DOWN + gamepad2.left_stick_y * robot.RELIC_WRIST_DOWN);
+            // TODO - Make separate method for manual control
+            robot.setRelicWrist(Team8740_Base.RELIC_WRIST_DOWN + gamepad2.left_stick_y * Team8740_Base.RELIC_WRIST_DOWN);
             robot.setLiftPower(-gamepad2.right_stick_y);
 
             if (gamepad2.a) {

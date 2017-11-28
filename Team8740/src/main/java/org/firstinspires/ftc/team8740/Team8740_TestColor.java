@@ -47,12 +47,11 @@ public class Team8740_TestColor extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-        robot.setHardwareMap(hardwareMap);
-        robot.setOpmode(this);
 
+        robot.init(hardwareMap, this);
         robot.initVuforia();
 
-        telemetry.addData("X", "Initializing...");
+        telemetry.addData("X", "Getting sensor data...");
         telemetry.update();
 
         color = robot.getColor();

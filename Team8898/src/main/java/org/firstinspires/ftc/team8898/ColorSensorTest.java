@@ -53,7 +53,7 @@ import com.qualcomm.robotcore.hardware.SwitchableLight;
  */
 @TeleOp(name = "Sensor: Colors", group = "Sensor")
 @Disabled
-public class colorSensorTest extends LinearOpMode {
+public class ColorSensorTest extends LinearOpMode {
 
     /** The colorSensor field will contain a reference to our color sensor hardware object */
     NormalizedColorSensor colorSensor;
