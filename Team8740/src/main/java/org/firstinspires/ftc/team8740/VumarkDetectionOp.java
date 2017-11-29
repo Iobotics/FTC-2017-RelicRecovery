@@ -18,13 +18,18 @@ public class VumarkDetectionOp extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        robot.setHardwareMap(hardwareMap);
-        robot.setOpmode(this);
 
+        robot.init(hardwareMap, this);
         robot.initVuforia();
+
+        telemetry.addData("Status", "Initialized");
+        telemetry.update();
+
         robot.activateVuforia();
 
         while (!isStarted()) {
+            if (robot.isStopRequested()) return;
+
             vuMark = robot.getVuMark();
 
             telemetry.addData("VuMark", vuMark); //Display it on telemetry

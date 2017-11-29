@@ -26,41 +26,24 @@ public class GoldDiggerBlueAuto extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         robot.init(hardwareMap, true);
         waitForStart();
-        FrameGrabber frameGrabber = FtcRobotControllerActivity.frameGrabber; //Get the frameGrabber
 
-        frameGrabber.grabSingleFrame(); //Tell it to grab a frame
-        while (!frameGrabber.isResultReady()) { //Wait for the result
-            Thread.sleep(5); //sleep for 5 milliseconds
-        }
 
-//Get the result
-        ImageProcessorResult imageProcessorResult = frameGrabber.getResult();
-        JewelColorResult result = (JewelColorResult) imageProcessorResult.getResult();
-
-        JewelColorResult.JewelColor leftColor = result.getLeftColor();
-        JewelColorResult.JewelColor rightColor = result.getRightColor();
-
-        telemetry.addData("Result", result); //Display it on telemetry
-        telemetry.update();
-//wait before quitting (quitting clears telemetry)
-        Thread.sleep(1000);
-    /*
-            if (rightColor == JewelColorResult.JewelColor.BLUE && leftColor == JewelColorResult.JewelColor.RED){
+            if (robot.checkBlue()){
                 robot.jewelServo.setPosition(robot.JEWEL_ARM_DOWN);
                 robot.encoderDrive(1, 0.4);
                 robot.jewelServo.setPosition(robot.JEWEL_ARM_UP);
                 robot.encoderDrive(23, 0.4);
 
             }
-            else if (leftColor == JewelColorResult.JewelColor.BLUE && rightColor == JewelColorResult.JewelColor.RED){
+            else if (!robot.checkBlue()){
                 robot.jewelServo.setPosition(robot.JEWEL_ARM_DOWN);
                 robot.encoderDrive(-1, 0.4);
                 robot.jewelServo.setPosition(robot.JEWEL_ARM_UP);
                 robot.encoderDrive(25, 0.4);
             } else {
-    */      //drives forward 24 inches no jewels are found
+          //drives forward 24 inches no jewels are found
             robot.encoderDrive(24, 0.4);
-       //}
+       }
         //turns 45 degrees clockwise to line up with cryptobox
         //robot.gyroTurn(0.4, -45);
         robot.gyroHold(0.4, -45, 2);
