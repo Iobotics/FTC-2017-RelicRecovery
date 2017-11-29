@@ -18,19 +18,24 @@ public class JewelDetectionOp extends LinearOpMode {
         FrameGrabber frameGrabber = FtcRobotControllerActivity.frameGrabber; //Get the frameGrabber
 
         frameGrabber.grabSingleFrame(); //Tell it to grab a frame
-        while (!frameGrabber.isResultReady()) { //Wait for the result
-            if (isStopRequested()) return;
+        while (true) { //Wait for the result
+            if(isStopRequested()) return;
+            //Get the result
+            while(!frameGrabber.isResultReady()) {
+                if(isStopRequested()) return;
 
-            sleep(5); //sleep for 5 milliseconds
+                sleep(5);
+            }
+
+            ImageProcessorResult imageProcessorResult = frameGrabber.getResult();
+            JewelColorResult result = (JewelColorResult) imageProcessorResult.getResult();
+
+            telemetry.addData("Result", result); //Display it on telemetry
+            telemetry.update();
+
+            frameGrabber.grabSingleFrame(); //Tell it to grab a frame
+            //wait before quitting (quitting clears telemetry)
+            sleep(100);
         }
-
-        //Get the result
-        ImageProcessorResult imageProcessorResult = frameGrabber.getResult();
-        JewelColorResult result = (JewelColorResult) imageProcessorResult.getResult();
-
-        telemetry.addData("Result", result); //Display it on telemetry
-        telemetry.update();
-        //wait before quitting (quitting clears telemetry)
-        sleep(1000);
     }
 }

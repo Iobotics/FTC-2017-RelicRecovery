@@ -458,6 +458,7 @@ public class Team8740_Base {
     public void toggleSpeed() {
         speedMultiplier = isLowSpeed ? HIGH_SPEED : LOW_SPEED;
         isLowSpeed = !isLowSpeed;
+        opmode.sleep(75);
     }
 
     public void resetEncoders() {
@@ -769,23 +770,20 @@ public class Team8740_Base {
      */
     public void hitJewel(JewelColorResult.JewelColor color) {
         toggleJewelArm();
-        if (teamColor == JewelColorResult.JewelColor.RED && color == JewelColorResult.JewelColor.RED) {
-            gyroTurn(45.0);
-            gyroHold(45.0, 0.5);
-        } else if (teamColor == JewelColorResult.JewelColor.RED && color == JewelColorResult.JewelColor.BLUE) {
-            gyroTurn(-45.0);
-            gyroHold(-45.0, 0.5);
-        } else if (teamColor == JewelColorResult.JewelColor.BLUE && color == JewelColorResult.JewelColor.BLUE) {
-            gyroTurn(45.0);
-            gyroHold(45.0, 0.5);
-        } else if (teamColor == JewelColorResult.JewelColor.BLUE && color == JewelColorResult.JewelColor.RED) {
-            gyroTurn(-45.0);
-            gyroHold(-45.0, 0.5);
+        opmode.sleep(500);
+        if (teamColor == color) {
+            gyroTurn(0.4,15.0);
+            gyroHold(0.4,15.0, 0.5);
+        } else {
+            gyroTurn(0.4,-15.0);
+            gyroHold(0.4,-15.0, 0.5);
         }
 
-        gyroTurn(0.0);
-        gyroHold(0.0, 0.5);
+        gyroTurn(0.4,0.0);
+        gyroHold(0.4,0.0, 0.5);
         toggleJewelArm();
+
+        opmode.sleep(100);
     }
 
     public void activateVuforia() {

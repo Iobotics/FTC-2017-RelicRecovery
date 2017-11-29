@@ -43,8 +43,6 @@ public class GoldDiggerBot {
     private DcMotor rightGlyphPull = null;
     public DcMotor conveyor = null;
     public Servo jewelServo = null;
-    private ColorSensor sensorRGB = null;
-    private DeviceInterfaceModule cdim = null;
 
     private final int TICKS_PER_REV = 1120;
     private final int WHEEL_DIAMETER = 4;
@@ -79,8 +77,6 @@ public class GoldDiggerBot {
         leftGlyphPull = hwMap.get(DcMotor.class, "leftIntake");
         conveyor = hwMap.get(DcMotor.class, "conveyor");
         jewelServo = hwMap.get(Servo.class, "jewelServo");
-        cdim = hwMap.deviceInterfaceModule.get("dim");
-        sensorRGB = hwMap.colorSensor.get("sensorRGB");
 
         //setting direction of motors and ther behaviour
 
@@ -92,9 +88,6 @@ public class GoldDiggerBot {
         leftGlyphPull.setDirection(DcMotor.Direction.REVERSE);
         conveyor.setDirection(DcMotor.Direction.REVERSE);
         jewelServo.setDirection(Servo.Direction.FORWARD);
-        //turns on LED to indicate the color sensor is on
-        cdim.setDigitalChannelMode(LED_CHANNEL, DigitalChannel.Mode.OUTPUT);
-        cdim.setDigitalChannelState(LED_CHANNEL, true);
 
         /*sets Behaviour of the motors depending on the type of Opmode
         if it is auto then brake
@@ -394,10 +387,6 @@ public class GoldDiggerBot {
         opMode.telemetry.addData("Speed.", "%5.2f:%5.2f", leftSpeed, rightSpeed);
 
         return onTarget;
-    }
-    public boolean checkBlue(){
-        if (sensorRGB.blue() > sensorRGB.red()) return  true;
-        else return false;
     }
 }
 

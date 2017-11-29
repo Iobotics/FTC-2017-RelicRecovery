@@ -42,7 +42,7 @@ public class Team8740_TestAuto extends LinearOpMode {
 
     /* Declare OpMode members */
     Team8740_Base robot = new Team8740_Base();
-    //JewelColorResult.JewelColor color = null;
+    JewelColorResult.JewelColor color = null;
     //RelicRecoveryVuMark vuMark = null;
 
     // These constants define the desired driving/control characteristics
@@ -57,7 +57,7 @@ public class Team8740_TestAuto extends LinearOpMode {
          * Initialize the standard drive system variables.
          * The initRobot() method of the hardware class does most of the work here
          */
-        robot.initRobot(hardwareMap, this, JewelColorResult.JewelColor.UNKNOWN);
+        robot.initRobot(hardwareMap, this, JewelColorResult.JewelColor.BLUE);
 
         robot.activateVuforia();
 
@@ -72,7 +72,11 @@ public class Team8740_TestAuto extends LinearOpMode {
         telemetry.addData("X", "Getting sensor data...");
         telemetry.update();
 
-        //color = robot.getColor();
+        color = robot.getColor();
+        while(color == JewelColorResult.JewelColor.UNKNOWN) {
+            color = robot.getColor();
+            sleep(100);
+        }
 
         // Wait for the game to start (Display Gyro value), and reset gyro before we move
         while (!isStarted()) {
@@ -83,7 +87,7 @@ public class Team8740_TestAuto extends LinearOpMode {
             telemetry.addData("O", "Robot Ready");
             telemetry.addLine("encoders").addData("X", robot.getXPosition()).addData("Y", robot.getYPosition());
             telemetry.addData(">", "Robot Heading = %.2f", robot.getGyroHeading());
-            //telemetry.addData("Color", color);
+            telemetry.addData("Color", color);
             //telemetry.addData("VuMark", vuMark);
             telemetry.update();
         }
@@ -93,8 +97,11 @@ public class Team8740_TestAuto extends LinearOpMode {
         // Put a hold after each turn
 
         //robot.hitJewel(color);
-        robot.driveStraight(DRIVE_SPEED, 12.0, 0.0);
+        //robot.driveStraight(DRIVE_SPEED, 12.0, 0.0);
         robot.gyroTurn(TURN_SPEED, -90.0);
-        //robot.gyroHold(TURN_SPEED, -90.0, 0.5);
+        robot.gyroHold(TURN_SPEED, -90.0, 2.0);
+
+        robot.gyroTurn(TURN_SPEED, 90.0);
+        robot.gyroHold(TURN_SPEED, 90.0, 2.0);
     }
 }

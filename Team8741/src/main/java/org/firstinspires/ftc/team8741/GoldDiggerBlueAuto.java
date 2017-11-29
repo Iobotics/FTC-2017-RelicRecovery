@@ -28,14 +28,14 @@ public class GoldDiggerBlueAuto extends LinearOpMode {
         waitForStart();
 
 
-            if (robot.checkBlue()){
+            if (false){
                 robot.jewelServo.setPosition(robot.JEWEL_ARM_DOWN);
                 robot.encoderDrive(1, 0.4);
                 robot.jewelServo.setPosition(robot.JEWEL_ARM_UP);
                 robot.encoderDrive(23, 0.4);
 
             }
-            else if (!robot.checkBlue()){
+            else if (false){
                 robot.jewelServo.setPosition(robot.JEWEL_ARM_DOWN);
                 robot.encoderDrive(-1, 0.4);
                 robot.jewelServo.setPosition(robot.JEWEL_ARM_UP);
