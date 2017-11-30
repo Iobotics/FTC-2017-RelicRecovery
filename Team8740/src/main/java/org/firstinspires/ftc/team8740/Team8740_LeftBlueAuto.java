@@ -89,16 +89,16 @@ public class Team8740_LeftBlueAuto extends LinearOpMode {
         // Note: Reverse movement is obtained by setting a negative distance (not speed)
         // Put a hold after each turn
 
-        //robot.hitJewel(color);
-        robot.driveStraight(-15.0, 0.0);
+        robot.hitJewel(color);
+        robot.driveStraight(-28.0, 0.0);
         robot.gyroTurn(90.0);
         robot.gyroHold(90.0, 0.5);
-        robot.driveStraight(9.0, 90.0);
+        robot.driveStraight(6.5, 90.0);
         robot.gyroTurn(180.0);
         robot.gyroHold(180.0, 0.5);
-        robot.driveStraight(11.0, 180.0);
+        robot.driveStraight(4.5, 180.0);
         robot.releaseGlyph();
-        robot.driveStraight(-2.0, 180.0);
+        robot.driveStraight(-4.0, 180.0);
     }
 
 }

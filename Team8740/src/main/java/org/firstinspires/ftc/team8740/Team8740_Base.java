@@ -67,8 +67,8 @@ import ftc.vision.JewelColorResult;
  */
 public class Team8740_Base {
     /* Constants */
-    private final static double LEFT_SERVO_HOME = 0.35;
-    private final static double RIGHT_SERVO_HOME = 0.65;
+    private final static double LEFT_SERVO_HOME = 0.30;
+    private final static double RIGHT_SERVO_HOME = 0.60;
 
     private final static double LEFT_SERVO_OPEN = 0.72;
     private final static double RIGHT_SERVO_OPEN = 1.25;
