@@ -18,6 +18,7 @@ import static java.lang.System.currentTimeMillis;
 public class WaffleToasterautocompBLUE extends LinearOpMode {
     View relativeLayout;
     WaffleToasterMain robot = new WaffleToasterMain();
+    private boolean jewelIsBlue;
 
     public void runOpMode() { //set up for the phone tp
         robot.init(hardwareMap, true);
@@ -28,7 +29,7 @@ public class WaffleToasterautocompBLUE extends LinearOpMode {
         // If possible, turn the light on in the beginning (it might already be on anyway,
         // we just make sure it is if we can).
         if (robot.colorSensor instanceof SwitchableLight) {
-            ((SwitchableLight)robot.colorSensor).enableLight(true);
+            ((SwitchableLight) robot.colorSensor).enableLight(true);
         }
 
         waitForStart();
@@ -40,32 +41,26 @@ public class WaffleToasterautocompBLUE extends LinearOpMode {
         NormalizedRGBA colors = robot.colorSensor.getNormalizedColors();
         int color = colors.toColor();
         long startTime = currentTimeMillis();
-        while(Color.red(color) <= 3 && currentTimeMillis()- startTime < 500) {
+        while (Color.red(color) <= 3 && currentTimeMillis() - startTime < 500) {
             colors = robot.colorSensor.getNormalizedColors();
             color = colors.toColor();
-            robot.allDrive(0,0);
+            robot.allDrive(0, 0);
         }
-        robot.allDrive(0,0);
+        robot.allDrive(0, 0);
         sleep(100);
-        int timeDiff;
         telemetry.addData("Red", Color.red(color));
-        if(Color.red(color) > 3){
-            robot.allDrive(.4, .4);
-            timeDiff = -500;
+        if (Color.red(color) < 3) {
+            robot.encoderDrive(0.5, 0.4);
+            jewelIsBlue = true;
+        } else {
+            robot.encoderDrive(0.5, -0.4);
+            jewelIsBlue = false;
         }
-        else{
-            robot.allDrive(-.4,-.4);
-            timeDiff = 550;
+        robot.resetRobot("jewel");
+        if (jewelIsBlue) {
+            robot.encoderDrive(32.5, 0.4);
+        } else {
+            robot.encoderDrive(33.5, 0.4);
         }
-        sleep(400);
-
-        robot.resetRobot("all");
-        sleep(200);
-        robot.allDrive(0.4,0.4);
-        sleep(1300-timeDiff);
-        robot.turnDrive("right", 0.4);
-        sleep(300);
-        robot.allDrive(0,0);
-        robot.resetRobot("arm");
     }
 }

@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.SwitchableLight;
 
 /**
- * Created by Teacher on 11/27/2017.
+ * Created by Jack Gonser :) on 11/27/2017.
  */
 
 public class WaffleToasterMain {
@@ -27,8 +27,18 @@ public class WaffleToasterMain {
 
     HardwareMap hwmap = null;
 
-    public void WaffleToasterMain () {
+    private boolean teleOp;
+    // Thanks Joel
+    private final int TICKS_PER_REV = 1120;
+    private final int WHEEL_DIAMETER = 4;
+    private final double COUNTS_PER_INCH = TICKS_PER_REV / (Math.PI * WHEEL_DIAMETER);
 
+    public void WaffleToasterMain (boolean teleOpCheck) {
+        if (teleOpCheck) {
+            teleOp = true;
+        } else {
+            teleOp = false;
+        }
     }
     void init (HardwareMap awhmap, boolean autoBlue) {
         hwmap = awhmap;
@@ -47,12 +57,18 @@ public class WaffleToasterMain {
 
         colorSensor = hwmap.get(NormalizedColorSensor.class, "colorSensor");
 
-        if (autoBlue) {
+        if (autoBlue && !teleOp) {
             leftFront.setDirection(DcMotorSimple.Direction.FORWARD);
             leftBack.setDirection(DcMotorSimple.Direction.FORWARD);
             rightBack.setDirection(DcMotorSimple.Direction.REVERSE);
             rightFront.setDirection(DcMotorSimple.Direction.REVERSE);
 
+        } else if (teleOp) {
+            //for butterfly drive
+            leftFront.setDirection(DcMotorSimple.Direction.FORWARD);
+            leftBack.setDirection(DcMotorSimple.Direction.FORWARD);
+            rightBack.setDirection(DcMotorSimple.Direction.FORWARD);
+            rightFront.setDirection(DcMotorSimple.Direction.FORWARD);
         } else {
             leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
             leftBack.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -151,6 +167,42 @@ public class WaffleToasterMain {
             arm.setPower(0.4);
             sleep(200);
             arm.setPower(0);
+        }
+    }
+
+    /**
+     * Sets the speed for strafing and normal drive with a butterfly drive train
+     * @param speed
+     * @param forward
+     */
+    public void twoMotorDrive (double speed, boolean forward) {
+        if (forward) {
+            leftFront.setPower(speed);
+            rightBack.setPower(-speed);
+        } else {
+            leftBack.setPower(-speed);
+            rightFront.setPower(speed);
+        }
+    }
+    //Thanks Joel
+    public void encoderDrive(double inches, double speed) {
+        //sets the target encoder value
+        int target = rightFront.getCurrentPosition() + (int) (inches*COUNTS_PER_INCH);
+        //if positive move forward to meet the value
+        if (inches > 0) {
+            allDrive(speed, speed);
+            while (rightFront.getCurrentPosition() <= target) {
+                //pauses the robot while moving forward
+            }
+            resetRobot("drive");
+        }
+        //if negative move backwards
+        else if (inches < 0){
+            allDrive(-speed, -speed);
+            while (rightFront.getCurrentPosition() >= target) {
+                //pauses the robot while moving back
+            }
+            resetRobot("drive");
         }
     }
 }

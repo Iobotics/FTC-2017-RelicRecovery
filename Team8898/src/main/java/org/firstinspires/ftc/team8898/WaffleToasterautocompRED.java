@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.team8898;
 
+import android.app.Activity;
 import android.graphics.Color;
 import android.view.View;
 
@@ -16,10 +17,13 @@ import static java.lang.System.currentTimeMillis;
 @Autonomous (name = "AUTO(RED)(Audience side)",group = "RED")
 public class WaffleToasterautocompRED extends LinearOpMode {
     View relativeLayout;
+    private boolean jewelIsBlue;
     WaffleToasterMain robot = new WaffleToasterMain();
 
     public void runOpMode()  { //set up for the phone tp
 
+        int relativeLayoutId = hardwareMap.appContext.getResources().getIdentifier("RelativeLayout", "id", hardwareMap.appContext.getPackageName());
+        relativeLayout = ((Activity) hardwareMap.appContext).findViewById(relativeLayoutId);
         // If possible, turn the light on in the beginning (it might already be on anyway,
         // we just make sure it is if we can).
         if (robot.colorSensor instanceof SwitchableLight) {
@@ -42,24 +46,19 @@ public class WaffleToasterautocompRED extends LinearOpMode {
         robot.allDrive(0, 0);
         sleep(100);
         telemetry.addData("Red", Color.red(color));
-        int timeDiff;
         if(Color.red(color) < 3){
-            robot.allDrive(-0.4,-0.4);
-            timeDiff = -350;
+            robot.encoderDrive(0.5,-0.4);
+            jewelIsBlue = true;
         }
-        else{
-            robot.allDrive(0.4,0.4);
-            timeDiff = 350;
+        else {
+            robot.encoderDrive(0.5, 0.4);
+            jewelIsBlue = false;
         }
-        sleep(500);
-
-        robot.resetRobot("all");
-        sleep(200);
-        robot.allDrive(0.4, 0.4);
-        sleep(1850-timeDiff);
-        robot.turnDrive("right", 0.4);
-        sleep(300);
-        robot.allDrive(0,0);
-        robot.resetRobot("arm");
+        robot.resetRobot("jewel");
+        if (jewelIsBlue) {
+            robot.encoderDrive(33.5,0.4);
+        } else {
+            robot.encoderDrive(32.5,0.4);
+        }
     }
 }

@@ -29,6 +29,7 @@ public class WaffleToaster extends LinearOpMode {
     private double turn = 0;
     private double left = 0;
     private double right = 0;
+    // private double strafe
 
     @Override
     public void runOpMode() { // set up
@@ -45,11 +46,23 @@ public class WaffleToaster extends LinearOpMode {
              */
             drive = -gamepad1.left_stick_y;
             turn = gamepad1.right_stick_x;
+            //turn = gamepad1.left_stick_x;
+            // strafe = gamepad1.right_stick_x
 
             // Combine drive and turn for blended motion.
             left = drive + turn;
             right = drive - turn;
+            /*
+            *replace above with this
+            if(turn > 0 || turn < 0) {
+                robot.allDrive(turn,turn);
+            }
+            if(drive > 0 || drive < 0) {
+                robot.rightFront.setPower(drive);
+                robot.leftBack.setPower(-drive);
+            }
 
+             */
             // Normalize the values so neither exceed +/- 1.0
             double max = Math.max(Math.abs(left), Math.abs(right));
             if (max > 1.0) {
