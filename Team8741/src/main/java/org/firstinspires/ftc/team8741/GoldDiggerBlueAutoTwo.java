@@ -29,7 +29,7 @@ import ftc.vision.JewelColorResult;
         waitForStart();
         
 
-        robot.encoderDrive(0.4, 30);
+        robot.encoderDrive(30, 0.4);
         robot.gyroTurn(0.4, 90);
         robot.gyroHold(0.4, 90, 0.5);
         robot.encoderDrive(10, 0.4);

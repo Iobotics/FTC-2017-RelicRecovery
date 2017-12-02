@@ -43,7 +43,7 @@ public class GoldDiggerOpMode_Linear extends LinearOpMode {
     // Have an else for every if especially for
     @Override
     public void runOpMode() throws InterruptedException {
-        robot.init(hardwareMap, true);
+        robot.init(hardwareMap, false);
         waitForStart();
 
         while (opModeIsActive()) {
