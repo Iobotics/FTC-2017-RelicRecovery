@@ -72,11 +72,7 @@ public class Team8740_TestAuto extends LinearOpMode {
         telemetry.addData("X", "Getting sensor data...");
         telemetry.update();
 
-        color = robot.getColor();
-        while(color == JewelColorResult.JewelColor.UNKNOWN) {
-            color = robot.getColor();
-            sleep(100);
-        }
+        //color = robot.getColor();
 
         // Wait for the game to start (Display Gyro value), and reset gyro before we move
         while (!isStarted()) {
@@ -97,11 +93,22 @@ public class Team8740_TestAuto extends LinearOpMode {
         // Put a hold after each turn
 
         //robot.hitJewel(color);
-        //robot.driveStraight(DRIVE_SPEED, 12.0, 0.0);
-        robot.gyroTurn(TURN_SPEED, -90.0);
-        robot.gyroHold(TURN_SPEED, -90.0, 2.0);
 
-        robot.gyroTurn(TURN_SPEED, 90.0);
-        robot.gyroHold(TURN_SPEED, 90.0, 2.0);
+        robot.driveStraight(-28.0, 0.0);
+        robot.gyroTurn(90.0);
+        robot.gyroHold(90.0, 1.0);
+        robot.driveStraight(6.5, 90.0);
+        robot.gyroTurn(180.0);
+        robot.gyroHold(180.0, 1.0);
+        robot.driveStraight(4.5, 180.0);
+        robot.releaseGlyph();
+        robot.driveStraight(-4.0, 180.0);
+
+        /*robot.driveStraight(12.0, 0.0);
+        robot.gyroTurn(-90.0);
+        robot.gyroHold(-90.0, 2.0);
+
+        robot.gyroTurn(90.0);
+        robot.gyroHold(90.0, 2.0);*/
     }
 }

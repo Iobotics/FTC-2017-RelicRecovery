@@ -48,7 +48,7 @@ public class Team8740_RightRedAuto extends LinearOpMode {
     // These constants define the desired driving/control characteristics
     // The can/should be tweaked to suite the specific robot drive train.
     static final double DRIVE_SPEED = 0.4;     // Nominal speed for better accuracy.
-    static final double TURN_SPEED = 0.4;     // Nominal half speed for better accuracy.
+    static final double TURN_SPEED = 0.45;     // Nominal half speed for better accuracy.
 
     @Override
     public void runOpMode() {
@@ -72,7 +72,7 @@ public class Team8740_RightRedAuto extends LinearOpMode {
         telemetry.addData("X", "Getting sensor data...");
         telemetry.update();
 
-        //color = robot.getColor();
+        color = robot.getColor();
 
         // Wait for the game to start (Display Gyro value), and reset gyro before we move
         while (!isStarted()) {
@@ -83,7 +83,7 @@ public class Team8740_RightRedAuto extends LinearOpMode {
             telemetry.addData("O", "Robot Ready");
             telemetry.addLine("encoders").addData("X", robot.getXPosition()).addData("Y", robot.getYPosition());
             telemetry.addData(">", "Robot Heading = %.2f", robot.getGyroHeading());
-            //telemetry.addData("Color", color);
+            telemetry.addData("Color", color);
             //telemetry.addData("VuMark", vuMark);
             telemetry.update();
         }

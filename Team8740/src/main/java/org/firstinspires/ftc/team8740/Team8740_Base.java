@@ -707,7 +707,8 @@ public class Team8740_Base {
     }
 
     public void setRelicWrist(double position) {
-        relicWrist.setPosition(position);
+        double wristPosition = Range.clip(position, RELIC_WRIST_UP, RELIC_WRIST_DOWN);
+        relicWrist.setPosition(wristPosition);
     }
 
     public void toggleRelicWrist() {
@@ -779,11 +780,11 @@ public class Team8740_Base {
             gyroHold(0.4,-15.0, 0.5);
         }
 
+        toggleJewelArm();
         gyroTurn(0.4,0.0);
         gyroHold(0.4,0.0, 0.5);
-        toggleJewelArm();
 
-        opmode.sleep(100);
+        opmode.sleep(1000);
     }
 
     public void activateVuforia() {
@@ -904,7 +905,7 @@ public class Team8740_Base {
 
             // Stop all motion
             setTank(0, 0);
-            opmode.sleep(500);
+            opmode.sleep(1000);
         }
     }
 

@@ -69,7 +69,7 @@ public class Team8740_LeftRedAuto extends LinearOpMode {
             idle();
         }
 
-        //color = robot.getColor();
+        color = robot.getColor();
 
         // Wait for the game to start (Display Gyro value), and reset gyro before we move
         while (!isStarted()) {
@@ -80,7 +80,7 @@ public class Team8740_LeftRedAuto extends LinearOpMode {
             telemetry.addData("O", "Robot Ready");
             telemetry.addLine("encoders").addData("X", robot.getXPosition()).addData("Y", robot.getYPosition());
             telemetry.addData(">", "Robot Heading = %.2f", robot.getGyroHeading());
-            //telemetry.addData("Color", color);
+            telemetry.addData("Color", color);
             //telemetry.addData("VuMark", vuMark);
             telemetry.update();
         }

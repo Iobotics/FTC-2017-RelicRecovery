@@ -36,6 +36,8 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 //@Disabled
 public class Team8740_Teleop extends LinearOpMode {
 
+    double wristRotation = 0;
+
     Team8740_Base robot = new Team8740_Base();
 
     @Override
@@ -81,18 +83,14 @@ public class Team8740_Teleop extends LinearOpMode {
                 robot.stopIntake();
             }
 
-            // Use gamepad A to toggle outtake
+            // Use gamepad A to toggle the intake claws
             if (gamepad1.a) {
-                robot.releaseGlyph();
+                robot.toggleIntakeClaws();
             }
 
-            // Use gamepad B or X to toggle outtake and reverse intake
-            if (gamepad1.b || gamepad1.x) {
-                robot.toggleIntakeClaws();
-                robot.reverseIntake();
+            // Use gamepad B to push the glyph
+            if (gamepad1.b) {
                 robot.pushGlyph();
-                robot.stopIntake();
-                robot.toggleIntakeClaws();
             }
 
             /* GAMEPAD 2 CONTROLS */
@@ -106,7 +104,11 @@ public class Team8740_Teleop extends LinearOpMode {
             }
 
             // TODO - Make separate method for manual control
-            robot.setRelicWrist(Team8740_Base.RELIC_WRIST_DOWN + gamepad2.left_stick_y * Team8740_Base.RELIC_WRIST_DOWN);
+            if(wristRotation < robot.RELIC_WRIST_UP && wristRotation > robot.RELIC_WRIST_DOWN) {
+                wristRotation += gamepad2.left_stick_y/100;
+            }
+            robot.setRelicWrist(Team8740_Base.RELIC_WRIST_DOWN + wristRotation);
+
             robot.setLiftPower(-gamepad2.right_stick_y);
 
             if (gamepad2.a) {
@@ -127,7 +129,7 @@ public class Team8740_Teleop extends LinearOpMode {
             }
 
             // Pause for 10 mS each cycle = update 100 times a second.
-            sleep(10);
+            sleep(1);
 
             telemetry.addData("Lift encoder", robot.getLiftEncoder());
             telemetry.addData("Lift position", robot.getLiftPosition());
