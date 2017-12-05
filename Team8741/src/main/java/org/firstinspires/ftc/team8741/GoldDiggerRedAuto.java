@@ -22,22 +22,9 @@ public class GoldDiggerRedAuto extends LinearOpMode {
         waitForStart();
 
 
-        if (false){
-            robot.jewelServo.setPosition(robot.JEWEL_ARM_DOWN);
-            robot.encoderDrive(this,1, 0.4);
-            robot.jewelServo.setPosition(robot.JEWEL_ARM_UP);
-            robot.encoderDrive(this,23, 0.4);
+        robot.knockJewel(JewelColorResult.JewelColor.RED);
 
-        }
-        else if (false){
-            robot.jewelServo.setPosition(robot.JEWEL_ARM_DOWN);
-            robot.encoderDrive(this, -1, 0.4);
-            robot.jewelServo.setPosition(robot.JEWEL_ARM_UP);
-            robot.encoderDrive(this,25, 0.4);
-        } else {
-
-        robot.encoderDrive(this,24, 0.4);
-        }
+        robot.encoderDrive(this, 24, 0.4);
 
         //robot.gyroTurn(0.5, 45);
 

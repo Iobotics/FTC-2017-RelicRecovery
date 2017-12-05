@@ -27,7 +27,8 @@ import ftc.vision.JewelColorResult;
     public void runOpMode() throws InterruptedException {
         robot.init(hardwareMap, true);
         waitForStart();
-        
+
+        robot.knockJewel(JewelColorResult.JewelColor.BLUE);
 
         robot.encoderDrive(this,30,0.4);
         robot.gyroTurn(0.4, 90);

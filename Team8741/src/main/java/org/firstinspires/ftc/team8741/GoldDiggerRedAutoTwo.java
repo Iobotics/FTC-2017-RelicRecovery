@@ -28,6 +28,7 @@ public class GoldDiggerRedAutoTwo extends LinearOpMode {
         robot.init(hardwareMap, true);
         waitForStart();
 
+        robot.knockJewel(JewelColorResult.JewelColor.RED);
 
         robot.encoderDrive(this,30, 0.4);
         robot.gyroTurn(0.4, -90);
