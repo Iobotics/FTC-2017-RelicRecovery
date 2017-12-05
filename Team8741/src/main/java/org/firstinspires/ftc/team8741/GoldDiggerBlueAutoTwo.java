@@ -29,14 +29,14 @@ import ftc.vision.JewelColorResult;
         waitForStart();
         
 
-        robot.encoderDrive(30, 0.4);
+        robot.encoderDrive(this,30,0.4);
         robot.gyroTurn(0.4, 90);
         robot.gyroHold(0.4, 90, 0.5);
-        robot.encoderDrive(10, 0.4);
+        robot.encoderDrive(this,10, 0.4);
         robot.glyphPull(-1);
         sleep(1000);
         robot.glyphPull(0);
-        robot.encoderDrive(-7, 0.4);
+        robot.encoderDrive(this,-7, 0.4);
     }
 
 }

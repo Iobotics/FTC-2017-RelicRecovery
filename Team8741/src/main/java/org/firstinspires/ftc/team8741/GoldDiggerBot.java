@@ -171,14 +171,14 @@ public class GoldDiggerBot {
      * @param inches Inches
      * @param maxSpeed  Should be greater than 0. Sets the maximum possible speed value.
      */
-    public void encoderDrive(double inches, double maxSpeed) {
+    public void encoderDrive(LinearOpMode opmode, double inches, double maxSpeed) {
         double speed;
         int error;
         //sets the target encoder value
         int target = rightFrontDrive.getCurrentPosition() + (int) (inches * COUNTS_PER_INCH);
 
         // While the absolute value of the error is greater than the error threshold
-        while (Math.abs(rightFrontDrive.getCurrentPosition() - target) >= DRIVE_THRESHOLD) {
+        while (opmode.opModeIsActive() && Math.abs(rightFrontDrive.getCurrentPosition() - target) >= DRIVE_THRESHOLD) {
             error = target - rightFrontDrive.getCurrentPosition();
             speed = Range.clip(error * P_DRIVE_COEFF, -maxSpeed , maxSpeed);
 
