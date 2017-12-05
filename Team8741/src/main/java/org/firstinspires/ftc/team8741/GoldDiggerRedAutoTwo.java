@@ -27,35 +27,17 @@ public class GoldDiggerRedAutoTwo extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         robot.init(hardwareMap, true);
         waitForStart();
-        FrameGrabber frameGrabber = FtcRobotControllerActivity.frameGrabber; //Get the frameGrabber
 
-        frameGrabber.grabSingleFrame(); //Tell it to grab a frame
-        while (!frameGrabber.isResultReady()) { //Wait for the result
-            Thread.sleep(5); //sleep for 5 milliseconds
-        }
+        robot.knockJewel(JewelColorResult.JewelColor.RED);
 
-//Get the result
-        ImageProcessorResult imageProcessorResult = frameGrabber.getResult();
-        JewelColorResult result = (JewelColorResult) imageProcessorResult.getResult();
-
-        JewelColorResult.JewelColor leftColor = result.getLeftColor();
-        JewelColorResult.JewelColor rightColor = result.getRightColor();
-
-        telemetry.addData("Result", result); //Display it on telemetry
-        telemetry.update();
-
-
-//wait before quitting (quitting clears telemetry)
-        Thread.sleep(1000);
-
-        robot.encoderDrive(30, 0.4);
+        robot.encoderDrive(this,30, 0.4);
         robot.gyroTurn(0.4, -90);
         robot.gyroHold(0.4, -90, 0.5);
-        robot.encoderDrive(10, 0.4);
+        robot.encoderDrive(this,10, 0.4);
         robot.glyphPull(-1);
-        Thread.sleep(1000);
+        sleep(1000);
         robot.glyphPull(0);
-        robot.encoderDrive(-7, 0.4);
+        robot.encoderDrive(this,-7, 0.4);
     }
 
 }

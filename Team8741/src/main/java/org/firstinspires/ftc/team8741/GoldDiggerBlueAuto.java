@@ -27,44 +27,33 @@ public class GoldDiggerBlueAuto extends LinearOpMode {
         robot.init(hardwareMap, true);
         waitForStart();
 
+        robot.knockJewel(JewelColorResult.JewelColor.BLUE);
 
-            if (false){
-                robot.jewelServo.setPosition(robot.JEWEL_ARM_DOWN);
-                robot.encoderDrive(1, 0.4);
-                robot.jewelServo.setPosition(robot.JEWEL_ARM_UP);
-                robot.encoderDrive(23, 0.4);
 
-            }
-            else if (false){
-                robot.jewelServo.setPosition(robot.JEWEL_ARM_DOWN);
-                robot.encoderDrive(-1, 0.4);
-                robot.jewelServo.setPosition(robot.JEWEL_ARM_UP);
-                robot.encoderDrive(25, 0.4);
-            } else {
-          //drives forward 24 inches no jewels are found
-            robot.encoderDrive(24, 0.4);
-       }
+        robot.encoderDrive(this, 24, 0.4);
+
+
         //turns 45 degrees clockwise to line up with cryptobox
         //robot.gyroTurn(0.4, -45);
         robot.gyroHold(0.4, -45, 2);
 
         //drives forward to meet box
-        robot.encoderDrive(9, 0.4);
+        robot.encoderDrive(this, 9, 0.4);
 
         //outtakes Glyph
         robot.glyphPull(-1);
-        Thread.sleep(1000);
+        sleep(1000);
         robot.glyphPull(0);
 
         //drives back out of zone
-        robot.encoderDrive(-11, 0.4);
+        robot.encoderDrive(this,-11, 0.4);
 
         //Turns another 45 degrees to line up with the safe zone
         //robot.gyroTurn(0.4, -90);
         robot.gyroHold(0.4, -90, 2);
 
         //drives back into zone
-        robot.encoderDrive(9, 0.4);
+        robot.encoderDrive(this,9, 0.4);
 
     }
 }

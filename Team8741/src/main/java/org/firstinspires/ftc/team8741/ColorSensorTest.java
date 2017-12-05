@@ -27,7 +27,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.team8898;
+package org.firstinspires.ftc.team8741;
 
 import android.app.Activity;
 import android.graphics.Color;
@@ -37,7 +37,6 @@ import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cColorSensor;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.SwitchableLight;
 
@@ -53,7 +52,7 @@ import com.qualcomm.robotcore.hardware.SwitchableLight;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 @TeleOp(name = "Sensor: Colors", group = "Sensor")
-@Disabled
+
 public class ColorSensorTest extends LinearOpMode {
 
     /** The colorSensor field will contain a reference to our color sensor hardware object */

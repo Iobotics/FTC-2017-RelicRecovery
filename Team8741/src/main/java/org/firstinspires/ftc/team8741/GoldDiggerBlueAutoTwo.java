@@ -27,16 +27,17 @@ import ftc.vision.JewelColorResult;
     public void runOpMode() throws InterruptedException {
         robot.init(hardwareMap, true);
         waitForStart();
-        
 
-        robot.encoderDrive(0.4, 30);
+        robot.knockJewel(JewelColorResult.JewelColor.BLUE);
+
+        robot.encoderDrive(this,30,0.4);
         robot.gyroTurn(0.4, 90);
         robot.gyroHold(0.4, 90, 0.5);
-        robot.encoderDrive(10, 0.4);
+        robot.encoderDrive(this,10, 0.4);
         robot.glyphPull(-1);
-        Thread.sleep(1000);
+        sleep(1000);
         robot.glyphPull(0);
-        robot.encoderDrive(-7, 0.4);
+        robot.encoderDrive(this,-7, 0.4);
     }
 
 }
