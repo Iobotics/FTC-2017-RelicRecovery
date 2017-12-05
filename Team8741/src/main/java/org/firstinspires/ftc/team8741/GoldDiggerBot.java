@@ -2,6 +2,7 @@ package org.firstinspires.ftc.team8741;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
+import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cColorSensor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -43,15 +44,16 @@ public class GoldDiggerBot {
     private DcMotor rightGlyphPull = null;
     public DcMotor conveyor = null;
     public Servo jewelServo = null;
+    private ModernRoboticsI2cColorSensor colorSensor;
 
     private final int TICKS_PER_REV = 1120;
     private final int WHEEL_DIAMETER = 4;
     private final double COUNTS_PER_INCH = TICKS_PER_REV / (Math.PI * WHEEL_DIAMETER);
     private final static double HEADING_THRESHOLD = 1;      // As tight as we can make it with an integer gyro
     private final static double P_TURN_COEFF = 0.07;     // Larger is more responsive, but also less stable
-    private final static double P_DRIVE_COEFF = 0.001;    // Larger is more responsive, but also less stable
-    public final double JEWEL_ARM_DOWN = 0.6;
-    public final double JEWEL_ARM_UP = 0;
+    private final static double P_DRIVE_COEFF = 0.005;    // Larger is more responsive, but also less stable
+    public final double JEWEL_ARM_DOWN = 0.76;
+    public final double JEWEL_ARM_UP = 0.24;
     private final int DRIVE_THRESHOLD = (int) (0.1 * COUNTS_PER_INCH);
 
 
@@ -79,6 +81,7 @@ public class GoldDiggerBot {
         leftGlyphPull = hwMap.get(DcMotor.class, "leftIntake");
         conveyor = hwMap.get(DcMotor.class, "conveyor");
         jewelServo = hwMap.get(Servo.class, "jewelServo");
+        colorSensor =hwMap.get(ModernRoboticsI2cColorSensor.class, "colorSensor");
 
         //setting direction of motors and ther behaviour
 
@@ -265,6 +268,11 @@ public class GoldDiggerBot {
             // Update telemetry & Allow time for other processes to run.
             opMode.telemetry.update();
         }
+    }
+    public void displayColors(){
+        opMode.telemetry.addData("Red: ", colorSensor.red());
+        opMode.telemetry.addData("Blue: ", colorSensor.blue());
+        opMode.telemetry.addData("Green: ", colorSensor.green());
     }
 
     /**

@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 @TeleOp(name = "Encoder Tester", group = "TeleOp")
 public class GoldDiggerEncoderTester extends LinearOpMode {
     GoldDiggerBot robot = new GoldDiggerBot(this);
-    float pos = 0;
+
     // TANK DRIVE NOT ARCADE
     // Have an else for every if especially
     @Override
@@ -18,21 +18,24 @@ public class GoldDiggerEncoderTester extends LinearOpMode {
         telemetry.addLine("Ready To go");
         telemetry.update();
         waitForStart();
-        robot.jewelServo.setPosition(pos);
+        robot.jewelServo.setPosition(robot.JEWEL_ARM_UP);
         while (opModeIsActive()) {
           telemetry.addData("Left Encoder", robot.getLeftEncoder());
           telemetry.addData("Right Encoder", robot.getRightEncoder());
           telemetry.addData("Heading", robot.getGyroHeading());
           telemetry.update();
           if (gamepad1.x){
-              pos += 0.01;
-              robot.jewelServo.setPosition(pos);
+
+              robot.jewelServo.setPosition(robot.JEWEL_ARM_UP);
           }
-            if (gamepad1.y){
-                pos -= 0.01;
-                robot.jewelServo.setPosition(pos);
-            }
-            telemetry.addData("Position", pos);
+          if (gamepad1.y){
+
+                robot.jewelServo.setPosition(robot.JEWEL_ARM_DOWN);
+          }
+          if (gamepad1.a){
+              robot.displayColors();
+          }
+            telemetry.addData("Position", robot.jewelServo.getPosition());
         }
     }
 }
