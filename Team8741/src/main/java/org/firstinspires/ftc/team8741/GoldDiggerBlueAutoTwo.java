@@ -34,7 +34,7 @@ import ftc.vision.JewelColorResult;
         robot.gyroHold(0.4, 90, 0.5);
         robot.encoderDrive(10, 0.4);
         robot.glyphPull(-1);
-        Thread.sleep(1000);
+        sleep(1000);
         robot.glyphPull(0);
         robot.encoderDrive(-7, 0.4);
     }

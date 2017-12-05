@@ -53,7 +53,7 @@ public class GoldDiggerBlueAuto extends LinearOpMode {
 
         //outtakes Glyph
         robot.glyphPull(-1);
-        Thread.sleep(1000);
+        sleep(1000);
         robot.glyphPull(0);
 
         //drives back out of zone

@@ -46,7 +46,7 @@ public class GoldDiggerRedAuto extends LinearOpMode {
         robot.encoderDrive(9, 0.4);
 
         robot.glyphPull(-1);
-        Thread.sleep(1000);
+        sleep(1000);
 
         robot.glyphPull(0);
 
