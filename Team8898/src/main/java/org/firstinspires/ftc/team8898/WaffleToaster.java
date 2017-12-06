@@ -2,6 +2,7 @@ package org.firstinspires.ftc.team8898;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.SwitchableLight;
 
 /**
@@ -33,6 +34,7 @@ public class WaffleToaster extends LinearOpMode {
 
     @Override
     public void runOpMode() { // set up
+        robot.init(hardwareMap,false);
 
         telemetry.addData("Ready", "Go");
         telemetry.update();

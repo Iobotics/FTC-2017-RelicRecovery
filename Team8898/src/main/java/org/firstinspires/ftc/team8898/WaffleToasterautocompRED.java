@@ -21,6 +21,7 @@ public class WaffleToasterautocompRED extends LinearOpMode {
     WaffleToasterMain robot = new WaffleToasterMain();
 
     public void runOpMode()  { //set up for the phone tp
+        robot.init(hardwareMap, false);
 
         int relativeLayoutId = hardwareMap.appContext.getResources().getIdentifier("RelativeLayout", "id", hardwareMap.appContext.getPackageName());
         relativeLayout = ((Activity) hardwareMap.appContext).findViewById(relativeLayoutId);
@@ -47,18 +48,19 @@ public class WaffleToasterautocompRED extends LinearOpMode {
         sleep(100);
         telemetry.addData("Red", Color.red(color));
         if(Color.red(color) < 3){
-            robot.encoderDrive(0.5,-0.4);
+            robot.encoderDrive(this,0.5,-0.4);
             jewelIsBlue = true;
         }
         else {
-            robot.encoderDrive(0.5, 0.4);
+            robot.encoderDrive(this,0.5, 0.4);
             jewelIsBlue = false;
         }
+        sleep(500);
         robot.resetRobot("jewel");
         if (jewelIsBlue) {
-            robot.encoderDrive(33.5,0.4);
+            robot.encoderDrive(this,33.5,0.4);
         } else {
-            robot.encoderDrive(32.5,0.4);
+            robot.encoderDrive(this, 32.5,0.4);
         }
     }
 }
