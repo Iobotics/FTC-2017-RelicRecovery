@@ -19,18 +19,14 @@ public class GoldDiggerRedAuto extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         robot.init(hardwareMap, true);
-        waitForStart();
 
-
-        robot.knockJewel(JewelColorResult.JewelColor.RED);
-
-        robot.encoderDrive(this, 24, 0.4);
+        robot.encoderDrive(this, 24  + robot.knockJewel(JewelColorResult.JewelColor.RED), 0.4);
 
         //robot.gyroTurn(0.5, 45);
 
         robot.gyroHold(0.5, 45, 2);
 
-        robot.encoderDrive(this,9, 0.4);
+        robot.encoderDrive(this,10, 0.4);
 
         robot.glyphPull(-1);
         sleep(1000);
@@ -44,6 +40,6 @@ public class GoldDiggerRedAuto extends LinearOpMode {
         robot.gyroHold(0.5, 90, 2);
 
         robot.encoderDrive(this,9, 0.4);
-
+        robot.jewelServo.setPosition(0);
     }
 }

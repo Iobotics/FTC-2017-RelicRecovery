@@ -51,7 +51,7 @@ public class GoldDiggerBot {
     private final int WHEEL_DIAMETER = 4;
     private final double COUNTS_PER_INCH = TICKS_PER_REV / (Math.PI * WHEEL_DIAMETER);
     private final static double HEADING_THRESHOLD = 1;      // As tight as we can make it with an integer gyro
-    private final static double P_TURN_COEFF = 0.07;     // Larger is more responsive, but also less stable
+    private final static double P_TURN_COEFF = 0.11;     // Larger is more responsive, but also less stable
     private final static double P_DRIVE_COEFF = 0.01;    // Larger is more responsive, but also less stable
     public final double JEWEL_ARM_DOWN = 0.76;
     public final double JEWEL_ARM_UP = 0.24;
@@ -82,7 +82,7 @@ public class GoldDiggerBot {
         leftGlyphPull = hwMap.get(DcMotor.class, "leftIntake");
         conveyor = hwMap.get(DcMotor.class, "conveyor");
         jewelServo = hwMap.get(Servo.class, "jewelServo");
-        colorSensor =hwMap.get(ModernRoboticsI2cColorSensor.class, "colorSensor");
+
 
         //setting direction of motors and ther behaviour
 
@@ -102,12 +102,13 @@ public class GoldDiggerBot {
         */
         if (isAuto) {
             setZeroPower(DcMotor.ZeroPowerBehavior.BRAKE);
-            jewelServo.setPosition(0);
+            initGyro();
+            colorSensor =hwMap.get(ModernRoboticsI2cColorSensor.class, "colorSensor");
         } else {
-            jewelServo.setPosition(JEWEL_ARM_UP);
+            //use default zero power behaviour on teleop
         }
-
-        initGyro();
+        opMode.waitForStart();
+        jewelServo.setPosition(JEWEL_ARM_UP);
     }
     //set run mode of the motors
 
@@ -346,11 +347,12 @@ public class GoldDiggerBot {
         return onTarget;
     }
 
-    public void knockJewel(JewelColorResult.JewelColor color) throws InterruptedException {
+    public int knockJewel(JewelColorResult.JewelColor color) throws InterruptedException {
         jewelServo.setPosition(JEWEL_ARM_DOWN);
-        sleep(100);
-        detectJewel(color);
+        sleep(1000);
+        int returnVal = detectJewel(color);
         jewelServo.setPosition(JEWEL_ARM_UP);
+        return  returnVal;
     }
     /**
      * Method checks the color of jewel infront of the robot
@@ -358,14 +360,15 @@ public class GoldDiggerBot {
      * and the side the robot is on.
      * @param color tells which side the robot is on.
      */
-    private void detectJewel(JewelColorResult.JewelColor color){
+    private int detectJewel(JewelColorResult.JewelColor color){
         if(colorSensor.blue() > colorSensor.red() && color == JewelColorResult.JewelColor.RED || colorSensor.red() > colorSensor.blue() && color == JewelColorResult.JewelColor.BLUE){
             encoderDrive(opMode, 3, 0.4);
-            encoderDrive(opMode, -3, 0.4);
+
+            return -3;
         }
         else {
             encoderDrive(opMode, -3, 0.4);
-            encoderDrive(opMode, 3, 0.4);
+            return 3;
         }
     }
 }
