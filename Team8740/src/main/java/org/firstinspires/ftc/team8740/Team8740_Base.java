@@ -177,6 +177,7 @@ public class Team8740_Base {
     private boolean programAssist = false;
 
     private double speedMultiplier = HIGH_SPEED;
+    private double wristControl = RELIC_WRIST_DOWN;
 
 
     /**
@@ -618,6 +619,7 @@ public class Team8740_Base {
         leftServo.setPosition(intakeClawOpen ? LEFT_SERVO_HOME : LEFT_SERVO_OPEN);
         rightServo.setPosition(intakeClawOpen ? RIGHT_SERVO_HOME : RIGHT_SERVO_OPEN);
         intakeClawOpen = !intakeClawOpen;
+        opmode.sleep(75);
     }
 
     public void pushGlyph() {
@@ -625,6 +627,18 @@ public class Team8740_Base {
         opmode.sleep(1430);
         pushServo.setPower(-GLYPH_POWER);
         opmode.sleep(1430);
+        pushServo.setPower(0);
+    }
+
+    public void crPushOut(){
+        pushServo.setPower(GLYPH_POWER);
+    }
+
+    public void crPushIn(){
+        pushServo.setPower(-GLYPH_POWER);
+    }
+
+    public void crStop(){
         pushServo.setPower(0);
     }
 
@@ -709,6 +723,12 @@ public class Team8740_Base {
     public void setRelicWrist(double position) {
         double wristPosition = Range.clip(position, RELIC_WRIST_UP, RELIC_WRIST_DOWN);
         relicWrist.setPosition(wristPosition);
+    }
+
+    public void controlRelicWrist(double input) {
+        wristControl -= input/100.0;
+        wristControl = Range.clip(wristControl, RELIC_WRIST_UP, RELIC_WRIST_DOWN);
+        setRelicWrist(wristControl);
     }
 
     public void toggleRelicWrist() {

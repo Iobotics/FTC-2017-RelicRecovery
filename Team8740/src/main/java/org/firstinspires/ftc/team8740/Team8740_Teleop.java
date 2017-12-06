@@ -31,14 +31,15 @@ package org.firstinspires.ftc.team8740;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.util.Range;
 
 @TeleOp(name = "Team 8740: Teleop Mecanum", group = "Team 8740")
 //@Disabled
 public class Team8740_Teleop extends LinearOpMode {
 
-    double wristRotation = 0;
-
     Team8740_Base robot = new Team8740_Base();
+
+    double wristRotation = 0;
 
     @Override
     public void runOpMode() {
@@ -93,6 +94,14 @@ public class Team8740_Teleop extends LinearOpMode {
                 robot.pushGlyph();
             }
 
+            if(gamepad1.dpad_up) {
+                robot.crPushOut();
+            } else if (gamepad1.dpad_down) {
+                robot.crPushIn();
+            }   else{
+                robot.crStop();
+            }
+
             /* GAMEPAD 2 CONTROLS */
 
             if (gamepad2.left_bumper) {
@@ -103,11 +112,7 @@ public class Team8740_Teleop extends LinearOpMode {
                 robot.setLiftPosition(Team8740_Base.LiftPosition.TOP);
             }
 
-            // TODO - Make separate method for manual control
-            if(wristRotation < robot.RELIC_WRIST_UP && wristRotation > robot.RELIC_WRIST_DOWN) {
-                wristRotation += gamepad2.left_stick_y/100;
-            }
-            robot.setRelicWrist(Team8740_Base.RELIC_WRIST_DOWN + wristRotation);
+            robot.controlRelicWrist(-gamepad2.left_stick_y);
 
             robot.setLiftPower(-gamepad2.right_stick_y);
 
