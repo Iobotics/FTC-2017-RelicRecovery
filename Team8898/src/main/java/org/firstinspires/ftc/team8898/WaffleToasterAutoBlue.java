@@ -18,6 +18,7 @@ import static java.lang.System.currentTimeMillis;
 public class WaffleToasterAutoBlue extends LinearOpMode {
     WaffleToasterMain robot = new WaffleToasterMain();
     View relativeLayout;
+    boolean isBlue；
 
     public void runOpMode() { //set up for the phone tp
         robot.init(hardwareMap, true);
@@ -51,12 +52,12 @@ public class WaffleToasterAutoBlue extends LinearOpMode {
         int timeDiff;
         telemetry.addData("Red", Color.red(color));
         if(Color.red(color) > 3){
-            robot.allDrive(.4, .4);
-            timeDiff = -300;
+            robot.encoderDrive（this，1，0。4）；
+            isBlue = false；
         }
         else{
-            robot.allDrive(-.4,-.4);
-            timeDiff = 550;
+            robot.encoderDrive（this，-1，0。4）；
+            isBlue = false；
         }
         sleep(400);
 
