@@ -49,6 +49,7 @@ public class Team8740_TestColor extends LinearOpMode {
     public void runOpMode() {
 
         robot.init(hardwareMap, this);
+        robot.initColor();
         robot.initVuforia();
 
         telemetry.addData("X", "Getting sensor data...");

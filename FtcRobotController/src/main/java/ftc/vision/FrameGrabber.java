@@ -5,6 +5,7 @@ import android.util.Log;
 import android.view.SurfaceView;
 
 import org.opencv.android.CameraBridgeViewBase;
+import org.opencv.android.JavaCameraView;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -39,6 +40,8 @@ public class FrameGrabber implements CameraBridgeViewBase.CvCameraViewListener2 
     private ImageProcessor imageProcessor = null;
     private ImageProcessorResult result = null;
 
+    private JavaCameraView cameraBridgeViewBase = null;
+
     //timing variables
     private long totalTime = 0, loopCount = 0, loopTimer = 0;
 
@@ -63,6 +66,7 @@ public class FrameGrabber implements CameraBridgeViewBase.CvCameraViewListener2 
     }
 
     public FrameGrabber(CameraBridgeViewBase cameraBridgeViewBase, int frameWidthRequest, int frameHeightRequest) {
+        this.cameraBridgeViewBase = (JavaCameraView) cameraBridgeViewBase;
         cameraBridgeViewBase.setVisibility(SurfaceView.VISIBLE);
 
         cameraBridgeViewBase.setMinimumWidth(frameWidthRequest);
@@ -89,6 +93,12 @@ public class FrameGrabber implements CameraBridgeViewBase.CvCameraViewListener2 
     public void throwAwayFrames() {
         mode = FrameGrabberMode.THROWAWAY;
         resultReady = false;
+    }
+
+    public void resetFrameGrabber() {
+        if(cameraBridgeViewBase != null) {
+            cameraBridgeViewBase.notifyCamera();
+        }
     }
 
     public void stopFrameGrabber() {
@@ -162,6 +172,7 @@ public class FrameGrabber implements CameraBridgeViewBase.CvCameraViewListener2 
 
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
+        Log.v(TAG, mode.toString());
         if (mode == FrameGrabberMode.SINGLE) { //if a single frame was requested
             processFrame(inputFrame); //process it
             stopFrameGrabber(); //and stop grabbing

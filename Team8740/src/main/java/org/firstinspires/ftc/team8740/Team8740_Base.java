@@ -162,6 +162,7 @@ public class Team8740_Base {
     /* Local OpMode members. */
     private HardwareMap hwMap = null;
     private LinearOpMode opmode = null;
+    private FrameGrabber frameGrabber = null;
 
     private ElapsedTime time = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
 
@@ -228,6 +229,7 @@ public class Team8740_Base {
         // If not teleop:
         if (color != null) {
             resetEncoders();
+            initColor();
             initGyro();
             initVuforia();
         }
@@ -339,6 +341,14 @@ public class Team8740_Base {
      */
     public void initProx() {
         proxSensor = hwMap.get(DistanceSensor.class, "prox");
+    }
+
+    /**
+     * Initialize OpenCV
+     */
+    public void initColor() {
+        frameGrabber = FtcRobotControllerActivity.frameGrabber; //Get the frameGrabber
+        //frameGrabber.resetFrameGrabber();
     }
 
     /**
@@ -754,8 +764,6 @@ public class Team8740_Base {
      * @return color
      */
     public JewelColorResult.JewelColor getColor() {
-        FrameGrabber frameGrabber = FtcRobotControllerActivity.frameGrabber; //Get the frameGrabber
-
         frameGrabber.grabSingleFrame(); //Tell it to grab a frame
 
         while (!frameGrabber.isResultReady()) { //Wait for the result
