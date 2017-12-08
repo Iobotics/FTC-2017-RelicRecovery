@@ -20,10 +20,11 @@ public class GoldDiggerRedAuto extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         robot.init(hardwareMap, true);
 
-        robot.encoderDrive(this, 24  + robot.knockJewel(JewelColorResult.JewelColor.RED), 0.4);
+        robot.encoderDrive(this, -(24  + robot.knockJewel(JewelColorResult.JewelColor.RED)), 0.4);
 
         //robot.gyroTurn(0.5, 45);
 
+        robot.gyroHold(0.5, 180, 3);
         robot.gyroHold(0.5, 45, 2);
 
         robot.encoderDrive(this,10, 0.4);
