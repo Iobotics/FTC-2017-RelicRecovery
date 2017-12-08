@@ -357,14 +357,12 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
         @Override
         public void run() {
             do {
-                Log.v(TAG, "Test 1");
                 boolean hasFrame = false;
                 synchronized (JavaCameraView.this) {
                     try {
                         while (!mCameraFrameReady && !mStopThread) {
-                            Log.v(TAG, "Test 4");
                             JavaCameraView.this.wait();
-                            Log.v(TAG, "Test 6");
+                            Log.v(TAG, (!mCameraFrameReady ? "Not ready" : "Ready") + " " + (!mStopThread ? "Running" : "Not running"));
                         }
                     } catch (InterruptedException e) {
                         e.printStackTrace();
@@ -375,16 +373,13 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
                         mCameraFrameReady = false;
                         hasFrame = true;
                     }
-                    Log.v(TAG, "Test 5");
                 }
 
                 if (!mStopThread && hasFrame) {
                     if (!mFrameChain[1 - mChainIdx].empty())
-                        Log.v(TAG, "Test 2");
                         deliverAndDrawFrame(mCameraFrame[1 - mChainIdx]);
                 }
             } while (!mStopThread);
-            Log.v(TAG, "Test 3");
             Log.d(TAG, "Finish processing thread");
         }
     }

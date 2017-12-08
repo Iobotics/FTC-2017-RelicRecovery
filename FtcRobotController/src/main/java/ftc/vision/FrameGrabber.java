@@ -95,12 +95,6 @@ public class FrameGrabber implements CameraBridgeViewBase.CvCameraViewListener2 
         resultReady = false;
     }
 
-    public void resetFrameGrabber() {
-        if(cameraBridgeViewBase != null) {
-            cameraBridgeViewBase.notifyCamera();
-        }
-    }
-
     public void stopFrameGrabber() {
         mode = FrameGrabberMode.STOPPED;
         totalTime = 0;

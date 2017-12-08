@@ -231,7 +231,7 @@ public class Team8740_Base {
             resetEncoders();
             initColor();
             initGyro();
-            initVuforia();
+            //initVuforia();
         }
     }
 
@@ -764,6 +764,8 @@ public class Team8740_Base {
      * @return color
      */
     public JewelColorResult.JewelColor getColor() {
+        frameGrabber = FtcRobotControllerActivity.frameGrabber; //Get the frameGrabber
+
         frameGrabber.grabSingleFrame(); //Tell it to grab a frame
 
         while (!frameGrabber.isResultReady()) { //Wait for the result
@@ -778,6 +780,8 @@ public class Team8740_Base {
         JewelColorResult.JewelColor leftColor = result.getLeftColor();
         JewelColorResult.JewelColor rightColor = result.getRightColor();
 
+        frameGrabber.grabSingleFrame();
+
         JewelColorResult.JewelColor color;
         if (leftColor == JewelColorResult.JewelColor.BLUE && rightColor == JewelColorResult.JewelColor.RED) {
             color = JewelColorResult.JewelColor.RED;
@@ -787,7 +791,7 @@ public class Team8740_Base {
             color = JewelColorResult.JewelColor.UNKNOWN;
         }
 
-        opmode.sleep(1000);
+        opmode.sleep(100);
 
         return color;
     }
