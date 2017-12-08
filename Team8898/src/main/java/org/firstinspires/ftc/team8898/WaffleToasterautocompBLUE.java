@@ -50,17 +50,17 @@ public class WaffleToasterautocompBLUE extends LinearOpMode {
         sleep(100);
         telemetry.addData("Red", Color.red(color));
         if (Color.red(color) < 3) {
-            robot.encoderDrive(this, 0.5, 0.4);
+            robot.encoderDrive(this, -0.5, 0.4);
             jewelIsBlue = true;
         } else {
-            robot.encoderDrive(this,0.5, -0.4);
+            robot.encoderDrive(this,0.5, 0.4);
             jewelIsBlue = false;
         }
         robot.resetRobot("jewel");
         if (jewelIsBlue) {
-            robot.encoderDrive(this,32.5, 0.4);
+            robot.encoderDrive(this,-32.5, 0.4);
         } else {
-            robot.encoderDrive(this,33.5, 0.4);
+            robot.encoderDrive(this,-33.5, 0.4);
         }
     }
 }

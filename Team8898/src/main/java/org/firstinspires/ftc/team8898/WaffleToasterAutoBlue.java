@@ -18,10 +18,11 @@ import static java.lang.System.currentTimeMillis;
 public class WaffleToasterAutoBlue extends LinearOpMode {
     WaffleToasterMain robot = new WaffleToasterMain();
     View relativeLayout;
-    boolean isBlue；
+    boolean isBlue;
 
     public void runOpMode() { //set up for the phone tp
         robot.init(hardwareMap, true);
+        robot.initGyro();
         int relativeLayoutId = hardwareMap.appContext.getResources().getIdentifier("RelativeLayout", "id", hardwareMap.appContext.getPackageName());
         relativeLayout = ((Activity) hardwareMap.appContext).findViewById(relativeLayoutId);
 
@@ -52,12 +53,12 @@ public class WaffleToasterAutoBlue extends LinearOpMode {
         int timeDiff;
         telemetry.addData("Red", Color.red(color));
         if(Color.red(color) > 3){
-            robot.encoderDrive（this，1，0。4）；
-            isBlue = false；
+            robot.encoderDrive(this,-1,0.4);
+            isBlue = false;
         }
         else{
-            robot.encoderDrive（this，-1，0。4）；
-            isBlue = false；
+            robot.encoderDrive(this,1,0.4);
+            isBlue = false;
         }
         sleep(400);
 

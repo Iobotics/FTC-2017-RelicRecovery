@@ -22,8 +22,8 @@ public class WaffleToasterAuto extends LinearOpMode {
 
 
     public void runOpMode()  { //set up for the phone tp
-        robot.initGyro();
         robot.init(hardwareMap, false);
+        robot.initGyro();
         int relativeLayoutId = hardwareMap.appContext.getResources().getIdentifier("RelativeLayout", "id", hardwareMap.appContext.getPackageName());
         relativeLayout = ((Activity) hardwareMap.appContext).findViewById(relativeLayoutId);
 
