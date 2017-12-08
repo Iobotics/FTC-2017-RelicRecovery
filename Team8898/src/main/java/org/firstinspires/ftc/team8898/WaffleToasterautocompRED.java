@@ -46,7 +46,6 @@ public class WaffleToasterautocompRED extends LinearOpMode {
         }
         robot.allDrive(0, 0);
         sleep(100);
-        telemetry.addData("Red", Color.red(color));
         if(Color.red(color) < 3){
             robot.encoderDrive(this,0.5,-0.4);
             jewelIsBlue = true;

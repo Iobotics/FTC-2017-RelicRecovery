@@ -282,7 +282,7 @@ public class WaffleToasterMain {
         // keep looping while we are still active, and not on heading.
         while (!onHeading(speed, angle, P_TURN_COEFF)) {
             // Update telemetry & Allow time for other processes to run.
-            opMode.telemetry.update();
+
         }
     }
     boolean onHeading(double speed, double angle, double PCoeff) {

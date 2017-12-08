@@ -22,7 +22,6 @@ public class WaffleToasterAutoBlue extends LinearOpMode {
 
     public void runOpMode() { //set up for the phone tp
         robot.init(hardwareMap, true);
-        robot.initGyro();
         int relativeLayoutId = hardwareMap.appContext.getResources().getIdentifier("RelativeLayout", "id", hardwareMap.appContext.getPackageName());
         relativeLayout = ((Activity) hardwareMap.appContext).findViewById(relativeLayoutId);
 
@@ -35,6 +34,7 @@ public class WaffleToasterAutoBlue extends LinearOpMode {
         }
 
         waitForStart();
+        robot.initGyro();
 
         robot.allServo(0.25);
         robot.jewelServo.setPosition(.4);
@@ -50,8 +50,6 @@ public class WaffleToasterAutoBlue extends LinearOpMode {
         }
         robot.resetRobot("drive");
         sleep(100);
-        int timeDiff;
-        telemetry.addData("Red", Color.red(color));
         if(Color.red(color) > 3){
             robot.encoderDrive(this,-1,0.4);
             isBlue = false;
