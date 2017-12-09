@@ -297,6 +297,12 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
         mCameraFrameReady = false;
     }
 
+    public void notifyCamera() {
+        synchronized(mThread) {
+            mThread.notify();
+        }
+    }
+
     @Override
     public void onPreviewFrame(byte[] frame, Camera arg1) {
         if (BuildConfig.DEBUG)
@@ -356,6 +362,7 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
                     try {
                         while (!mCameraFrameReady && !mStopThread) {
                             JavaCameraView.this.wait();
+                            Log.v(TAG, (!mCameraFrameReady ? "Not ready" : "Ready") + " " + (!mStopThread ? "Running" : "Not running"));
                         }
                     } catch (InterruptedException e) {
                         e.printStackTrace();

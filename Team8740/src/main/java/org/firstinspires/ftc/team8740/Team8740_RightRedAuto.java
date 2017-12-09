@@ -43,7 +43,7 @@ public class Team8740_RightRedAuto extends LinearOpMode {
     /* Declare OpMode members */
     Team8740_Base robot = new Team8740_Base();
     JewelColorResult.JewelColor color = null;
-    RelicRecoveryVuMark vuMark = null;
+    //RelicRecoveryVuMark vuMark = null;
 
     // These constants define the desired driving/control characteristics
     // The can/should be tweaked to suite the specific robot drive train.
@@ -59,7 +59,7 @@ public class Team8740_RightRedAuto extends LinearOpMode {
          */
         robot.initRobot(hardwareMap, this, JewelColorResult.JewelColor.RED);
 
-        robot.activateVuforia();
+        //robot.activateVuforia();
 
         // make sure the gyro is calibrated before continuing
         while (robot.isGyroCalibrating()) {

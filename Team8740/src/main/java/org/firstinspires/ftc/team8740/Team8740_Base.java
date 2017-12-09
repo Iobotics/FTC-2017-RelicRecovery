@@ -162,6 +162,7 @@ public class Team8740_Base {
     /* Local OpMode members. */
     private HardwareMap hwMap = null;
     private LinearOpMode opmode = null;
+    private FrameGrabber frameGrabber = null;
 
     private ElapsedTime time = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
 
@@ -189,6 +190,7 @@ public class Team8740_Base {
     public void init(HardwareMap hwMap, LinearOpMode opmode) {
         setHardwareMap(hwMap);
         setOpmode(opmode);
+        setTeamColor(JewelColorResult.JewelColor.UNKNOWN);
 
         opmode.telemetry.addData("X", "Initializing...");
         opmode.telemetry.update();
@@ -214,6 +216,7 @@ public class Team8740_Base {
     public void initRobot(HardwareMap hwMap, LinearOpMode opmode, JewelColorResult.JewelColor color) {
         setHardwareMap(hwMap);
         setOpmode(opmode);
+        setTeamColor(color);
 
         opmode.telemetry.addData("X", "Initializing...");
         opmode.telemetry.update();
@@ -228,8 +231,9 @@ public class Team8740_Base {
         // If not teleop:
         if (color != null) {
             resetEncoders();
+            initColor();
             initGyro();
-            initVuforia();
+            //initVuforia();
         }
     }
 
@@ -342,6 +346,14 @@ public class Team8740_Base {
     }
 
     /**
+     * Initialize OpenCV
+     */
+    public void initColor() {
+        frameGrabber = FtcRobotControllerActivity.frameGrabber; //Get the frameGrabber
+        //frameGrabber.resetFrameGrabber();
+    }
+
+    /**
      * Initialize Vuforia
      */
     public void initVuforia() {
@@ -391,6 +403,10 @@ public class Team8740_Base {
 
     public void setOpmode(LinearOpMode opmode) {
         this.opmode = opmode;
+    }
+
+    public void setTeamColor(JewelColorResult.JewelColor color) {
+        this.teamColor = color;
     }
 
     public boolean isStopRequested() {
@@ -754,7 +770,7 @@ public class Team8740_Base {
      * @return color
      */
     public JewelColorResult.JewelColor getColor() {
-        FrameGrabber frameGrabber = FtcRobotControllerActivity.frameGrabber; //Get the frameGrabber
+        frameGrabber = FtcRobotControllerActivity.frameGrabber; //Get the frameGrabber
 
         frameGrabber.grabSingleFrame(); //Tell it to grab a frame
 
@@ -770,16 +786,18 @@ public class Team8740_Base {
         JewelColorResult.JewelColor leftColor = result.getLeftColor();
         JewelColorResult.JewelColor rightColor = result.getRightColor();
 
+        frameGrabber.grabSingleFrame();
+
         JewelColorResult.JewelColor color;
-        if (leftColor == JewelColorResult.JewelColor.BLUE && rightColor == JewelColorResult.JewelColor.RED) {
+        if (leftColor == JewelColorResult.JewelColor.BLUE || rightColor == JewelColorResult.JewelColor.RED) {
             color = JewelColorResult.JewelColor.RED;
-        } else if (leftColor == JewelColorResult.JewelColor.RED && rightColor == JewelColorResult.JewelColor.BLUE) {
+        } else if (leftColor == JewelColorResult.JewelColor.RED || rightColor == JewelColorResult.JewelColor.BLUE) {
             color = JewelColorResult.JewelColor.BLUE;
         } else {
             color = JewelColorResult.JewelColor.UNKNOWN;
         }
 
-        opmode.sleep(1000);
+        opmode.sleep(100);
 
         return color;
     }
@@ -792,10 +810,10 @@ public class Team8740_Base {
     public void hitJewel(JewelColorResult.JewelColor color) {
         toggleJewelArm();
         opmode.sleep(500);
-        if (teamColor == color) {
+        if (teamColor == JewelColorResult.JewelColor.RED && color == JewelColorResult.JewelColor.RED || teamColor == JewelColorResult.JewelColor.BLUE && color == JewelColorResult.JewelColor.BLUE) {
             gyroTurn(0.4,15.0);
             gyroHold(0.4,15.0, 0.5);
-        } else {
+        } else if(teamColor == JewelColorResult.JewelColor.RED && color == JewelColorResult.JewelColor.BLUE || teamColor == JewelColorResult.JewelColor.BLUE && color == JewelColorResult.JewelColor.RED) {
             gyroTurn(0.4,-15.0);
             gyroHold(0.4,-15.0, 0.5);
         }
@@ -903,8 +921,8 @@ public class Team8740_Base {
                 if (distance < 0)
                     steer *= -1.0;
 
-                leftSpeed = speed + steer;
-                rightSpeed = speed - steer;
+                leftSpeed = speed - steer;
+                rightSpeed = speed + steer;
 
                 // Normalize speeds if either one exceeds +/- 1.0
                 max = Math.max(Math.abs(leftSpeed), Math.abs(rightSpeed));
