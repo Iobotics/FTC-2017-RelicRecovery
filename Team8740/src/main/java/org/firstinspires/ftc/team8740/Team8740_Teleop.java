@@ -130,6 +130,7 @@ public class Team8740_Teleop extends LinearOpMode {
 
             if (gamepad2.y) {
                 robot.releaseGlyph();
+                robot.toggleIntakeClaws();
                 //robot.toggleProgramAssist();
             }
 

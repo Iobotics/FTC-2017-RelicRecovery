@@ -72,7 +72,7 @@ public class Team8740_TestAuto extends LinearOpMode {
         telemetry.addData("X", "Getting sensor data...");
         telemetry.update();
 
-        //color = robot.getColor();
+        color = robot.getColor();
 
         // Wait for the game to start (Display Gyro value), and reset gyro before we move
         while (!isStarted()) {
@@ -92,23 +92,13 @@ public class Team8740_TestAuto extends LinearOpMode {
         // Note: Reverse movement is obtained by setting a negative distance (not speed)
         // Put a hold after each turn
 
-        //robot.hitJewel(color);
-
-        robot.driveStraight(-28.0, 0.0);
-        robot.gyroTurn(90.0);
-        robot.gyroHold(90.0, 1.0);
-        robot.driveStraight(6.5, 90.0);
-        robot.gyroTurn(180.0);
-        robot.gyroHold(180.0, 1.0);
-        robot.driveStraight(4.5, 180.0);
-        robot.releaseGlyph();
-        robot.driveStraight(-4.0, 180.0);
-
-        /*robot.driveStraight(12.0, 0.0);
+        robot.hitJewel(color);
+        robot.driveOffBalance(false);
+        robot.driveStraight(-16.0, 0.0);
         robot.gyroTurn(-90.0);
-        robot.gyroHold(-90.0, 2.0);
-
-        robot.gyroTurn(90.0);
-        robot.gyroHold(90.0, 2.0);*/
+        robot.gyroHold(-90.0, 0.5);
+        robot.driveStraight(6.0, -90.0);
+        robot.releaseGlyph();
+        robot.driveStraight(-4.0, -90.0);
     }
 }

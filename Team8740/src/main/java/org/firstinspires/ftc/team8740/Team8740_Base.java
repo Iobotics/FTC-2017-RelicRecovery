@@ -106,8 +106,12 @@ public class Team8740_Base {
 
     // TODO - Tweak the P-gains
     private final static double HEADING_THRESHOLD = 1; // As tight as we can make it with an integer gyro
+    private final static double PITCH_THRESHOLD = 1; // As tight as we can make it with an integer gyro
     private final static double P_TURN_COEFF = 0.143;   // Larger is more responsive, but also less stable
     private final static double P_DRIVE_COEFF = 0.16;  // Larger is more responsive, but also less stable
+
+    private final static double FLAT_PITCH = -1;    // Pitch when robot is flat on the balance stone
+    private final static double BALANCE_PITCH = -8; // Pitch when robot is leaving the balance stone
 
     private final static double AUTO_DRIVE_SPEED = 0.6;
     private final static double AUTO_TURN_SPEED = 0.6;
@@ -665,7 +669,7 @@ public class Team8740_Base {
     public void releaseGlyph() {
         toggleIntakeClaws();
         pushGlyph();
-        toggleIntakeClaws();
+        //toggleIntakeClaws();
     }
 
     /**
@@ -864,6 +868,20 @@ public class Team8740_Base {
         return heading;
     }
 
+    /**
+     * Gets the pitch of the gyro in degrees
+     *
+     * @return pitch
+     */
+    public double getGyroPitch() {
+        // Update gyro
+        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        gravity = imu.getGravity();
+
+        double pitch = AngleUnit.DEGREES.normalize(AngleUnit.DEGREES.fromUnit(angles.angleUnit, angles.thirdAngle));
+        return pitch;
+    }
+
     public void driveStraight(double distance, double angle) {
         driveStraight(AUTO_DRIVE_SPEED, distance, angle);
     }
@@ -1020,6 +1038,28 @@ public class Team8740_Base {
             // Stop all motion
             setMecanum(0, 0, 0);
         }
+    }
+
+    /**
+     * Method to drive off the balance stone
+     */
+    public void driveOffBalance(boolean reverse) {
+        double speed = AUTO_DRIVE_SPEED;
+        if(reverse) speed *= -1;
+        // Drive partially off the balance
+        while(Math.abs(getGyroPitch() - BALANCE_PITCH) > PITCH_THRESHOLD) {
+            setTank(speed, speed);
+        }
+
+        // Finish driving off the balance
+        while(Math.abs(getGyroPitch() - FLAT_PITCH) > PITCH_THRESHOLD) {
+            setTank(speed, speed);
+        }
+        setTank(0.0, 0.0);
+
+        setDriveMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        setDriveMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        opmode.sleep(100);
     }
 
     public void gyroTurn(double angle) {

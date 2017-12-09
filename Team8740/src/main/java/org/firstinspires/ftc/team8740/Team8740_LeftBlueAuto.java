@@ -90,7 +90,8 @@ public class Team8740_LeftBlueAuto extends LinearOpMode {
         // Put a hold after each turn
 
         robot.hitJewel(color);
-        robot.driveStraight(-28.0, 0.0);
+        robot.driveOffBalance(false);
+        robot.driveStraight(-16.0, 0.0);
         robot.gyroTurn(90.0);
         robot.gyroHold(90.0, 1.0);
         robot.driveStraight(6.5, 90.0);
