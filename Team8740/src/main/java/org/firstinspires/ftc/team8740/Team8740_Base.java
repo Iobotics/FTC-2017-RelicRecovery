@@ -1045,14 +1045,18 @@ public class Team8740_Base {
      */
     public void driveOffBalance(boolean reverse) {
         double speed = AUTO_DRIVE_SPEED;
-        if(reverse) speed *= -1;
+        double direction = 1;
+        if(reverse) {
+            speed *= -1;
+            direction *= -1;
+        }
         // Drive partially off the balance
-        while(Math.abs(getGyroPitch() - BALANCE_PITCH) > PITCH_THRESHOLD) {
+        while(Math.abs(getGyroPitch() - BALANCE_PITCH * direction) > PITCH_THRESHOLD) {
             setTank(speed, speed);
         }
 
         // Finish driving off the balance
-        while(Math.abs(getGyroPitch() - FLAT_PITCH) > PITCH_THRESHOLD) {
+        while(Math.abs(getGyroPitch() - FLAT_PITCH * direction) > PITCH_THRESHOLD) {
             setTank(speed, speed);
         }
         setTank(0.0, 0.0);
