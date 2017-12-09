@@ -59,7 +59,7 @@ public class Team8740_TestAuto extends LinearOpMode {
          */
         robot.initRobot(hardwareMap, this, JewelColorResult.JewelColor.BLUE);
 
-        robot.activateVuforia();
+        //robot.activateVuforia();
 
         // make sure the gyro is calibrated before continuing
         while (robot.isGyroCalibrating()) {

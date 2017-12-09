@@ -69,7 +69,7 @@ public class Team8740_LeftRedAuto extends LinearOpMode {
             idle();
         }
 
-        //color = robot.getColor();
+        color = robot.getColor();
 
         // Wait for the game to start (Display Gyro value), and reset gyro before we move
         while (!isStarted()) {

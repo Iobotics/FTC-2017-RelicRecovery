@@ -72,7 +72,7 @@ public class Team8740_RightRedAuto extends LinearOpMode {
         telemetry.addData("X", "Getting sensor data...");
         telemetry.update();
 
-        //color = robot.getColor();
+        color = robot.getColor();
 
         // Wait for the game to start (Display Gyro value), and reset gyro before we move
         while (!isStarted()) {
