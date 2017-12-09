@@ -30,6 +30,7 @@ public class GoldDiggerAuto extends LinearOpMode {
         //goes into glyph box or at least go up to it
 
         robot.glyphPull(-1, -1);
+
         Thread.sleep(1500);
         //put preloaded glyph into the crypto box
 

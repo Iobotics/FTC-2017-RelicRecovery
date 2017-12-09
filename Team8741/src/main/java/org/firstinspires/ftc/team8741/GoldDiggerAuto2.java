@@ -37,6 +37,7 @@ public class GoldDiggerAuto2 extends LinearOpMode {
         //put pre-loaded glyph into the crypto box
 
         robot.glyphPull(0,0);
+
         //turn off glyph motors
 
         //THIS IS FOR THE STAND NEAREST TO BOTH CRYPTO BOXES AND PUTS ON GLYPH AND GETS INTO THE TRIANGLE OF POINTS
