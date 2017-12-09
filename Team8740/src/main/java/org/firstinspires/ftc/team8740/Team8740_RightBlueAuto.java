@@ -31,103 +31,74 @@ package org.firstinspires.ftc.team8740;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
 
-/**
- * This file illustrates the concept of driving a path based on Gyro heading and encoder counts.
- * It uses the common Pushbot hardware class to define the drive on the robot.
- * The code is structured as a LinearOpMode
- *
- * The code REQUIRES that you DO have encoders on the wheels,
- *   otherwise you would use: PushbotAutoDriveByTime;
- *
- *  This code ALSO requires that you have a Modern Robotics I2C gyro with the name "gyro"
- *   otherwise you would use: PushbotAutoDriveByEncoder;
- *
- *  This code requires that the drive Motors have been configured such that a positive
- *  power command moves them forward, and causes the encoders to count UP.
- *
- *  This code uses the RUN_TO_POSITION mode to enable the Motor controllers to generate the run profile
- *
- *  In order to calibrate the Gyro correctly, the robot must remain stationary during calibration.
- *  This is performed when the INIT button is pressed on the Driver Station.
- *  This code assumes that the robot is stationary when the INIT button is pressed.
- *  If this is not the case, then the INIT should be performed again.
- *
- *  Note: in this example, all angles are referenced to the initial coordinate frame set during the
- *  the Gyro Calibration process, or whenever the program issues a resetZAxisIntegrator() call on the Gyro.
- *
- *  The angle of movement/rotation is assumed to be a standardized rotation around the robot Z axis,
- *  which means that a Positive rotation is Counter Clock Wise, looking down on the field.
- *  This is consistent with the FTC field coordinate conventions set out in the document:
- *  ftc_app\doc\tutorial\FTC_FieldCoordinateSystemDefinition.pdf
- *
- * Use Android Studios to Copy this Class, and Paste it into your team's code folder with a new name.
- * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
- */
+import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
 
-@Autonomous(name="Team 8740: Right Blue Auto", group="Team 8740")
+import ftc.vision.JewelColorResult;
+
+@Autonomous(name = "Team 8740: Right Blue Auto", group = "Team 8740")
 //@Disabled
 public class Team8740_RightBlueAuto extends LinearOpMode {
 
     /* Declare OpMode members */
-    Team8740_Base         robot   = new Team8740_Base();
+    Team8740_Base robot = new Team8740_Base();
+    JewelColorResult.JewelColor color = null;
+    //RelicRecoveryVuMark vuMark = null;
 
     // These constants define the desired driving/control characteristics
     // The can/should be tweaked to suite the specific robot drive train.
-    static final double     DRIVE_SPEED             = 0.5;     // Nominal speed for better accuracy.
-    static final double     TURN_SPEED              = 0.4;     // Nominal half speed for better accuracy.
+    static final double DRIVE_SPEED = 0.4;     // Nominal speed for better accuracy.
+    static final double TURN_SPEED = 0.4;     // Nominal half speed for better accuracy.
 
     @Override
     public void runOpMode() {
+
         /*
          * Initialize the standard drive system variables.
-         * The init() method of the hardware class does most of the work here
+         * The initRobot() method of the hardware class does most of the work here
          */
-        robot.init(hardwareMap, this);
+        robot.initRobot(hardwareMap, this, JewelColorResult.JewelColor.BLUE);
 
-        // Ensure the robot is stationary, then reset the encoders
-        robot.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        // Send telemetry message to alert driver that we are calibrating
-        telemetry.addData("X", "Calibrating Gyro");
-        telemetry.update();
-
-        robot.calibrateGyro();
+        //robot.activateVuforia();
 
         // make sure the gyro is calibrated before continuing
-        while (!isStopRequested() && robot.isGyroCalibrating())  {
+        while (robot.isGyroCalibrating()) {
+            if (robot.isStopRequested()) return;
+
             sleep(50);
             idle();
         }
 
-        telemetry.addData("O", "Robot Ready");
+        telemetry.addData("X", "Getting sensor data...");
         telemetry.update();
 
-        robot.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        color = robot.getColor();
 
         // Wait for the game to start (Display Gyro value), and reset gyro before we move
         while (!isStarted()) {
+            if (robot.isStopRequested()) return;
+
+            //vuMark = robot.getVuMark();
+
             telemetry.addData("O", "Robot Ready");
-            telemetry.addLine("encoders").addData("left", robot.getLeftEncoder()).addData("right", robot.getRightEncoder());
+            telemetry.addLine("encoders").addData("X", robot.getXPosition()).addData("Y", robot.getYPosition());
             telemetry.addData(">", "Robot Heading = %.2f", robot.getGyroHeading());
+            telemetry.addData("Color", color);
+            //telemetry.addData("VuMark", vuMark);
             telemetry.update();
         }
-
-        //robot.activateVuforia();
 
         // Step through each leg of the path,
         // Note: Reverse movement is obtained by setting a negative distance (not speed)
         // Put a hold after each turn
 
-        //robot.toggleJewelArm();
-        robot.gyroDrive(DRIVE_SPEED, -24.0, 0.0);
-        //robot.toggleJewelArm();
-        robot.gyroTurn(TURN_SPEED, -90.0);
-        robot.gyroHold(TURN_SPEED, -90.0, 0.5);
-        robot.gyroDrive(DRIVE_SPEED, 12.0, -90.0);
-
-        requestOpModeStop();
+        robot.hitJewel(color);
+        robot.driveStraight(-28.0, 0.0);
+        robot.gyroTurn(-90.0);
+        robot.gyroHold(-90.0, 0.5);
+        robot.driveStraight(6.0, -90.0);
+        robot.releaseGlyph();
+        robot.driveStraight(-4.0, -90.0);
     }
 
 }

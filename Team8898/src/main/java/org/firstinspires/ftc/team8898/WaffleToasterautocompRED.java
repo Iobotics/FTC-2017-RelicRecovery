@@ -1,62 +1,65 @@
 package org.firstinspires.ftc.team8898;
 
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.Servo;
+import android.app.Activity;
+import android.graphics.Color;
+import android.view.View;
 
-import ftc.vision.BeaconColorResult;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.NormalizedRGBA;
+import com.qualcomm.robotcore.hardware.SwitchableLight;
+
+import static java.lang.System.currentTimeMillis;
 
 /**
- * Created by Teacher on 10/28/2017.
+ * Created by Matt Hockenberger and Jack Gonser on 10/28/2017.
 */
-@Autonomous (name = "AUTO(allcolor)(if auto fails)",group = "RED")
-public class WaffleToasterautocompRED extends WaffleToasterAuto {
-    private DcMotor leftFront = null;
-    private DcMotor leftBack = null;
-    private DcMotor rightFront = null;
-    private DcMotor rightBack = null;
-    // creates arm variable
-    private DcMotor arm = null;
-    // sets up variable for the arm servos
-    private Servo leftServo = null;
-    private Servo rightServo = null;
-    // sets up variable for the jewel servo
-    private Servo jewelServo = null;
+@Autonomous (name = "AUTO(RED)(Audience side)",group = "RED")
+public class WaffleToasterautocompRED extends LinearOpMode {
+    View relativeLayout;
+    private boolean jewelIsBlue;
+    WaffleToasterMain robot = new WaffleToasterMain();
 
+    public void runOpMode()  { //set up for the phone tp
+        robot.init(hardwareMap, false);
 
-    public void runOpMode() throws InterruptedException { //set up for the phone tp
-        leftFront = hardwareMap.get(DcMotor.class, "leftFront");
-        leftBack = hardwareMap.get(DcMotor.class, "leftBack");
-        rightFront = hardwareMap.get(DcMotor.class, "rightFront");
-        rightBack = hardwareMap.get(DcMotor.class, "rightBack");
-
-        arm = hardwareMap.get(DcMotor.class, "arm");
-
-        leftServo = hardwareMap.get(Servo.class, "leftServo");
-        rightServo = hardwareMap.get(Servo.class, "rightServo");
-
-        jewelServo = hardwareMap.get(Servo.class, "jewelServo");
-
-        leftFront.setDirection(DcMotorSimple.Direction.FORWARD);
-        leftBack.setDirection(DcMotorSimple.Direction.FORWARD);
-        rightBack.setDirection(DcMotorSimple.Direction.REVERSE);
-        rightFront.setDirection(DcMotorSimple.Direction.REVERSE);
-
-        arm.setDirection(DcMotorSimple.Direction.FORWARD);
-
-        leftServo.setDirection(Servo.Direction.FORWARD);
-        rightServo.setDirection(Servo.Direction.REVERSE);
-
-        jewelServo.setDirection(Servo.Direction.FORWARD);
+        int relativeLayoutId = hardwareMap.appContext.getResources().getIdentifier("RelativeLayout", "id", hardwareMap.appContext.getPackageName());
+        relativeLayout = ((Activity) hardwareMap.appContext).findViewById(relativeLayoutId);
+        // If possible, turn the light on in the beginning (it might already be on anyway,
+        // we just make sure it is if we can).
+        if (robot.colorSensor instanceof SwitchableLight) {
+            ((SwitchableLight)robot.colorSensor).enableLight(true);
+        }
 
         waitForStart();
-        leftServo.setPosition(0.25);
-        rightServo.setPosition(0.25);
-        arm.setPower(0.25);
-        Thread.sleep(500);
-        allDrive(1);
-        Thread.sleep(2000);
-        allDrive(0);
+        robot.allServo(0.25);
+        robot.jewelServo.setPosition(.4);
+        robot.arm.setPower(0.25);
+        sleep(500);
+        NormalizedRGBA colors = robot.colorSensor.getNormalizedColors();
+        int color = colors.toColor();
+        long startTime = currentTimeMillis();
+        while(Color.red(color) < 3 && currentTimeMillis()- startTime < 900) {
+            colors = robot.colorSensor.getNormalizedColors();
+            color = colors.toColor();
+            robot.allDrive(0, 0);
+        }
+        robot.allDrive(0, 0);
+        sleep(100);
+        if(Color.red(color) < 3){
+            robot.encoderDrive(this,0.5,-0.4);
+            jewelIsBlue = true;
+        }
+        else {
+            robot.encoderDrive(this,0.5, 0.4);
+            jewelIsBlue = false;
+        }
+        sleep(500);
+        robot.resetRobot("jewel");
+        if (jewelIsBlue) {
+            robot.encoderDrive(this,33.5,0.4);
+        } else {
+            robot.encoderDrive(this, 32.5,0.4);
+        }
     }
 }

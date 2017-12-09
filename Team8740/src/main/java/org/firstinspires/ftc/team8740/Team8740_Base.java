@@ -33,48 +33,55 @@ import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
-import com.qualcomm.robotcore.util.ReadWriteFile;
+import com.vuforia.PIXEL_FORMAT;
+import com.vuforia.Vuforia;
 
+import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
-import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
-import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
-import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 
-import java.io.File;
+import ftc.vision.FrameGrabber;
+import ftc.vision.ImageProcessorResult;
+import ftc.vision.JewelColorResult;
 
 /**
  * Team 8740 base class
  *
- * @author Darren Kam
+ * @author darrenk1801
  */
 public class Team8740_Base {
     /* Constants */
-    private final static double LEFT_SERVO_HOME  = 0.3;
-    private final static double RIGHT_SERVO_HOME = 0.6;         //    \(._.)/
-    private final static double LEFT_SERVO_CLOSED  = 0.33;
-    private final static double RIGHT_SERVO_CLOSED = 0.63;
-    private final static double LEFT_SERVO_OPEN  = 0.72;
+    private final static double LEFT_SERVO_HOME = 0.30;
+    private final static double RIGHT_SERVO_HOME = 0.60;
+
+    private final static double LEFT_SERVO_OPEN = 0.72;
     private final static double RIGHT_SERVO_OPEN = 1.25;
 
     private final static double JEWEL_SERVO_HOME = 0.45;
     private final static double JEWEL_SERVO_DOWN = 0.85;
+
+    // TODO - Make constants private
+    public final static double RELIC_WRIST_DOWN = 0.77;
+    public final static double RELIC_WRIST_UP = 0.0;
+
+    private final static double RELIC_CLAW_CLOSED = 0.0;
+    private final static double RELIC_CLAW_OPEN = 1.0;
 
     private final static double LOW_SPEED = 0.4;
     private final static double HIGH_SPEED = 0.7;
@@ -83,118 +90,166 @@ public class Team8740_Base {
 
     private final static double GLYPH_POWER = 1.0;
 
-    private final static double LIFT_DOWN_POWER = -0.4;
-    private final static double LIFT_UP_POWER = 0.6;
+    private final static double LIFT_POWER = 0.5;
 
-    private final static double TICKS_PER_REV   = 512;    // Ticks per revolution
-    private final static double GEAR_REDUCTION  = 1.0;     // This is < 1.0 if geared UP
-    private final static double WHEEL_DIAMETER  = 4.0;     // Inches
-    private final static double TICKS_PER_INCH = (TICKS_PER_REV * GEAR_REDUCTION) * Math.sqrt(2) / (WHEEL_DIAMETER * 3.1415);
+    private final static double RELIC_ARM_SPEED = 0.5;
 
-    private final static double HEADING_THRESHOLD = 1;      // As tight as we can make it with an integer gyro
-    private final static double P_TURN_COEFF       = 0.05;     // Larger is more responsive, but also less stable
-    private final static double P_DRIVE_COEFF      = 0.05;    // Larger is more responsive, but also less stable
+    private final static double LIFT_POS_MIDDLE = 896.0;
 
-    // TODO - Find thresholds
-    private final static double RED_THRESHOLD = 180;
-    private final static double BLUE_THRESHOLD = 150;
+    private final static double DRIVE_TICKS_PER_REV = 1024;  // Ticks per revolution
+    private final static double DRIVE_GEAR_REDUCTION = 1.0; // This is < 1.0 if geared UP
+    private final static double DRIVE_WHEEL_DIAMETER = 1.5; // Inches
+    private final static double DRIVE_TICKS_PER_INCH = (DRIVE_TICKS_PER_REV * DRIVE_GEAR_REDUCTION) / (DRIVE_WHEEL_DIAMETER * 3.1415);
+
+    // TODO - Find drive encoder offset
+    private final static double DRIVE_ENCODER_OFFSET = -4.0; // Inches
+
+    // TODO - Tweak the P-gains
+    private final static double HEADING_THRESHOLD = 1; // As tight as we can make it with an integer gyro
+    private final static double P_TURN_COEFF = 0.143;   // Larger is more responsive, but also less stable
+    private final static double P_DRIVE_COEFF = 0.16;  // Larger is more responsive, but also less stable
+
+    private final static double AUTO_DRIVE_SPEED = 0.6;
+    private final static double AUTO_TURN_SPEED = 0.6;
 
     private final static String VUFORIA_LICENSE = "AY0QHQL/////AAAAGddY2lrlhEkenq0T04cRoVVmq/FAquH7DThEnayFrV+ojyjel8qTCn03vKe+FaZt0FwnE4tKdbimF0i47pzVuCQm2lRVdy5m1W03vvMN+8SA0RoXquxc1ddQLNyw297Ei3yWCJLV74UsEtfBwYKqr4ys3d2b2vPgaWnaZX6SNzD+x7AfKsaTSEIFqWfH8GOBoyw0kJ6qSCL384ylCcId6fVJbO8s9WccvuQYsCgCizdr0N/wOdEn76wY7fiNuR+5oReDCaIgfw5L35mD8EtQ0UHmNZGeDndtPDd6ZfNVlU3gyzch7nj5cmPBTleaoiCjyR9AputQHRH3qXnf3k76MvozmMGTE/j5o1HBA6BMSPwH";
 
-    private enum Color {
-        RED,
-        BLUE,
-        UNKNOWN
+    public enum LiftPosition {
+        TOP,
+        MIDDLE,
+        BOTTOM
     }
 
-
     /* OpMode members */
-    private DcMotor frontLeftDrive  = null;
+    private DcMotor frontLeftDrive = null;
     private DcMotor frontRightDrive = null;
-    private DcMotor backLeftDrive   = null;
-    private DcMotor backRightDrive  = null;
+    private DcMotor backLeftDrive = null;
+    private DcMotor backRightDrive = null;
 
-    private DcMotor intakeLeft  = null;
+    private DcMotor intakeLeft = null;
     private DcMotor intakeRight = null;
 
     private DcMotor lift = null;
 
-    private Servo leftServo  = null;
+    private DcMotor relicArm = null;
+
+    private Servo leftServo = null;
     private Servo rightServo = null;
 
     private Servo jewelServo = null;
+
+    private Servo relicWrist = null;
+    private Servo relicClaw = null;
 
     private CRServo pushServo = null;
 
     private DigitalChannel lowerLimit = null;
     private DigitalChannel upperLimit = null;
 
-    private ColorSensor color_sensor = null;
+    private DistanceSensor proxSensor = null;
 
     // The IMU sensor object
     private BNO055IMU imu = null;
 
     // State used for updating telemetry
-    private Orientation angles   = null;
+    private Orientation angles = null;
     private Acceleration gravity = null;
 
     private VuforiaLocalizer vuforia = null;
     private VuforiaTrackables relicTrackables = null;
     private VuforiaTrackable relicTemplate = null;
 
+    /* Local OpMode members. */
     private HardwareMap hwMap = null;
-
     private LinearOpMode opmode = null;
+    private FrameGrabber frameGrabber = null;
 
     private ElapsedTime time = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
 
+    private JewelColorResult.JewelColor teamColor = null;
 
-    /* Local OpMode members. */
+    private LiftPosition liftPosition = LiftPosition.BOTTOM;
+
     private boolean isLowSpeed = false;
-    private boolean jewelStatus = false;
-    private boolean clawStatus = false;
-    private boolean teleop = false;
+    private boolean jewelArmUp = true;
+    private boolean relicClawOpen = false;
+    private boolean relicWristUp = false;
+    private boolean intakeClawOpen = false;
+    private boolean programAssist = false;
 
     private double speedMultiplier = HIGH_SPEED;
+    private double wristControl = RELIC_WRIST_DOWN;
 
 
-    /* Initialize standard Hardware interfaces */
-    public void init(HardwareMap hwMap) {
-        this.init(hwMap, null);
-    }
-
-    /* Initialize standard Hardware interfaces */
+    /**
+     * Method for manual initialization
+     *
+     * @param hwMap
+     * @param opmode
+     */
     public void init(HardwareMap hwMap, LinearOpMode opmode) {
-        this.init(hwMap, opmode, false);
+        setHardwareMap(hwMap);
+        setOpmode(opmode);
+        setTeamColor(JewelColorResult.JewelColor.UNKNOWN);
+
+        opmode.telemetry.addData("X", "Initializing...");
+        opmode.telemetry.update();
     }
 
-    /* Initialize standard Hardware interfaces */
-    public void init(HardwareMap hwMap, LinearOpMode opmode, boolean teleop) {
-        this.hwMap = hwMap;
-        this.opmode = opmode;
-        this.teleop = teleop;
+    /**
+     * Method for teleop initialization
+     *
+     * @param hwMap
+     * @param opmode
+     */
+    public void initRobot(HardwareMap hwMap, LinearOpMode opmode) {
+        this.initRobot(hwMap, opmode, null);
+    }
+
+    /**
+     * Method for autonomous initialization
+     *
+     * @param hwMap
+     * @param opmode
+     * @param color
+     */
+    public void initRobot(HardwareMap hwMap, LinearOpMode opmode, JewelColorResult.JewelColor color) {
+        setHardwareMap(hwMap);
+        setOpmode(opmode);
+        setTeamColor(color);
+
+        opmode.telemetry.addData("X", "Initializing...");
+        opmode.telemetry.update();
 
         initDrive();
         initIntake();
         initLift();
         initServos();
-        if(!teleop) initColorSensor();
-        //initVuforia();
-        if(!teleop) initGyro();
+        initRelic();
+        initProx();
+
+        // If not teleop:
+        if (color != null) {
+            resetEncoders();
+            initColor();
+            initGyro();
+            //initVuforia();
+        }
     }
 
-    private void initDrive() {
+    /**
+     * Initialize the drive motors
+     */
+    public void initDrive() {
         // Define and initialize motors
-        frontLeftDrive  = hwMap.dcMotor.get("frontLeft");
+        frontLeftDrive = hwMap.dcMotor.get("frontLeft");
         frontRightDrive = hwMap.dcMotor.get("frontRight");
-        backLeftDrive   = hwMap.dcMotor.get("backLeft");
-        backRightDrive  = hwMap.dcMotor.get("backRight");
+        backLeftDrive = hwMap.dcMotor.get("backLeft");
+        backRightDrive = hwMap.dcMotor.get("backRight");
 
         // Reverse left motors
-        if(teleop) {
-            frontLeftDrive.setDirection(DcMotor.Direction.REVERSE);
-            backLeftDrive.setDirection(DcMotor.Direction.REVERSE);
-        }
+        frontLeftDrive.setDirection(DcMotor.Direction.REVERSE);
+        backLeftDrive.setDirection(DcMotor.Direction.REVERSE);
 
         // Set all motors to brake mode
         frontLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -203,24 +258,39 @@ public class Team8740_Base {
         backRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // Set all motors to run without encoders
-        setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        setDriveMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         // Set all motors to zero power
-        this.setPower(0, 0, 0, 0);
+        setPower(0, 0, 0, 0);
     }
 
-    private void initIntake() {
+    /**
+     * Initialize the intake motors
+     */
+    public void initIntake() {
         // Define the intake motors
-        intakeLeft  = hwMap.dcMotor.get("intakeLeft");
+        intakeLeft = hwMap.dcMotor.get("intakeLeft");
         intakeRight = hwMap.dcMotor.get("intakeRight");
 
         // Reverse the right intake motor
-        intakeRight.setDirection(DcMotor.Direction.REVERSE);
+        intakeLeft.setDirection(DcMotor.Direction.REVERSE);
     }
 
-    private void initLift() {
+    /**
+     * Initialize the lift motor and limit switches
+     */
+    public void initLift() {
         // Define the lift motor
         lift = hwMap.dcMotor.get("lift");
+
+        // Set the lift motor to brake mode
+        lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        // Reset and set the lift to run using the encoder
+        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        lift.setPower(0);
 
         // Define limit switches
         lowerLimit = hwMap.digitalChannel.get("lowerLimit");
@@ -231,46 +301,81 @@ public class Team8740_Base {
         upperLimit.setMode(DigitalChannel.Mode.INPUT);
     }
 
-    private void initServos() {
+    /**
+     * Initialize the servos
+     */
+    public void initServos() {
         // Define and initialize ALL installed servos
-        leftServo  = hwMap.servo.get("grabLeft");
+        leftServo = hwMap.servo.get("grabLeft");
         rightServo = hwMap.servo.get("grabRight");
-
         jewelServo = hwMap.servo.get("jewelArm");
-
         pushServo = hwMap.crservo.get("pushServo");
 
         // Reverse the right servo and jewel servo
         rightServo.setDirection(Servo.Direction.REVERSE);
-
         jewelServo.setDirection(Servo.Direction.REVERSE);
+        pushServo.setDirection(CRServo.Direction.REVERSE);
 
         // Home the servos
         leftServo.setPosition(LEFT_SERVO_HOME);
         rightServo.setPosition(RIGHT_SERVO_HOME);
-
         jewelServo.setPosition(JEWEL_SERVO_HOME);
     }
 
-    private void initColorSensor() {
-        color_sensor = hwMap.get(ColorSensor.class, "color");
+    /**
+     * Initialize the relic grabber
+     */
+    public void initRelic() {
+        relicWrist = hwMap.servo.get("relicWrist");
+        relicClaw = hwMap.servo.get("relicClaw");
+        relicArm = hwMap.dcMotor.get("relicArm");
+
+        relicClaw.setDirection(Servo.Direction.REVERSE);
+
+        relicWrist.setPosition(RELIC_WRIST_DOWN);
+        relicClaw.setPosition(RELIC_CLAW_CLOSED);
+
+        relicArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
-    private void initVuforia() {
+    /**
+     * Initialize the proximity sensor
+     */
+    public void initProx() {
+        proxSensor = hwMap.get(DistanceSensor.class, "prox");
+    }
+
+    /**
+     * Initialize OpenCV
+     */
+    public void initColor() {
+        frameGrabber = FtcRobotControllerActivity.frameGrabber; //Get the frameGrabber
+        //frameGrabber.resetFrameGrabber();
+    }
+
+    /**
+     * Initialize Vuforia
+     */
+    public void initVuforia() {
         int cameraMonitorViewId = hwMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hwMap.appContext.getPackageName());
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
+        //VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
 
         parameters.vuforiaLicenseKey = VUFORIA_LICENSE;
         parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
 
-        this.vuforia = ClassFactory.createVuforiaLocalizer(parameters);
+        vuforia = ClassFactory.createVuforiaLocalizer(parameters);
+        Vuforia.setFrameFormat(PIXEL_FORMAT.RGB565, true);
 
-        relicTrackables = this.vuforia.loadTrackablesFromAsset("RelicVuMark");
+        relicTrackables = vuforia.loadTrackablesFromAsset("RelicVuMark");
         relicTemplate = relicTrackables.get(0);
         relicTemplate.setName("relicVuMarkTemplate");
     }
 
-    private void initGyro() {
+    /**
+     * Initialize the BNO055 gyro
+     */
+    public void initGyro() {
         // Set up the parameters with which we will use our IMU. Note that integration
         // algorithm here just reports accelerations to the logcat log; it doesn't actually
         // provide positional information.
@@ -278,24 +383,57 @@ public class Team8740_Base {
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
         parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
         parameters.calibrationDataFile = "BNO055IMUCalibration.json"; // see the calibration sample opmode
-        parameters.loggingEnabled = true;
+        parameters.loggingEnabled = false;
         parameters.loggingTag = "IMU";
         parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
+
+        opmode.telemetry.addData("X", "Calibrating gyro...");
+        opmode.telemetry.update();
 
         // Retrieve and initialize the IMU. We expect the IMU to be attached to an I2C port
         // on a Core Device Interface Module, configured to be a sensor of type "AdaFruit IMU",
         // and named "imu".
         imu = hwMap.get(BNO055IMU.class, "imu");
         imu.initialize(parameters);
+    }
 
-        calibrateGyro();
+    public void setHardwareMap(HardwareMap hwMap) {
+        this.hwMap = hwMap;
+    }
+
+    public void setOpmode(LinearOpMode opmode) {
+        this.opmode = opmode;
+    }
+
+    public void setTeamColor(JewelColorResult.JewelColor color) {
+        this.teamColor = color;
+    }
+
+    public boolean isStopRequested() {
+        boolean stopRequested = opmode.isStopRequested();
+
+        if (stopRequested && vuforia != null) {
+            deactivateVuforia();
+        }
+
+        return stopRequested;
+    }
+
+    public void toggleProgramAssist() {
+        //TODO - Add program-assisted methods
+        programAssist = !programAssist;
+        opmode.sleep(75);
+    }
+
+    public boolean assistEnabled() {
+        return programAssist;
     }
 
     /**
      * Set tank drive
      *
-     * @param left
-     * @param right
+     * @param left Left motor power
+     * @param right Right motor power
      */
     public void setTank(double left, double right) {
         this.setPower(left, right, left, right);
@@ -304,9 +442,9 @@ public class Team8740_Base {
     /**
      * Set mecanum drive
      *
-     * @param x
-     * @param y
-     * @param rotation
+     * @param x X component
+     * @param y Y component
+     * @param rotation Rotation
      */
     public void setMecanum(double x, double y, double rotation) {
         // Setup a variable for each drive wheel to save power level for telemetry
@@ -315,10 +453,10 @@ public class Team8740_Base {
         double backLeftPower;
         double backRightPower;
 
-        frontLeftPower  = Range.clip(x + y - rotation, -1.0, 1.0);
-        frontRightPower = Range.clip(-x + y + rotation, -1.0, 1.0);
-        backLeftPower   = Range.clip(-x + y - rotation, -1.0, 1.0);
-        backRightPower  = Range.clip(x + y + rotation, -1.0, 1.0);
+        frontLeftPower = Range.clip(x - y - rotation, -1.0, 1.0);
+        frontRightPower = Range.clip(x - y + rotation, -1.0, 1.0);
+        backLeftPower = Range.clip(-x - y - rotation, -1.0, 1.0);
+        backRightPower = Range.clip(-x - y + rotation, -1.0, 1.0);
 
         // Send calculated power to wheels
         setPower(frontLeftPower, frontRightPower, backLeftPower, backRightPower);
@@ -337,35 +475,39 @@ public class Team8740_Base {
     public void toggleSpeed() {
         speedMultiplier = isLowSpeed ? HIGH_SPEED : LOW_SPEED;
         isLowSpeed = !isLowSpeed;
+        opmode.sleep(75);
     }
 
-    public double getLeftEncoder() {
+    public void resetEncoders() {
+        setDriveMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        setDriveMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    }
+
+    public double getXPosition() {
         return frontLeftDrive.getCurrentPosition();
     }
 
-    public double getRightEncoder() {
+    public double getYPosition() {
         return frontRightDrive.getCurrentPosition();
     }
 
-    public void setLeftEncoder(double position) {
+    public boolean xTargetReached(double position) {
+        return false;
+    }
+
+    public boolean yTargetReached(double position) {
+        return false;
+    }
+
+    public void setXPosition(double position) {
         frontLeftDrive.setTargetPosition(Math.round((float) position));
     }
 
-    public void setRightEncoder(double position) {
+    public void setYPosition(double position) {
         frontRightDrive.setTargetPosition(Math.round((float) position));
     }
 
-    /**
-     * Converts inches to ticks
-     * @param inches
-     * @return ticks
-     */
-    public double inchesToTicks(double inches) {
-        double ticks = inches * TICKS_PER_INCH;
-        return ticks;
-    }
-
-    public void setMode(DcMotor.RunMode mode) {
+    public void setDriveMode(DcMotor.RunMode mode) {
         frontLeftDrive.setMode(mode);
         frontRightDrive.setMode(mode);
         backLeftDrive.setMode(mode);
@@ -382,34 +524,82 @@ public class Team8740_Base {
         intakeRight.setPower(-INTAKE_POWER);
     }
 
-
     public void stopIntake() {
         intakeLeft.setPower(0);
         intakeRight.setPower(0);
     }
 
-    public void lowerLift() {
-        if(!lowerLimit.getState()) {
-            lift.setPower(0);
-        } else {
-            lift.setPower(LIFT_DOWN_POWER);
-        }
+    public void setIntakePower(double power) {
+        intakeLeft.setPower(power);
+        intakeRight.setPower(power);
     }
 
     public double getLiftEncoder() {
         return lift.getCurrentPosition();
     }
 
-    public void raiseLift() {
-        if(!upperLimit.getState()) {
+    public void lowerLift() {
+        if (getLowerLimit()) {
             lift.setPower(0);
         } else {
-            lift.setPower(LIFT_UP_POWER);
+            lift.setPower(-LIFT_POWER);
+        }
+    }
+
+    public void raiseLift() {
+        if (getUpperLimit()) {
+            lift.setPower(0);
+        } else {
+            lift.setPower(LIFT_POWER);
         }
     }
 
     public void stopLift() {
         lift.setPower(0);
+    }
+
+    public void setLiftPower(double power) {
+        lift.setPower(power);
+    }
+
+    public void setLiftPosition(LiftPosition position) {
+        liftPosition = position;
+        switch (position) {
+            case TOP:
+                while (!getUpperLimit()) {
+                    if (isStopRequested()) return;
+                    lift.setPower(LIFT_POWER);
+                }
+                lift.setPower(0);
+                break;
+            case MIDDLE:
+                lift.setTargetPosition((int) LIFT_POS_MIDDLE);
+
+                lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+                lift.setPower(LIFT_POWER);
+
+                while (lift.isBusy()) {
+                    if (isStopRequested()) return;
+                }
+
+                lift.setPower(0);
+
+                lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                break;
+            case BOTTOM:
+                while (!getLowerLimit()) {
+                    if (isStopRequested()) return;
+                    lift.setPower(-LIFT_POWER);
+                }
+                lift.setPower(0);
+                break;
+        }
+        opmode.sleep(250);
+    }
+
+    public LiftPosition getLiftPosition() {
+        return liftPosition;
     }
 
     /**
@@ -418,7 +608,7 @@ public class Team8740_Base {
      * @return lowerLimitState
      */
     public boolean getLowerLimit() {
-        boolean lowerLimitState = lowerLimit.getState();
+        boolean lowerLimitState = !lowerLimit.getState();
         return lowerLimitState;
     }
 
@@ -428,115 +618,225 @@ public class Team8740_Base {
      * @return upperLimitState
      */
     public boolean getUpperLimit() {
-        boolean upperLimitState = upperLimit.getState();
+        boolean upperLimitState = !upperLimit.getState();
         return upperLimitState;
     }
 
     /**
-     * Checks if claws are open
+     * Checks if intake claws are open
      *
-     * @return clawStatus
+     * @return intakeClawOpen
      */
-    public boolean getClawStatus() {
-        return clawStatus;
+    public boolean getIntakeClawStatus() {
+        return intakeClawOpen;
     }
 
-    public void toggleClaws() {
-        leftServo.setPosition(clawStatus ? LEFT_SERVO_CLOSED : LEFT_SERVO_OPEN);
-        rightServo.setPosition(clawStatus ? RIGHT_SERVO_CLOSED : RIGHT_SERVO_OPEN);
-        clawStatus = !clawStatus;
+    public void toggleIntakeClaws() {
+        leftServo.setPosition(intakeClawOpen ? LEFT_SERVO_HOME : LEFT_SERVO_OPEN);
+        rightServo.setPosition(intakeClawOpen ? RIGHT_SERVO_HOME : RIGHT_SERVO_OPEN);
+        intakeClawOpen = !intakeClawOpen;
+        opmode.sleep(75);
     }
 
     public void pushGlyph() {
         pushServo.setPower(GLYPH_POWER);
-    }
-
-    public void retractGlyph() {
+        opmode.sleep(1430);
         pushServo.setPower(-GLYPH_POWER);
-    }
-
-    public void stopGlyph() {
+        opmode.sleep(1430);
         pushServo.setPower(0);
     }
 
+    public void crPushOut(){
+        pushServo.setPower(GLYPH_POWER);
+    }
+
+    public void crPushIn(){
+        pushServo.setPower(-GLYPH_POWER);
+    }
+
+    public void crStop(){
+        pushServo.setPower(0);
+    }
+
+    public void setGlyphPower(double power) {
+        pushServo.setPower(power);
+    }
+
+    public void releaseGlyph() {
+        toggleIntakeClaws();
+        pushGlyph();
+        toggleIntakeClaws();
+    }
+
+    /**
+     * Method to place the cryptobox glyph
+     *
+     * @param vuMark  The VuMark detected
+     * @param angle The angle of approach
+     */
+    // TODO - Finish this method
+    public void cryptoboxGlyph(RelicRecoveryVuMark vuMark, double angle) {
+        switch (vuMark) {
+            case LEFT:
+                gyroTurn(90.0);
+                gyroHold(90.0, 0.5);
+                driveStraight(3.0, angle);
+                releaseGlyph();
+                driveStraight(-3.0, angle);
+                break;
+            case CENTER:
+                driveStraight(3.0, angle);
+                releaseGlyph();
+                driveStraight(-3.0, angle);
+                break;
+            case RIGHT:
+                gyroTurn(-90.0);
+                gyroHold(-90.0, 0.5);
+                driveStraight(3.0, angle);
+                releaseGlyph();
+                driveStraight(-3.0, angle);
+                break;
+        }
+    }
+
+    /**
+     * Checks if the jewel arm is up
+     *
+     * @return jewelArmUp
+     */
+    public boolean getJewelArmStatus() {
+        return jewelArmUp;
+    }
+
     public void toggleJewelArm() {
-        jewelServo.setPosition(jewelStatus ? JEWEL_SERVO_DOWN : JEWEL_SERVO_HOME);
-        jewelStatus = !jewelStatus;
+        jewelServo.setPosition(jewelArmUp ? JEWEL_SERVO_DOWN : JEWEL_SERVO_HOME);
+        jewelArmUp = !jewelArmUp;
+        opmode.sleep(75);
+    }
+
+    public void extendRelicArm() {
+        relicArm.setPower(RELIC_ARM_SPEED);
+    }
+
+    public void retractRelicArm() {
+        relicArm.setPower(-RELIC_ARM_SPEED);
+    }
+
+    public void stopRelicArm() {
+        relicArm.setPower(0);
+    }
+
+    public void setRelicClaw(double position) {
+        relicClaw.setPosition(position);
+    }
+
+    public void toggleRelicClaw() {
+        relicClaw.setPosition(relicClawOpen ? RELIC_CLAW_CLOSED : RELIC_CLAW_OPEN);
+        relicClawOpen = !relicClawOpen;
+        opmode.sleep(75);
+    }
+
+    public void setRelicWrist(double position) {
+        double wristPosition = Range.clip(position, RELIC_WRIST_UP, RELIC_WRIST_DOWN);
+        relicWrist.setPosition(wristPosition);
+    }
+
+    public void controlRelicWrist(double input) {
+        wristControl -= input/100.0;
+        wristControl = Range.clip(wristControl, RELIC_WRIST_UP, RELIC_WRIST_DOWN);
+        setRelicWrist(wristControl);
+    }
+
+    public void toggleRelicWrist() {
+        relicWrist.setPosition(relicWristUp ? RELIC_WRIST_DOWN : RELIC_WRIST_UP);
+        relicWristUp = !relicWristUp;
+        opmode.sleep(75);
+    }
+
+    /**
+     * Gets the distance from the prox sensor in inches
+     *
+     * @return distance
+     */
+    public double getDistance() {
+        double distance = proxSensor.getDistance(DistanceUnit.INCH);
+
+        return distance;
     }
 
     /**
      * Gets color from the color sensor
+     *
      * @return color
      */
-    public Color getColor() {
-        Color color;
-        if(color_sensor.red() > RED_THRESHOLD) {
-            color = Color.RED;
-        } else if(color_sensor.blue() > BLUE_THRESHOLD) {
-            color = Color.BLUE;
-        } else {
-            color = Color.UNKNOWN;
+    public JewelColorResult.JewelColor getColor() {
+        frameGrabber = FtcRobotControllerActivity.frameGrabber; //Get the frameGrabber
+
+        frameGrabber.grabSingleFrame(); //Tell it to grab a frame
+
+        while (!frameGrabber.isResultReady()) { //Wait for the result
+            if (isStopRequested()) return JewelColorResult.JewelColor.UNKNOWN;
+            opmode.sleep(5); //sleep for 5 milliseconds
         }
 
+        //Get the result
+        ImageProcessorResult imageProcessorResult = frameGrabber.getResult();
+        JewelColorResult result = (JewelColorResult) imageProcessorResult.getResult();
+
+        JewelColorResult.JewelColor leftColor = result.getLeftColor();
+        JewelColorResult.JewelColor rightColor = result.getRightColor();
+
+        frameGrabber.grabSingleFrame();
+
+        JewelColorResult.JewelColor color;
+        if (leftColor == JewelColorResult.JewelColor.BLUE || rightColor == JewelColorResult.JewelColor.RED) {
+            color = JewelColorResult.JewelColor.RED;
+        } else if (leftColor == JewelColorResult.JewelColor.RED || rightColor == JewelColorResult.JewelColor.BLUE) {
+            color = JewelColorResult.JewelColor.BLUE;
+        } else {
+            color = JewelColorResult.JewelColor.UNKNOWN;
+        }
+
+        opmode.sleep(100);
+
         return color;
+    }
+
+    /**
+     * A method to knock off the opposing team's jewel
+     *
+     * @param color The team color
+     */
+    public void hitJewel(JewelColorResult.JewelColor color) {
+        toggleJewelArm();
+        opmode.sleep(500);
+        if (teamColor == JewelColorResult.JewelColor.RED && color == JewelColorResult.JewelColor.RED || teamColor == JewelColorResult.JewelColor.BLUE && color == JewelColorResult.JewelColor.BLUE) {
+            gyroTurn(0.4,15.0);
+            gyroHold(0.4,15.0, 0.5);
+        } else if(teamColor == JewelColorResult.JewelColor.RED && color == JewelColorResult.JewelColor.BLUE || teamColor == JewelColorResult.JewelColor.BLUE && color == JewelColorResult.JewelColor.RED) {
+            gyroTurn(0.4,-15.0);
+            gyroHold(0.4,-15.0, 0.5);
+        }
+
+        toggleJewelArm();
+        gyroTurn(0.4,0.0);
+        gyroHold(0.4,0.0, 0.5);
+
+        opmode.sleep(1000);
     }
 
     public void activateVuforia() {
         relicTrackables.activate();
     }
 
-    public void trackVuMarks() {
-        RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
-        if (vuMark != RelicRecoveryVuMark.UNKNOWN) {
-
-                /* Found an instance of the template. In the actual game, you will probably
-                 * loop until this condition occurs, then move on to act accordingly depending
-                 * on which VuMark was visible. */
-            opmode.telemetry.addData("VuMark", "%s visible", vuMark);
-
-                /* For fun, we also exhibit the navigational pose. In the Relic Recovery game,
-                 * it is perhaps unlikely that you will actually need to act on this pose information, but
-                 * we illustrate it nevertheless, for completeness. */
-            OpenGLMatrix pose = ((VuforiaTrackableDefaultListener)relicTemplate.getListener()).getPose();
-            String formattedPose = (pose != null) ? pose.formatAsTransform() : "null";
-            opmode.telemetry.addData("Pose", formattedPose);
-
-                /* We further illustrate how to decompose the pose into useful rotational and
-                 * translational components */
-            if (pose != null) {
-                VectorF trans = pose.getTranslation();
-                Orientation rot = Orientation.getOrientation(pose, AxesReference.EXTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES);
-
-                // Extract the X, Y, and Z components of the offset of the target relative to the robot
-                double tX = trans.get(0);
-                double tY = trans.get(1);
-                double tZ = trans.get(2);
-
-                // Extract the rotational components of the target relative to the robot
-                double rX = rot.firstAngle;
-                double rY = rot.secondAngle;
-                double rZ = rot.thirdAngle;
-            }
-        }
-        else {
-            opmode.telemetry.addData("VuMark", "not visible");
-        }
-
-        opmode.telemetry.update();
+    public void deactivateVuforia() {
+        if (relicTrackables != null) relicTrackables.deactivate();
     }
 
-    public void calibrateGyro() {
-        // Get the calibration data
-        BNO055IMU.CalibrationData calibrationData = imu.readCalibrationData();
+    public RelicRecoveryVuMark getVuMark() {
+        RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
 
-        // Save the calibration data to a file. You can choose whatever file
-        // name you wish here, but you'll want to indicate the same file name
-        // when you initialize the IMU in an opmode in which it is used. If you
-        // have more than one IMU on your robot, you'll of course want to use
-        // different configuration file names for each.
-        String filename = "BNO055IMUCalibration.json";
-        File file = AppUtil.getInstance().getSettingsFile(filename);
-        ReadWriteFile.writeFile(file, calibrationData.serialize());
+        return vuMark;
     }
 
     /**
@@ -545,9 +845,7 @@ public class Team8740_Base {
      * @return isCalibrating
      */
     public boolean isGyroCalibrating() {
-        angles   = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-        gravity  = imu.getGravity();
-        boolean isCalibrating = imu.isGyroCalibrated();
+        boolean isCalibrating = !imu.isGyroCalibrated();
 
         return isCalibrating;
     }
@@ -558,10 +856,16 @@ public class Team8740_Base {
      * @return heading
      */
     public double getGyroHeading() {
-        angles  = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        // Update gyro
+        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         gravity = imu.getGravity();
+
         double heading = AngleUnit.DEGREES.normalize(AngleUnit.DEGREES.fromUnit(angles.angleUnit, angles.firstAngle));
         return heading;
+    }
+
+    public void driveStraight(double distance, double angle) {
+        driveStraight(AUTO_DRIVE_SPEED, distance, angle);
     }
 
     /**
@@ -576,68 +880,150 @@ public class Team8740_Base {
      *                 0 = fwd. +ve is CCW from fwd. -ve is CW from forward.
      *                 If a relative angle is required, add/subtract from current heading.
      */
-    public void gyroDrive(double speed, double distance, double angle) {
-        double newLeftTarget;
-        double newRightTarget;
+    public void driveStraight(double speed, double distance, double angle) {
+        double newTarget;
         double moveCounts;
         double max;
         double error;
         double steer;
         double leftSpeed;
         double rightSpeed;
+        double direction;
         // Ensure that the opmode is still active
         if (opmode.opModeIsActive()) {
             // Determine new target position, and pass to motor controller
-            moveCounts = distance * TICKS_PER_INCH;
-            newLeftTarget = getLeftEncoder() + moveCounts;
-            newRightTarget = getRightEncoder() + moveCounts;
+            moveCounts = distance * DRIVE_TICKS_PER_INCH;
+            newTarget = getYPosition() + moveCounts;
 
-            // Set Target and Turn On RUN_TO_POSITION
-            setLeftEncoder(newLeftTarget);
-            setRightEncoder(newRightTarget);
+            // If target is negative relative to current position
+            if (getYPosition() > newTarget) {
+                direction = 1;
+                //newTarget = newTarget - Math.round((float) (ERROR_OFFSET * DRIVE_TICKS_PER_INCH));
+            } else {
+                direction = -1;
+                //newTarget = newTarget + Math.round((float) (ERROR_OFFSET * DRIVE_TICKS_PER_INCH));
+            }
 
-            setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            // Set target position
+            setYPosition(newTarget);
 
-            // start motion.
+            // Start motion
             speed = Range.clip(Math.abs(speed), 0.0, 1.0);
-            setTank(speed, speed);
+            setTank(speed * direction, speed * direction);
 
-            // keep looping while we are still active, and BOTH motors are running.
-            while (opmode.opModeIsActive() && (frontLeftDrive.isBusy() && frontRightDrive.isBusy())) {
-                // adjust relative speed based on heading error.
+            // Keep looping while we are still active, and the front right motor is running.
+            while (opmode.opModeIsActive() && !((direction > 0 && getYPosition() < frontRightDrive.getTargetPosition()) || (direction < 0 && getYPosition() > frontRightDrive.getTargetPosition()))) {
+                // Adjust relative speed based on heading error
                 error = getError(angle);
                 steer = getSteer(error, P_DRIVE_COEFF);
 
-                // if driving in reverse, the motor correction also needs to be reversed
+                // If driving in reverse, the motor correction also needs to be reversed
                 if (distance < 0)
                     steer *= -1.0;
 
-                leftSpeed  = speed - steer;
+                leftSpeed = speed - steer;
                 rightSpeed = speed + steer;
 
-                // Normalize speeds if either one exceeds +/- 1.0;
+                // Normalize speeds if either one exceeds +/- 1.0
                 max = Math.max(Math.abs(leftSpeed), Math.abs(rightSpeed));
                 if (max > 1.0) {
                     leftSpeed /= max;
                     rightSpeed /= max;
                 }
 
-                setTank(leftSpeed, rightSpeed);
+                setTank(leftSpeed * direction, rightSpeed * direction);
 
                 // Display drive status for the driver.
-                opmode.telemetry.addData("Err/St",  "%5.1f/%5.1f", error, steer);
-                opmode.telemetry.addData("Target",  "%.2f:%.2f",      newLeftTarget,  newRightTarget);
-                opmode.telemetry.addData("Actual",  "%.2f:%.2f",      getLeftEncoder(), getRightEncoder());
-                opmode.telemetry.addData("Speed",   "%5.2f:%5.2f", leftSpeed, rightSpeed);
+                opmode.telemetry.addData("Err/St", "%5.1f/%5.1f", error, steer);
+                opmode.telemetry.addData("Target", "%.2f", newTarget);
+                opmode.telemetry.addData("Actual", "%.2f:%.2f", getXPosition(), getYPosition());
+                opmode.telemetry.addData("Speed", "%5.2f:%5.2f", leftSpeed * direction, rightSpeed * direction);
                 opmode.telemetry.update();
             }
 
-            // Stop all motion;
+            // Stop all motion
             setTank(0, 0);
-
-            // Turn off RUN_TO_POSITION
-            setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            opmode.sleep(1000);
         }
+    }
+
+    /**
+     * Method to drive on a fixed compass bearing (angle), based on encoder counts.
+     * Move will stop if either of these conditions occur:
+     * 1) Move gets to the desired position
+     * 2) Driver stops the opmode running.
+     *
+     * @param speed    Target speed for motion.
+     * @param distance Distance (in inches) to move from current position.  Negative distance means move backwards.
+     * @param angle    Absolute Angle (in Degrees) relative to last gyro reset.
+     *                 0 = fwd. +ve is CCW from fwd. -ve is CW from forward.
+     *                 If a relative angle is required, add/subtract from current heading.
+     */
+    // TODO - Finish writing this method
+    public void driveStrafe(double speed, double distance, double angle) {
+        int newXTarget;
+        int newYTarget;
+        double xMoveCounts;
+        double max;
+        double error;
+        double steer;
+        double xSpeed;
+        double ySpeed;
+        double rotation;
+        double direction = 1;
+        // Ensure that the opmode is still active
+        if (opmode.opModeIsActive()) {
+            // Determine new target position, and pass to motor controller
+            xMoveCounts = distance * Math.sqrt(2) * DRIVE_TICKS_PER_INCH;
+            newXTarget = Math.round((float) (getXPosition() + xMoveCounts));
+            newYTarget = 0;
+
+            if (frontRightDrive.getCurrentPosition() > newXTarget) {
+                direction = -1;
+            }
+
+            // Start motion
+            xSpeed = Range.clip(Math.abs(speed), 0.0, 1.0);
+            ySpeed = 0;
+
+            setMecanum(xSpeed, ySpeed, 0);
+
+            // Keep looping while we are still active
+            while (opmode.opModeIsActive() && !((direction < 0 && frontRightDrive.getCurrentPosition() < newXTarget) || (direction > 0 && frontRightDrive.getCurrentPosition() > newXTarget))) {
+                // Adjust relative speed based on heading error
+                error = getError(angle);
+                steer = getSteer(error, P_DRIVE_COEFF);
+
+                // If driving in reverse, the motor correction also needs to be reversed
+                if (distance < 0)
+                    steer *= -1.0;
+
+                rotation = steer;
+
+                // Normalize speeds if either one exceeds +/- 1.0
+                max = Math.max(Math.abs(xSpeed), Math.abs(ySpeed));
+                if (max > 1.0) {
+                    xSpeed /= max;
+                    ySpeed /= max;
+                }
+
+                setMecanum(xSpeed, ySpeed, rotation);
+
+                // Display drive status for the driver.
+                opmode.telemetry.addData("Err/St", "%5.1f/%5.1f", error, steer);
+                opmode.telemetry.addData("Target", "%d:%d", newXTarget, newYTarget);
+                opmode.telemetry.addData("Actual", "%.2f:%.2f", getXPosition(), getYPosition());
+                opmode.telemetry.addData("Speed", "%5.2f:%5.2f", xSpeed, ySpeed);
+                opmode.telemetry.update();
+            }
+
+            // Stop all motion
+            setMecanum(0, 0, 0);
+        }
+    }
+
+    public void gyroTurn(double angle) {
+        gyroTurn(AUTO_TURN_SPEED, angle);
     }
 
     /**
@@ -658,6 +1044,10 @@ public class Team8740_Base {
             // Update telemetry & Allow time for other processes to run.
             opmode.telemetry.update();
         }
+    }
+
+    public void gyroHold(double angle, double holdTime) {
+        gyroHold(AUTO_TURN_SPEED, angle, holdTime);
     }
 
     /**
@@ -694,7 +1084,7 @@ public class Team8740_Base {
      *               0 = fwd. +ve is CCW from fwd. -ve is CW from forward.
      *               If a relative angle is required, add/subtract from current heading.
      * @param PCoeff Proportional Gain coefficient
-     * @return
+     * @return onTarget
      */
     boolean onHeading(double speed, double angle, double PCoeff) {
         double error;
@@ -708,13 +1098,13 @@ public class Team8740_Base {
 
         if (Math.abs(error) <= HEADING_THRESHOLD) {
             steer = 0.0;
-            leftSpeed  = 0.0;
+            leftSpeed = 0.0;
             rightSpeed = 0.0;
             onTarget = true;
         } else {
             steer = getSteer(error, PCoeff);
-            rightSpeed = speed * steer;
-            leftSpeed  = -rightSpeed;
+            leftSpeed = speed * steer;
+            rightSpeed = -leftSpeed;
         }
 
         // Send desired speeds to motors
@@ -723,7 +1113,7 @@ public class Team8740_Base {
         // Display it for the driver
         opmode.telemetry.addData("Target", "%5.2f", angle);
         opmode.telemetry.addData("Err/St", "%5.2f/%5.2f", error, steer);
-        opmode.telemetry.addData("Speed.", "%5.2f:%5.2f", leftSpeed, rightSpeed);
+        opmode.telemetry.addData("Speed", "%5.2f:%5.2f", leftSpeed, rightSpeed);
 
         return onTarget;
     }
@@ -741,7 +1131,7 @@ public class Team8740_Base {
 
         // calculate error in -179 to +180 range  (
         robotError = targetAngle - getGyroHeading();
-        while (robotError > 180)   robotError -= 360;
+        while (robotError > 180) robotError -= 360;
         while (robotError <= -180) robotError += 360;
         return robotError;
     }
@@ -751,9 +1141,17 @@ public class Team8740_Base {
      *
      * @param error  Error angle in robot relative degrees
      * @param PCoeff Proportional Gain Coefficient
-     * @return
+     * @return steer
      */
     public double getSteer(double error, double PCoeff) {
         return Range.clip(error * PCoeff, -1, 1);
+    }
+
+    public void resetTimer() {
+        time.reset();
+    }
+
+    public ElapsedTime getTime() {
+        return time;
     }
 }

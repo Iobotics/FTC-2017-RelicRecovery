@@ -14,11 +14,11 @@ import static java.lang.System.currentTimeMillis;
 /**
  * Created by Matt Hockenberger and Jack Gonser on 10/28/2017.
  */
-@Autonomous (name = "AUTO(BLUE)(Back Glyph Box)",group = "BLUE")
-public class WaffleToasterAutoBlue extends LinearOpMode {
-    WaffleToasterMain robot = new WaffleToasterMain();
+@Autonomous (name = "AUTO(BLUE)(Audience side)",group = "BLUE")
+public class WaffleToasterautocompBLUE extends LinearOpMode {
     View relativeLayout;
-    boolean isBlue;
+    WaffleToasterMain robot = new WaffleToasterMain();
+    private boolean jewelIsBlue;
 
     public void runOpMode() { //set up for the phone tp
         robot.init(hardwareMap, true);
@@ -26,15 +26,13 @@ public class WaffleToasterAutoBlue extends LinearOpMode {
         relativeLayout = ((Activity) hardwareMap.appContext).findViewById(relativeLayoutId);
 
 
-
         // If possible, turn the light on in the beginning (it might already be on anyway,
         // we just make sure it is if we can).
         if (robot.colorSensor instanceof SwitchableLight) {
-            ((SwitchableLight)robot.colorSensor).enableLight(true);
+            ((SwitchableLight) robot.colorSensor).enableLight(true);
         }
 
         waitForStart();
-        robot.initGyro();
 
         robot.allServo(0.25);
         robot.jewelServo.setPosition(.4);
@@ -43,24 +41,26 @@ public class WaffleToasterAutoBlue extends LinearOpMode {
         NormalizedRGBA colors = robot.colorSensor.getNormalizedColors();
         int color = colors.toColor();
         long startTime = currentTimeMillis();
-        while(Color.red(color) <= 3 && currentTimeMillis()- startTime < 500) {
+        while (Color.red(color) <= 3 && currentTimeMillis() - startTime < 500) {
             colors = robot.colorSensor.getNormalizedColors();
             color = colors.toColor();
-            robot.resetRobot("drive");
+            robot.allDrive(0, 0);
         }
-        robot.resetRobot("drive");
+        robot.allDrive(0, 0);
         sleep(100);
-        if(Color.red(color) > 3){
-            robot.encoderDrive(this,-1,0.4);
-            isBlue = false;
-        }
-        else{
-            robot.encoderDrive(this,1,0.4);
-            isBlue = false;
+        if (Color.red(color) < 3) {
+            robot.encoderDrive(this, -0.5, 0.4);
+            jewelIsBlue = true;
+        } else {
+            robot.encoderDrive(this,0.5, 0.4);
+            jewelIsBlue = false;
         }
         sleep(500);
-
-        robot.resetRobot("all");
-        sleep(1000);
+        robot.resetRobot("jewel");
+        if (jewelIsBlue) {
+            robot.encoderDrive(this,-32.5, 0.4);
+        } else {
+            robot.encoderDrive(this,-33.5, 0.4);
+        }
     }
 }

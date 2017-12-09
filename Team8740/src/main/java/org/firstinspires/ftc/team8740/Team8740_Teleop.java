@@ -31,18 +31,21 @@ package org.firstinspires.ftc.team8740;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.util.Range;
 
-@TeleOp(name="Team 8740: Teleop Mecanum", group="Team 8740")
+@TeleOp(name = "Team 8740: Teleop Mecanum", group = "Team 8740")
 //@Disabled
 public class Team8740_Teleop extends LinearOpMode {
 
     Team8740_Base robot = new Team8740_Base();
 
+    double wristRotation = 0;
+
     @Override
     public void runOpMode() {
 
         //Initialize the hardware variables.
-        robot.init(hardwareMap, this, true);
+        robot.initRobot(hardwareMap, this);
 
         // Send telemetry message to signify robot waiting
         telemetry.addData("O", "Waiting for start");
@@ -51,8 +54,8 @@ public class Team8740_Teleop extends LinearOpMode {
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
 
-        gamepad2.setJoystickDeadzone((float) 0.05);
         gamepad1.setJoystickDeadzone((float) 0.05);
+        gamepad2.setJoystickDeadzone((float) 0.05);
 
         // Run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
@@ -68,99 +71,75 @@ public class Team8740_Teleop extends LinearOpMode {
             robot.setMecanum(x, y, rotation);
 
             // Use gamepad left bumper to toggle speed
-            if(gamepad1.left_bumper) {
+            if (gamepad1.left_bumper) {
                 robot.toggleSpeed();
             }
 
             // Use gamepad right bumper to run intake
-            if(gamepad1.right_bumper) {
-               robot.runIntake();
-            } else if(gamepad1.right_trigger > 0.2) {
+            if (gamepad1.right_bumper) {
+                robot.runIntake();
+            } else if (gamepad1.right_trigger > 0.2) {
                 robot.reverseIntake();
             } else {
                 robot.stopIntake();
+            }
+
+            // Use gamepad A to toggle the intake claws
+            if (gamepad1.a) {
+                robot.toggleIntakeClaws();
+            }
+
+            // Use gamepad B to push the glyph
+            if (gamepad1.b) {
+                robot.pushGlyph();
+            }
+
+            if(gamepad1.dpad_up) {
+                robot.crPushOut();
+            } else if (gamepad1.dpad_down) {
+                robot.crPushIn();
+            }   else{
+                robot.crStop();
             }
 
             /* GAMEPAD 2 CONTROLS */
 
-            if(gamepad2.left_bumper) {
-                // TODO - Lift stage #1
-            } else if(gamepad2.left_trigger > 0.2) {
-                // TODO - Lift stage #2
-            } else if(gamepad2.right_bumper) {
-                // TODO - Lift stage #3
+            if (gamepad2.left_bumper) {
+                robot.setLiftPosition(Team8740_Base.LiftPosition.BOTTOM);
+            } else if (gamepad2.left_trigger > 0.2) {
+                robot.setLiftPosition(Team8740_Base.LiftPosition.MIDDLE);
+            } else if (gamepad2.right_bumper) {
+                robot.setLiftPosition(Team8740_Base.LiftPosition.TOP);
             }
 
-            // TODO - robot.relic(-gamepad2.left_stick_y);
-            // TODO - robot.setLift(-gamepad2.right_stick_y);
+            robot.controlRelicWrist(-gamepad2.left_stick_y);
 
-            // Use gamepad A to toggle top outtake
-            if(gamepad2.a) {
-                robot.pushGlyph();
-                robot.toggleClaws();
-                sleep(250);
-                robot.retractGlyph();
-                sleep(250);
-                robot.stopGlyph();
+            robot.setLiftPower(-gamepad2.right_stick_y);
+
+            if (gamepad2.a) {
+                robot.extendRelicArm();
+            } else if (gamepad2.b) {
+                robot.retractRelicArm();
             } else {
-                robot.stopGlyph();
+                robot.stopRelicArm();
             }
 
-            // Use gamepad B to toggle all outtakes
-            if(gamepad2.b) {
-                robot.reverseIntake();
-                robot.pushGlyph();
-                robot.toggleClaws();
-                sleep(250);
-                robot.stopIntake();
-                robot.retractGlyph();
-                sleep(250);
-                robot.stopGlyph();
-            } else {
-                robot.stopGlyph();
+            if (gamepad2.x) {
+                robot.toggleRelicClaw();
             }
 
-            // Use gamepad X to toggle bottom outtake
-            if(gamepad2.x) {
-                robot.reverseIntake();
-                robot.toggleClaws();
-                sleep(250);
-            } else {
-                robot.stopIntake();
+            if (gamepad2.y) {
+                robot.releaseGlyph();
+                //robot.toggleProgramAssist();
             }
 
-            // Use gamepad Y to toggle program-assist sensors
-            if(gamepad2.y) {
-                // TODO - Toggle program-assist sensors
-            }
+            // Pause for 10 mS each cycle = update 100 times a second.
+            sleep(1);
 
-            /* TEMPORARY GAMEPAD 1 CONTROLS */
-
-            // Use gamepad dpad to control the lift
-            /*if(gamepad2.right_stick_y < -0.05) {
-                robot.lowerLift();
-            } else if(gamepad2.right_stick_y > 0.05) {
-                robot.raiseLift();
-            } else {
-                robot.stopLift();
-            }
-
-            if(gamepad1.left_trigger > 0.2) {
-                robot.pushGlyph();
-            } else {
-                robot.stopGlyph();
-            }
-
-            // Use gamepad B to lower and raise the jewel arm
-            if(gamepad1.b) {
-                robot.toggleJewelArm();
-                sleep(50);
-            }*/
-
-            // Pause for 25 mS each cycle = update 40 times a second.
-            sleep(25);
-
-            telemetry.addData("Lift position", robot.getLiftEncoder());
+            telemetry.addData("Lift encoder", robot.getLiftEncoder());
+            telemetry.addData("Lift position", robot.getLiftPosition());
+            telemetry.addData("Program assist", robot.assistEnabled());
+            telemetry.addLine("Encoders").addData("X", robot.getXPosition()).addData("Y", robot.getYPosition());
             telemetry.update();
         }
     }

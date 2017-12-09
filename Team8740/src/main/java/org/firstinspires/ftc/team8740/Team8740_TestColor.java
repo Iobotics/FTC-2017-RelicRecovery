@@ -27,50 +27,44 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.team8741;
+package org.firstinspires.ftc.team8740;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-// Setting motors right here under
-// USE setPosition to program Servos
-@TeleOp(name = "TeleOp: Gold Digger Tank Drive", group = "Linear Opmode")
-public class GoldDiggerOpMode_Linear extends LinearOpMode {
-    GoldDiggerBot robot = new GoldDiggerBot(this);
+import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
 
-    // TANK DRIVE NOT ARCADE
-    // Have an else for every if especially for
+import ftc.vision.JewelColorResult;
+
+@Autonomous(name = "Team 8740: Test Color", group = "Team 8740")
+//@Disabled
+public class Team8740_TestColor extends LinearOpMode {
+
+    /* Declare OpMode members */
+    Team8740_Base robot = new Team8740_Base();
+    JewelColorResult.JewelColor color = null;
+    RelicRecoveryVuMark vuMark = null;
+
     @Override
-    public void runOpMode() throws InterruptedException {
-        robot.init(hardwareMap, true);
-        waitForStart();
+    public void runOpMode() {
 
-        while (opModeIsActive()) {
-            // Setting the motors to different joysticks of controller
-                robot.drive(-gamepad1.left_stick_y, -gamepad1.right_stick_y);
-            if (gamepad1.right_trigger > 0.5) {
-                robot.glyphPull(-1, -1);
-            }
+        robot.init(hardwareMap, this);
+        robot.initColor();
+        //robot.initVuforia();
 
-            else {
-                robot.glyphPull(0, 0);
-            }
+        telemetry.addData("X", "Getting sensor data...");
+        telemetry.update();
 
-            if (gamepad1.right_bumper) {
-                robot.glyphPull(1, 1);
-            }
+        color = robot.getColor();
+       // vuMark = robot.getVuMark();
 
-            else {
-                robot.glyphPull(0, 0);
-            }
-            if (gamepad1.left_trigger >= 0.5){
-                robot.conveyor.setPower(1);
-            }
-            else if(gamepad1.left_bumper){
-                robot.conveyor.setPower(-1);
-            }
-            else robot.conveyor.setPower(0);
+        while (!isStarted()) {
+            if (isStopRequested()) return;
+
+            telemetry.addData("O", "Robot Ready");
+            telemetry.addData("Color", color);
+            //telemetry.addData("VuMark", vuMark);
+            telemetry.update();
         }
     }
 }

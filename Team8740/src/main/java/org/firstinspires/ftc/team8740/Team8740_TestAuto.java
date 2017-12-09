@@ -36,9 +36,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
 
 import ftc.vision.JewelColorResult;
 
-@Autonomous(name = "Team 8740: Left Blue Auto", group = "Team 8740")
+@Autonomous(name = "Team 8740: Test Auto", group = "Team 8740")
 //@Disabled
-public class Team8740_LeftBlueAuto extends LinearOpMode {
+public class Team8740_TestAuto extends LinearOpMode {
 
     /* Declare OpMode members */
     Team8740_Base robot = new Team8740_Base();
@@ -48,7 +48,7 @@ public class Team8740_LeftBlueAuto extends LinearOpMode {
     // These constants define the desired driving/control characteristics
     // The can/should be tweaked to suite the specific robot drive train.
     static final double DRIVE_SPEED = 0.4;     // Nominal speed for better accuracy.
-    static final double TURN_SPEED = 0.45;     // Nominal half speed for better accuracy.
+    static final double TURN_SPEED = 0.4;     // Nominal half speed for better accuracy.
 
     @Override
     public void runOpMode() {
@@ -69,7 +69,10 @@ public class Team8740_LeftBlueAuto extends LinearOpMode {
             idle();
         }
 
-        color = robot.getColor();
+        telemetry.addData("X", "Getting sensor data...");
+        telemetry.update();
+
+        //color = robot.getColor();
 
         // Wait for the game to start (Display Gyro value), and reset gyro before we move
         while (!isStarted()) {
@@ -89,7 +92,8 @@ public class Team8740_LeftBlueAuto extends LinearOpMode {
         // Note: Reverse movement is obtained by setting a negative distance (not speed)
         // Put a hold after each turn
 
-        robot.hitJewel(color);
+        //robot.hitJewel(color);
+
         robot.driveStraight(-28.0, 0.0);
         robot.gyroTurn(90.0);
         robot.gyroHold(90.0, 1.0);
@@ -99,6 +103,12 @@ public class Team8740_LeftBlueAuto extends LinearOpMode {
         robot.driveStraight(4.5, 180.0);
         robot.releaseGlyph();
         robot.driveStraight(-4.0, 180.0);
-    }
 
+        /*robot.driveStraight(12.0, 0.0);
+        robot.gyroTurn(-90.0);
+        robot.gyroHold(-90.0, 2.0);
+
+        robot.gyroTurn(90.0);
+        robot.gyroHold(90.0, 2.0);*/
+    }
 }

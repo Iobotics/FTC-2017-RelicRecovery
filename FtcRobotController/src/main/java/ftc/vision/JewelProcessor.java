@@ -42,11 +42,11 @@ public class JewelProcessor implements ImageProcessor<JewelColorResult> {
         List<Scalar> hsvMax = new ArrayList<>();
 
         //hsvMin.add(new Scalar(  H,   S,   V  ));
-        hsvMin.add(new Scalar(346/2,  150, 140)); //red min
-        hsvMax.add(new Scalar( 14/2, 255, 255)); //red max
+        hsvMin.add(new Scalar(346 / 2, 101, 149)); //red min
+        hsvMax.add(new Scalar(26 / 2, 255, 255));  //red max
 
-        hsvMin.add(new Scalar(196/2,  127, 60)); //blue min
-        hsvMax.add(new Scalar(220/2, 255, 165)); //blue max
+        hsvMin.add(new Scalar(188 / 2, 135, 128)); //blue min
+        hsvMax.add(new Scalar(212 / 2, 255, 255));   //blue max
 
         // make a list of channels that are blank (used for combining binary images)
         List<Mat> rgbaChannels = new ArrayList<>();
@@ -55,7 +55,7 @@ public class JewelProcessor implements ImageProcessor<JewelColorResult> {
         // much of a color is present on that side (in units of scaled pixels that pass the
         // color filter). This variable keeps track of the mass
         // of the color that ended up having the most "color mass" on each side.
-        double [] maxMass = { Double.MIN_VALUE, Double.MIN_VALUE }; //max mass for left and right
+        double[] maxMass = {Double.MIN_VALUE, Double.MIN_VALUE}; //max mass for left and right
         // This next variable keeps track of the color on each side that had the max "color mass"
         // with  0=red 1=blue  2=UNKNOWN
         // So both sides start as unknown:
@@ -71,7 +71,7 @@ public class JewelProcessor implements ImageProcessor<JewelColorResult> {
         int[] data = new int[2]; //used to read the colSum
 
         //loop through the filters
-        for(int i=0; i<2; i++) {
+        for (int i = 0; i < 2; i++) {
             //apply HSV thresholds
             maskedImage = new Mat();
             ImageUtil.hsvInRange(hsv, hsvMin.get(i), hsvMax.get(i), maskedImage);
@@ -84,18 +84,18 @@ public class JewelProcessor implements ImageProcessor<JewelColorResult> {
 
             //loop through left and right to calculate mass
             int start = 0;
-            int end = hsv.width()/2;
-            for(int j=0; j<2; j++){
+            int end = hsv.width() / 2;
+            for (int j = 0; j < 2; j++) {
                 //calculate the mass
                 mass = 0;
-                for(int x=start; x<end; x++){
+                for (int x = start; x < end; x++) {
                     colSum.get(0, x, data);
                     mass += data[0];
                 }
                 mass /= hsv.size().area(); //scale the mass by the image size
 
                 //if the mass found is greater than the max for this side
-                if(mass >= MIN_MASS && mass > maxMass[j]){
+                if (mass >= MIN_MASS && mass > maxMass[j]) {
                     //this mass is the new max for this side
                     maxMass[j] = mass;
                     //and this index is the new maxIndex for this side
@@ -120,9 +120,9 @@ public class JewelProcessor implements ImageProcessor<JewelColorResult> {
         JewelColorResult.JewelColor right = jewelColors[maxMassIndex[1]];
 
         //draw the color result bars
-        int barHeight = hsv.height()/30;
-        Imgproc.rectangle(rgbaFrame, new Point(0, 0), new Point(hsv.width()/2, barHeight), left.color, barHeight);
-        Imgproc.rectangle(rgbaFrame, new Point(hsv.width()/2, 0), new Point(hsv.width(), barHeight), right.color, barHeight);
+        int barHeight = hsv.height() / 30;
+        Imgproc.rectangle(rgbaFrame, new Point(0, 0), new Point(hsv.width() / 2, barHeight), left.color, barHeight);
+        Imgproc.rectangle(rgbaFrame, new Point(hsv.width() / 2, 0), new Point(hsv.width(), barHeight), right.color, barHeight);
 
         if (saveImages) {
             ImageUtil.saveImage(TAG, rgbaFrame, Imgproc.COLOR_RGBA2BGR, "1_binary", startTime);

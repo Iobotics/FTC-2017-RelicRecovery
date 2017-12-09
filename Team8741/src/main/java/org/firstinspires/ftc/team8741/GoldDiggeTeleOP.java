@@ -26,54 +26,51 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.firstinspires.ftc.team8898;
 
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+package org.firstinspires.ftc.team8741;
+
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
+// Setting motors right here under
+// USE setPosition to program Servos
+@TeleOp(name = "TeleOp: Gold Digger Tank Drive", group = "Opmode")
+public class GoldDiggeTeleOP extends LinearOpMode {
+    GoldDiggerBot robot = new GoldDiggerBot(this);
 
-import ftc.vision.BeaconColorResult;
-import ftc.vision.FrameGrabber;
-import ftc.vision.ImageProcessorResult;
-
-@Autonomous(name = "TestVision", group = "Vision")
-@Disabled
-public class OpenCVAuto extends LinearOpMode {
-
-
-    static final double COUNTS_PER_MOTOR_REV = 1440.0;
-    static final double WHEEL_DIAMETER_INCHES = 4.0;
-    static final double COUNTS_PER_INCH = COUNTS_PER_MOTOR_REV / (WHEEL_DIAMETER_INCHES * Math.PI);
-
-    private ElapsedTime runtime = new ElapsedTime();
-    DcMotor vertical = null;
-    DcMotor grab = null;
-
-    FrameGrabber frameGrabber = FtcRobotControllerActivity.frameGrabber;
-
+    // TANK DRIVE NOT ARCADE
+    // Have an else for every if especially for
+    @Override
     public void runOpMode() throws InterruptedException {
-
+        robot.init(hardwareMap, false);
         waitForStart();
 
-        frameGrabber.grabSingleFrame(); //Tell it to grab a frame
-        while (!frameGrabber.isResultReady()) { //Wait for the result
-            Thread.sleep(5); //sleep for 5 milliseconds
+        while (opModeIsActive()) {
+            // Setting the motors to different joysticks of controller
+                robot.drive(-gamepad1.left_stick_y, -gamepad1.right_stick_y);
+            if (gamepad1.right_trigger > 0.5) {
+                robot.glyphPull(-1);
+            }
+
+            else {
+                robot.glyphPull(0);
+            }
+
+            if (gamepad1.right_bumper) {
+                robot.glyphPull(1);
+            }
+
+            else {
+                robot.glyphPull(0);
+            }
+            if (gamepad1.left_trigger >= 0.5){
+                robot.conveyor.setPower(.7);
+            }
+            else if(gamepad1.left_bumper){
+                robot.conveyor.setPower(-1);
+            }
+            else robot.conveyor.setPower(0);
         }
-
-        //Get the result
-        ImageProcessorResult imageProcessorResult = frameGrabber.getResult();
-        BeaconColorResult result = (BeaconColorResult)imageProcessorResult.getResult();
-        BeaconColorResult.BeaconColor leftColor = result.getLeftColor();
-        BeaconColorResult.BeaconColor rightColor = result.getRightColor();
-        telemetry.addData("Result", leftColor); //Display it on telemetry
-        telemetry.update();
-        //wait before quitting (quitting clears telemetry)
-        Thread.sleep(1000);
-
     }
-
 }
