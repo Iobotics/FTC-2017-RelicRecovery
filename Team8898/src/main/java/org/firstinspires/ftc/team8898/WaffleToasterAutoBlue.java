@@ -37,7 +37,7 @@ public class WaffleToasterAutoBlue extends LinearOpMode {
         robot.initGyro();
 
         robot.allServo(0.25);
-        robot.jewelServo.setPosition(.4);
+        //robot.jewelServo.setPosition(.4);
         robot.arm.setPower(0.25);
         sleep(500);
         NormalizedRGBA colors = robot.colorSensor.getNormalizedColors();
@@ -50,17 +50,19 @@ public class WaffleToasterAutoBlue extends LinearOpMode {
         }
         robot.resetRobot("drive");
         sleep(100);
-        if(Color.red(color) > 3){
+        /* if(Color.red(color) > 3){
             robot.encoderDrive(this,-1,0.4);
-            isBlue = false;
+            isBlue = true;
         }
         else{
             robot.encoderDrive(this,1,0.4);
             isBlue = false;
-        }
-        sleep(500);
+        } */
+        sleep(1000);
 
         robot.resetRobot("all");
         sleep(1000);
+        robot.encoderDrive(this,-17,0.4);
+
     }
 }

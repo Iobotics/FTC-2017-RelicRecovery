@@ -79,7 +79,7 @@ public class WaffleToaster extends LinearOpMode {
                 robot.allDrive(left, right);
             }
             //Arm servos for grabbing (dpad down)
-            if (gamepad1.dpad_down) {
+            if (gamepad1.dpad_left) {
                 if (servoPos == 0) {
                     servoPos = 0.8;
                 } else {
@@ -105,6 +105,7 @@ public class WaffleToaster extends LinearOpMode {
                 telemetry.addData("Arm Down", "1/2 second.");
             } else if (gamepad1.y) {
                 robot.allServo(0.75);
+                sleep(250   );
                 robot.arm.setPower(0.75);
                 sleep(500);
                 robot.arm.setPower(0);
@@ -151,6 +152,6 @@ public class WaffleToaster extends LinearOpMode {
                 ((SwitchableLight)robot.colorSensor).enableLight(false);
             }
             telemetry.update(); //sends data to driver station
+            }
         }
-    }
 }

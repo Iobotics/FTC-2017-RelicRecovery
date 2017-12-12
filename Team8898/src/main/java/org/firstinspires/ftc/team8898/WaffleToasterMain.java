@@ -39,6 +39,10 @@ public class WaffleToasterMain {
     public Servo jewelServo = null;
     NormalizedColorSensor colorSensor;
 
+    DcMotor relicArmMotor = null;
+    Servo relicArmServoZ = null;
+    Servo relicArmClaw = null;
+
     HardwareMap hwmap = null;
 
     private boolean teleOp;
@@ -266,6 +270,7 @@ public class WaffleToasterMain {
         File file = AppUtil.getInstance().getSettingsFile(filename);
         ReadWriteFile.writeFile(file, calibrationData.serialize());
     }
+
     /**
      * Method to spin on central axis to point in a new direction.
      * Move will stop if either of these conditions occur:
@@ -285,6 +290,7 @@ public class WaffleToasterMain {
 
         }
     }
+
     boolean onHeading(double speed, double angle, double PCoeff) {
         double error;
         double steer;
@@ -312,6 +318,7 @@ public class WaffleToasterMain {
 
         return onTarget;
     }
+
     public double getError(double targetAngle) {
 
         double robotError;
@@ -321,12 +328,15 @@ public class WaffleToasterMain {
         while (robotError > 180) robotError -= 360;
         while (robotError <= -180) robotError += 360;
         return robotError;
-    }public double getGyroHeading() {
+    }
+
+    public double getGyroHeading() {
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         gravity = imu.getGravity();
         double heading = AngleUnit.DEGREES.normalize(AngleUnit.DEGREES.fromUnit(angles.angleUnit, angles.firstAngle));
         return heading;
     }
+
     public double getSteer(double error, double PCoeff) {
         return Range.clip(error * PCoeff, -1, 1);
     }

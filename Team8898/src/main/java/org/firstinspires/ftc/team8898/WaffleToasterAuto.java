@@ -49,25 +49,28 @@ public class WaffleToasterAuto extends LinearOpMode {
         robot.allDrive(0, 0);
         sleep(100);
         if(Color.red(color) < 3){
-            robot.encoderDrive(this,-1,0.4);
+            robot.encoderDrive(this,1,0.4);
             isBlue = false;
+            telemetry.addData("blue","");
         }
         else{
-            robot.encoderDrive(this,1,0.4);
+            robot.encoderDrive(this,-1,0.4);
             isBlue = true;
+            telemetry.addData("red","");
         }
+        telemetry.update();
         sleep(500);
 
-        robot.resetRobot("all");
+        robot.resetRobot("jewel");
         sleep(1000);
         if (isBlue) {
-            robot.encoderDrive(this,15,0.4);
+            robot.encoderDrive(this,16,0.4);
         } else {
-            robot.encoderDrive(this,17,0.4);
+            robot.encoderDrive(this,18,0.4);
         }
         robot.gyroTurn(0.4,90);
         robot.encoderDrive(this,13,0.4);
-        robot.gyroTurn(0.4,-90);
+        robot.gyroTurn(0.6,270);
         robot.encoderDrive(this,2.4,0.4);
         robot.resetRobot("drive");
     }

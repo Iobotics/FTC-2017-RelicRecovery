@@ -47,7 +47,7 @@ public class WaffleToasterautocompRED extends LinearOpMode {
         robot.allDrive(0, 0);
         sleep(100);
         if(Color.red(color) < 3){
-            robot.encoderDrive(this,0.5,-0.4);
+            robot.encoderDrive(this,-0.5,0.4);
             jewelIsBlue = true;
         }
         else {
@@ -57,9 +57,9 @@ public class WaffleToasterautocompRED extends LinearOpMode {
         sleep(500);
         robot.resetRobot("jewel");
         if (jewelIsBlue) {
-            robot.encoderDrive(this,33.5,0.4);
+            robot.encoderDrive(this,-33.5,0.4);
         } else {
-            robot.encoderDrive(this, 32.5,0.4);
+            robot.encoderDrive(this, -32.5,0.4);
         }
     }
 }

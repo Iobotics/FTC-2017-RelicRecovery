@@ -55,7 +55,7 @@ public class WaffleToasterautocompBLUE extends LinearOpMode {
             robot.encoderDrive(this,0.5, 0.4);
             jewelIsBlue = false;
         }
-        sleep(500);
+        sleep(1000);
         robot.resetRobot("jewel");
         if (jewelIsBlue) {
             robot.encoderDrive(this,-32.5, 0.4);
