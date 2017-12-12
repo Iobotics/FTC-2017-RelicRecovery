@@ -815,16 +815,16 @@ public class Team8740_Base {
         toggleJewelArm();
         opmode.sleep(500);
         if (teamColor == JewelColorResult.JewelColor.RED && color == JewelColorResult.JewelColor.RED || teamColor == JewelColorResult.JewelColor.BLUE && color == JewelColorResult.JewelColor.BLUE) {
-            gyroTurn(0.4,15.0);
-            gyroHold(0.4,15.0, 0.5);
+            gyroTurn(0.45,15.0);
+            gyroHold(0.45,15.0, 0.5);
         } else if(teamColor == JewelColorResult.JewelColor.RED && color == JewelColorResult.JewelColor.BLUE || teamColor == JewelColorResult.JewelColor.BLUE && color == JewelColorResult.JewelColor.RED) {
-            gyroTurn(0.4,-15.0);
-            gyroHold(0.4,-15.0, 0.5);
+            gyroTurn(0.45,-15.0);
+            gyroHold(0.45,-15.0, 0.5);
         }
 
         toggleJewelArm();
-        gyroTurn(0.4,0.0);
-        gyroHold(0.4,0.0, 0.5);
+        gyroTurn(0.45,0.0);
+        gyroHold(0.45,0.0, 0.5);
 
         opmode.sleep(1000);
     }
